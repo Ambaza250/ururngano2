@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRH Services - Urungano Platform</title>
+    <title>Ubuzima Bw' Imyororokere - Urungano Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
         .accordion-btn {
             transition: all 0.3s ease;
         }
@@ -17,7 +16,7 @@
             transition: max-height 0.5s ease-out;
         }
         .accordion-content.open {
-            max-height: 4000px;
+            max-height: 4500px;
         }
         .icon {
             transition: transform 0.3s ease;
@@ -27,14 +26,24 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50" data-lang="rw">
 
     <div class="max-w-5xl mx-auto px-6 py-12">
 
-        <!-- Page Header -->
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-blue-700 mb-3">Ibikorwa by'Ubuzima bw'Imyororokere (SRH Services)</h1>
-            <p class="text-slate-600 text-lg">Amakuru yizewe kandi yoroshye kumenya</p>
+        <!-- Header with Language Switcher -->
+        <div class="flex justify-between items-center mb-10">
+            <h1 id="page-title" class="text-4xl font-bold text-blue-700" 
+                data-en="Sexual and Reproductive Health Services" 
+                data-rw="Ubuzima Bw' Imyororokere">
+                Ubuzima Bw' Imyororokere
+            </h1>
+
+            <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow-md">
+                <button onclick="switchLanguage('rw')" id="btn-rw" 
+                        class="lang-btn active px-6 py-2.5 rounded-3xl text-sm font-medium">Kinyarwanda</button>
+                <button onclick="switchLanguage('en')" id="btn-en" 
+                        class="lang-btn px-6 py-2.5 rounded-3xl text-sm font-medium">English</button>
+            </div>
         </div>
 
         <!-- Toggle 1: Ukwezi k'umugore -->
@@ -43,39 +52,31 @@
                     class="accordion-btn w-full bg-white hover:bg-blue-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold text-slate-800">
                 <div class="flex items-center gap-4">
                     <span class="text-3xl">🌸</span>
-                    <span>Ukwezi k'umugore</span>
+                    <span data-en="Menstruation" data-rw="Ukwezi k'umugore">Ukwezi k'umugore</span>
                 </div>
                 <span id="icon1" class="icon text-3xl text-blue-600">+</span>
             </button>
             <div id="menstruation" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
 
-                <h3 class="font-bold text-2xl text-blue-600 mt-8 mb-4">Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?</h3>
-                <p class="mb-6">Kubabara mu nda mu gihe cy’imihango ni ibintu bisanzwe, ariko iyo ububabare butihanganirwa, ihutire kuya kwa muganga bagufashe.</p>
-                
-                <h4 class="font-semibold mt-6 mb-3">Ibintu byagufasha guhangana n’ububabare:</h4>
-                <ul class="list-disc pl-6 space-y-4 text-slate-700">
-                    <li><strong>Gukoresha amazi ashyushye:</strong> Gushyira ubushyuhe ku nda cyangwa koga amazi ashyushye bishobora koroshya imikaya no kugabanya ububabare. Koresha icupa ririmo amazi ashyushye cyangwa igitambaro cy’amazi ishyushye mu gihe cy’iminota 15-20.</li>
-                    <li><strong>Imyitozo ngororamubiri yoroheje:</strong> Kugendagenda, kwigorora (Yoga) cyangwa imyitozo yoroheje bifasha amaraso gutembera neza.</li>
-                    <li><strong>Kurya indyo yuzuye:</strong> Kurya ibiryo byiza, guhagarika ikawa nyinshi, inzoga n’ibinyobwa birimo umunyu mwinshi.</li>
-                    <li><strong>Kunywa amazi menshi:</strong> Byibura litro ebyiri ku munsi kugira ngo wirinde umwuma.</li>
-                    <li><strong>Kuruhuka no guhumeka byimbitse:</strong> Meditation cyangwa deep breathing bigabanya stress.</li>
-                    <li><strong>Gukanda ahantu habugenewe:</strong> Gukanda buhoro buhoro ku nda cyangwa mu mugongo.</li>
+                <h3 class="font-bold text-2xl text-blue-600 mt-8 mb-4" data-en="What can I do to reduce pain during menstruation?" data-rw="Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?">
+                    Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?
+                </h3>
+                <p class="mb-6" data-en="Pain during menstruation is normal but if it becomes unbearable and affects daily activities, seek medical help." 
+                   data-rw="Kubabara mu nda mu gihe cy’imihango ni ibintu bisanzwe ariko iyo ububabare butihanganirwa, ihutire kuya kwa muganga.">
+                    Kubabara mu nda mu gihe cy’imihango ni ibintu bisanzwe ariko iyo ububabare butihanganirwa, ihutire kuya kwa muganga.
+                </p>
+
+                <h4 class="font-semibold mt-6 mb-3" data-en="Helpful tips:" data-rw="Ibintu byagufasha:">Ibintu byagufasha:</h4>
+                <ul class="list-disc pl-6 space-y-3 text-slate-700">
+                    <li data-en="Use warm water or a heating pad on the lower abdomen" data-rw="Gukoresha amazi ashyushye ku nda cyangwa igitambaro cy'ubushyuhe">Gukoresha amazi ashyushye ku nda cyangwa igitambaro cy'ubushyuhe</li>
+                    <li data-en="Light exercise like walking or yoga" data-rw="Imyitozo ngororamubiri yoroheje nk'ugendagenda cyangwa yoga">Imyitozo ngororamubiri yoroheje nk'ugendagenda cyangwa yoga</li>
+                    <li data-en="Eat balanced meals and drink plenty of water" data-rw="Kurya indyo yuzuye no kunywa amazi menshi">Kurya indyo yuzuye no kunywa amazi menshi</li>
+                    <li data-en="Rest and practice deep breathing" data-rw="Kuruhuka no guhumeka byimbitse">Kuruhuka no guhumeka byimbitse</li>
                 </ul>
 
-                <h3 class="font-bold text-2xl text-blue-600 mt-12 mb-4">Ese ni ibihe bimenyetso bishobora kunyereka ko ngiye kujya mu mihango?</h3>
-                <p class="mb-4">Ibimenyetso bibanziriza imihango bitangira mu cyumweru kimwe cyangwa bibiri mbere.</p>
-                <ul class="list-disc pl-6 space-y-2">
-                    <li>Kubabara umutwe, kubabara mu kiziba cy’inda</li>
-                    <li>Kubabara no kubyimba amabere</li>
-                    <li>Gutura umubi, kugira umunaniro</li>
-                    <li>Kumva udashaka kurya cyangwa ushaka kurya cyane</li>
-                    <li>Kumva ubabaye cyangwa udatuje</li>
-                </ul>
-
-                <h3 class="font-bold text-2xl text-blue-600 mt-12 mb-4">Ni ryari umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama?</h3>
-                <p class="mb-6">Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama mu gihe cy’**uburumbuke** (ovulation).</p>
-                <p>Uburumbuke ni igihe intangangore (igi) irekurwa mu mirantanga. Igihe cy’uburumbuke gitera amahirwe yo gusama ari ku munsi wa 14 w’ukwezi (ku bakobwa bafite ukwezi kudahindagurika).</p>
-                <p>Igihe cy’uburumbuke gishobora kumara iminsi 5 mbere y’uburumbuke n’umunsi umwe nyuma yabwo.</p>
+                <h3 class="font-bold text-2xl text-blue-600 mt-12 mb-4" data-en="Signs that your period is coming" data-rw="Ibimenyetso by'imihango">Ibimenyetso by'imihango</h3>
+                <p data-en="Common signs include headache, lower abdominal pain, breast tenderness, fatigue, and mood changes." 
+                   data-rw="Ibimenyetso bisanzwe: kubabara umutwe, kubabara mu nda, kubyimba amabere, umunaniro, n'impinduka mu myifatire.">Ibimenyetso bisanzwe: kubabara umutwe, kubabara mu nda, kubyimba amabere, umunaniro, n'impinduka mu myifatire.</p>
             </div>
         </div>
 
@@ -85,40 +86,36 @@
                     class="accordion-btn w-full bg-white hover:bg-red-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold text-slate-800">
                 <div class="flex items-center gap-4">
                     <span class="text-3xl">🦠</span>
-                    <span>Virusi itera sida (HIV)</span>
+                    <span data-en="HIV / AIDS" data-rw="Virusi itera sida (HIV)">Virusi itera sida (HIV)</span>
                 </div>
                 <span id="icon2" class="icon text-3xl text-red-600">+</span>
             </button>
             <div id="hiv" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
-                <h3 class="font-bold text-2xl text-red-600 mt-8 mb-4">Virusi itera sida (HIV / SIDA)</h3>
-                <p class="mb-6">VIH ni virusi yibasira ubudahangarwa bw’umubiri. Iyo itavuwe, ishobora gutera indwara yitwa SIDA.</p>
+                <h3 class="font-bold text-2xl text-red-600 mt-8 mb-4" data-en="HIV / AIDS" data-rw="Virusi itera sida (HIV)">Virusi itera sida (HIV)</h3>
+                <p class="mb-6" data-en="HIV is a virus that attacks the immune system. If untreated, it can lead to AIDS." 
+                   data-rw="VIH ni virusi yibasira ubudahangarwa bw'umubiri. Iyo itavuwe, ishobora gutera SIDA.">VIH ni virusi yibasira ubudahangarwa bw'umubiri. Iyo itavuwe, ishobora gutera SIDA.</p>
                 
-                <h4 class="font-semibold mt-6 mb-3">Uko yanduramo:</h4>
+                <h4 class="font-semibold mt-6 mb-3" data-en="How it spreads:" data-rw="Uko yanduramo:">Uko yanduramo:</h4>
                 <ul class="list-disc pl-6 space-y-2">
-                    <li>Gukora imibonano mpuzabitsina idakingiye</li>
-                    <li>Gusangira ibikoresho by’amaraso byanduye</li>
-                    <li>Kwanduzwa n’umubyeyi ku mwana</li>
-                </ul>
-                
-                <h4 class="font-semibold mt-8 mb-3">Uko wirinda VIH:</h4>
-                <ul class="list-disc pl-6 space-y-2">
-                    <li>Gukoresha agakingirizo buri gihe</li>
-                    <li>Kugira umukunzi umwe gusa</li>
-                    <li>Kwipimisha VIH</li>
-                    <li>Gukoresha PrEP na PEP</li>
+                    <li data-en="Unprotected sexual intercourse" data-rw="Imibonano mpuzabitsina idakingiye">Imibonano mpuzabitsina idakingiye</li>
+                    <li data-en="Sharing contaminated sharp objects" data-rw="Gusangira ibikoresho byanduye">Gusangira ibikoresho byanduye</li>
+                    <li data-en="From mother to child" data-rw="Kuva ku nyina ku mwana">Kuva ku nyina ku mwana</li>
                 </ul>
 
-                <div class="bg-red-50 border-l-4 border-red-600 p-6 mt-10 rounded-r-2xl">
-                    <p class="font-bold text-red-700">Ubutumwa bw'ingenzi:</p>
-                    <p class="text-red-600">Kwipimisha ni byiza kandi ni ngombwa. Niba ufite ubwoba cyangwa ibibazo, hamagara 3530 cyangwa uje kwa muganga hakiri kare.</p>
-                </div>
+                <h4 class="font-semibold mt-8 mb-3" data-en="How to protect yourself:" data-rw="Uko wirinda:">Uko wirinda:</h4>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li data-en="Always use condoms" data-rw="Gukoresha agakingirizo buri gihe">Gukoresha agakingirizo buri gihe</li>
+                    <li data-en="Get tested regularly" data-rw="Kwipimisha VIH">Kwipimisha VIH</li>
+                    <li data-en="Have one faithful partner" data-rw="Kugira umukunzi umwe gusa">Kugira umukunzi umwe gusa</li>
+                </ul>
             </div>
         </div>
 
         <!-- Back Button -->
         <div class="text-center mt-16">
             <a href="urungano.html" 
-               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-10 py-4 rounded-2xl transition">
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-10 py-4 rounded-2xl transition"
+               data-en="← Back to Home" data-rw="← Subira ku rupapuro rw'ibanze">
                 ← Subira ku rupapuro rw'ibanze
             </a>
         </div>
@@ -130,13 +127,22 @@
             const icon = document.getElementById(section === 'menstruation' ? 'icon1' : 'icon2');
             
             content.classList.toggle('open');
-            
-            if (content.classList.contains('open')) {
-                icon.textContent = '−';
-            } else {
-                icon.textContent = '+';
-            }
+            icon.textContent = content.classList.contains('open') ? '−' : '+';
         }
+
+        function switchLanguage(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.body.setAttribute('data-lang', lang);
+
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+            });
+
+            document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        }
+
+        window.onload = () => switchLanguage('rw');
     </script>
 </body>
 </html>
