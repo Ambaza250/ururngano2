@@ -7,101 +7,194 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .lesson-card {
+        .accordion-btn {
             transition: all 0.3s ease;
         }
-        .lesson-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 4000px;
+        }
+        .icon {
+            transition: transform 0.3s ease;
+        }
+        .open .icon {
+            transform: rotate(45deg);
         }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50" data-lang="rw">
 
+    <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="WhatsApp Image 2026-04-03 at 1.45.18 PM.jpeg" 
+                <img src="urungano-logo.jpeg" 
                      alt="Urungano Logo" 
                      class="w-12 h-12 object-cover rounded-2xl">
                 <h1 class="text-2xl font-bold text-blue-600">Urungano</h1>
             </div>
+
+            <!-- Language Switcher -->
+            <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow">
+                <button onclick="switchLanguage('rw')" id="btn-rw" 
+                        class="lang-btn active px-5 py-2 rounded-3xl text-sm">Kinyarwanda</button>
+                <button onclick="switchLanguage('en')" id="btn-en" 
+                        class="lang-btn px-5 py-2 rounded-3xl text-sm">English</button>
+            </div>
+
+            <!-- Navigation Links -->
             <div class="flex gap-6 text-sm font-medium">
-                <a href="urungano.html" class="hover:text-blue-600 transition">Home</a>
-                <a href="srh.html" class="hover:text-blue-600 transition">SRH Services</a>
-                <a href="mental-health.html" class="text-blue-600 font-semibold">Ubuzima bwo mu Mutwe</a>
-                <a href="about-us.html" class="hover:text-blue-600 transition">About Us</a>
+                <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="text-blue-600 font-semibold" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
             </div>
         </div>
     </nav>
 
     <div class="max-w-5xl mx-auto px-6 py-12">
 
-        <h1 class="text-4xl font-bold text-center text-slate-800 mb-4">Ubuzima bwo mu Mutwe</h1>
-        <p class="text-center text-slate-600 text-lg mb-12">Amakuru yizewe kugira ngo ufashe umutwe wawe n’uw’abandi</p>
+        <div class="text-center mb-12">
+            <h1 id="page-title" class="text-4xl font-bold text-slate-800" 
+                data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">
+                Ubuzima bwo mu Mutwe
+            </h1>
+            <p id="page-subtitle" class="text-slate-600 text-lg mt-3"
+               data-en="Learn, understand, and take care of your mental well-being"
+               data-rw="Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe">
+                Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe
+            </p>
+        </div>
 
         <!-- Lesson 1 -->
-        <div class="lesson-card bg-white rounded-3xl shadow-sm p-8 mb-8">
-            <h2 class="text-2xl font-bold text-blue-700 mb-4">Isomo rya 1: Gusobanukirwa Ubuzima bwo mu Mutwe</h2>
-            <p class="text-slate-700 leading-relaxed">
-                Ubuzima bwo mu mutwe ni uburyo utekereza, uko wiyumva, n’uko ubana n’abandi. Si "ubusazi", ni imigendekere myiza y’intekerezo zawe.
-            </p>
-            <p class="mt-4 text-slate-700">
-                Ibimenyetso by’ibanze: Kutaryama neza, kumva uhorana umunzi (stress), kwiheba, no kwigunga cyane.
-            </p>
-            <p class="mt-6 font-medium text-blue-600">
-                Inama: Niba wiyumva nabi mu mutwe, si intege nke. Vuga ibikubaho! Kuganira n’inshuti cyangwa inzobere ni intambwe ya mbere yo gukira.
-            </p>
+        <div class="mb-8">
+            <button onclick="toggleSection('lesson1')" 
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
+                <span data-en="Lesson 1: Understanding Mental Health" data-rw="Isomo rya 1: Gusobanukirwa Ubuzima bwo mu Mutwe">
+                    Isomo rya 1: Gusobanukirwa Ubuzima bwo mu Mutwe
+                </span>
+                <span id="icon1" class="icon text-3xl text-blue-600">+</span>
+            </button>
+            <div id="lesson1" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
+                <p class="mt-6 text-slate-700" data-en="Mental health is as important as physical health. It is how we think, feel, and relate to others." 
+                   data-rw="Ubuzima bwo mu mutwe ni ingenzi nko kwita ku mubiri. Ni uburyo utekereza, uko wiyumva, n’uko ubana n’abandi.">
+                    Ubuzima bwo mu mutwe ni ingenzi nko kwita ku mubiri. Ni uburyo utekereza, uko wiyumva, n’uko ubana n’abandi.
+                </p>
+                <p class="mt-4 text-slate-700" data-en="Common signs: difficulty sleeping, constant stress, feeling hopeless, or isolating yourself." 
+                   data-rw="Ibimenyetso by’ibanze: kutaryama neza, kumva uhorana umunzi, kwiheba, no kwigunga cyane.">
+                    Ibimenyetso by’ibanze: kutaryama neza, kumva uhorana umunzi, kwiheba, no kwigunga cyane.
+                </p>
+                <p class="mt-6 font-medium text-blue-600" data-en="Remember: If you feel bad mentally, it is not weakness. Talk about it!" 
+                   data-rw="Inama: Niba wiyumva nabi mu mutwe, si intege nke. Vuga ibikubaho!">
+                    Inama: Niba wiyumva nabi mu mutwe, si intege nke. Vuga ibikubaho!
+                </p>
+            </div>
         </div>
 
         <!-- Lesson 2 -->
-        <div class="lesson-card bg-white rounded-3xl shadow-sm p-8 mb-8">
-            <h2 class="text-2xl font-bold text-blue-700 mb-4">Isomo rya 2: Guhangana n’Imihangayiko n’Agahinda</h2>
-            <p class="text-slate-700 leading-relaxed">
-                Uburyo bwo kuruhura umutwe: Hagarara gato, uhumeke utura (deep breathing), utekereze ku bintu bito bigushimisha.
-            </p>
-            <p class="mt-4 text-slate-700">
-                Kwirinda inzira mbi: Inzoga n’ibiyobyabwenge ntibikemura ibibazo, ahubwo birabyongera. Shaka uburyo bwiza bwo kwishimira ubuzima (siporo, muzika, gusoma).
-            </p>
-            <p class="mt-6 font-medium text-blue-600">
-                Icyizere: Wibuke ko buri muntu wese agira ibihe bikomeye. Kwemera ko ukeneye ubufasha ni ubutwari, si ikimwaro.
-            </p>
+        <div class="mb-8">
+            <button onclick="toggleSection('lesson2')" 
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
+                <span data-en="Lesson 2: Coping with Stress and Sadness" data-rw="Isomo rya 2: Guhangana n’Imihangayiko n’Agahinda">
+                    Isomo rya 2: Guhangana n’Imihangayiko n’Agahinda
+                </span>
+                <span id="icon2" class="icon text-3xl text-blue-600">+</span>
+            </button>
+            <div id="lesson2" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
+                <p class="mt-6 text-slate-700" data-en="When you feel overwhelmed, pause, take deep breaths, and think of small things that make you happy." 
+                   data-rw="Uburyo bwo kuruhura umutwe: Hagarara gato, uhumeke utura, maze utekereze ku bintu bito bigushimisha.">
+                    Uburyo bwo kuruhura umutwe: Hagarara gato, uhumeke utura, maze utekereze ku bintu bito bigushimisha.
+                </p>
+                <p class="mt-4 text-slate-700" data-en="Avoid alcohol and drugs – they make problems worse." 
+                   data-rw="Kwirinda inzira mbi: Inzoga n’ibiyobyabwenge ntibikemura ibibazo, ahubwo birabyongera.">
+                    Kwirinda inzira mbi: Inzoga n’ibiyobyabwenge ntibikemura ibibazo, ahubwo birabyongera.
+                </p>
+                <p class="mt-6 font-medium text-blue-600" data-en="Seeking help is strength, not weakness." 
+                   data-rw="Kwemera ko ukeneye ubufasha ni ubutwari, si ikimwaro.">
+                    Kwemera ko ukeneye ubufasha ni ubutwari, si ikimwaro.
+                </p>
+            </div>
         </div>
 
         <!-- Lesson 3 -->
-        <div class="lesson-card bg-white rounded-3xl shadow-sm p-8 mb-8">
-            <h2 class="text-2xl font-bold text-blue-700 mb-4">Isomo rya 3: Ubuzima bwo mu Mutwe n’Imyororokere</h2>
-            <p class="text-slate-700 leading-relaxed">
-                Ihungabana n’inda zitateganyijwe: Umwangavu wasamye inda akenera gushyigikirwa mu mutwe kurusha kunenwa. 
-                Agahinda n’ubwoba bishobora kuvurwa binyuze mu mubujyanama (Counseling).
-            </p>
-            <p class="mt-4 text-slate-700">
-                Gufata ibyemezo bituje: Igihe ufite ibishuko mu mibonano mpuzabitsina, banza utekereze ku ngaruka zabyo ku mutima n'ahazaza hawe.
-            </p>
+        <div class="mb-8">
+            <button onclick="toggleSection('lesson3')" 
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
+                <span data-en="Lesson 3: Mental Health and Reproductive Health" data-rw="Isomo rya 3: Ubuzima bwo mu Mutwe n’Imyororokere">
+                    Isomo rya 3: Ubuzima bwo mu Mutwe n’Imyororokere
+                </span>
+                <span id="icon3" class="icon text-3xl text-blue-600">+</span>
+            </button>
+            <div id="lesson3" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
+                <p class="mt-6 text-slate-700" data-en="Unplanned pregnancy can cause emotional stress. Counseling helps." 
+                   data-rw="Ihungabana n’inda zitateganyijwe: Umwangavu wasamye inda akenera gushyigikirwa mu mutwe.">
+                    Ihungabana n’inda zitateganyijwe: Umwangavu wasamye inda akenera gushyigikirwa mu mutwe.
+                </p>
+                <p class="mt-4 text-slate-700" data-en="Take calm decisions regarding sexual activity and think about future consequences." 
+                   data-rw="Gufata ibyemezo bituje: Igihe ufite ibishuko mu mibonano mpuzabitsina, banza utekereze ku ngaruka zabyo.">
+                    Gufata ibyemezo bituje: Igihe ufite ibishuko mu mibonano mpuzabitsina, banza utekereze ku ngaruka zabyo.
+                </p>
+            </div>
         </div>
 
         <!-- Lesson 4 -->
-        <div class="lesson-card bg-white rounded-3xl shadow-sm p-8 mb-12">
-            <h2 class="text-2xl font-bold text-blue-700 mb-4">Isomo rya 4: Uburyo bwo Kubona Ubufasha n’Inshingano</h2>
-            <p class="text-slate-700 leading-relaxed">
-                Niba ufite ibitekerezo byo kwigirira nabi, agahinda kamaze ibyumweru birenga bibiri, cyangwa kumva utagishaka kubaho, shaka ubufasha uyu munsi.
-            </p>
-            <p class="mt-6 font-medium">Aho wakura ubufasha:</p>
-            <ul class="list-disc pl-6 space-y-2 text-slate-700">
-                <li>Hamagara 114 (RBC) cyangwa 112 mu bihe byihutirwa</li>
-                <li>Gana ikigo cy’ubuzima cyangwa ibitaro bikuri hafi</li>
-                <li>Vugana n’umujyanama mu by’ubuzima bwo mu mutwe</li>
-            </ul>
+        <div class="mb-12">
+            <button onclick="toggleSection('lesson4')" 
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
+                <span data-en="Lesson 4: Seeking Help and Supporting Others" data-rw="Isomo rya 4: Uburyo bwo Kubona Ubufasha n’Inshingano">
+                    Isomo rya 4: Uburyo bwo Kubona Ubufasha n’Inshingano
+                </span>
+                <span id="icon4" class="icon text-3xl text-blue-600">+</span>
+            </button>
+            <div id="lesson4" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
+                <p class="mt-6 text-slate-700" data-en="If you have thoughts of self-harm, persistent sadness for more than two weeks, or feel like you no longer want to live, seek help immediately." 
+                   data-rw="Niba ufite ibitekerezo byo kwigirira nabi, agahinda kamaze ibyumweru birenga bibiri, cyangwa kumva utagishaka kubaho, shaka ubufasha uyu munsi.">
+                    Niba ufite ibitekerezo byo kwigirira nabi, agahinda kamaze ibyumweru birenga bibiri, cyangwa kumva utagishaka kubaho, shaka ubufasha uyu munsi.
+                </p>
+                <p class="mt-8 font-medium" data-en="How to help someone struggling:" data-rw="Dore uburyo wafasha umuntu ufite ibibazo by’ubuzima bwo mu mutwe:">Dore uburyo wafasha umuntu ufite ibibazo by’ubuzima bwo mu mutwe:</p>
+                <ul class="list-disc pl-6 space-y-2 mt-4 text-slate-700">
+                    <li data-en="Listen without judgment" data-rw="Mumve utamuciriye urubanza">Mumve utamuciriye urubanza</li>
+                    <li data-en="Encourage them to seek professional help" data-rw="Mugire inama yo kugana inzobere">Mugire inama yo kugana inzobere</li>
+                    <li data-en="Check in regularly and show you care" data-rw="Gira gahunda yo kumukurikirana">Gira gahunda yo kumukurikirana</li>
+                </ul>
+            </div>
         </div>
 
         <!-- Back Button -->
         <div class="text-center">
             <a href="urungano.html" 
-               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-10 py-4 rounded-2xl transition">
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-10 py-4 rounded-2xl transition"
+               data-en="← Back to Home" data-rw="← Subira ku rupapuro rw'ibanze">
                 ← Subira ku rupapuro rw'ibanze
             </a>
         </div>
     </div>
 
+    <script>
+        function toggleSection(section) {
+            const content = document.getElementById(section);
+            const icon = document.getElementById('icon' + section.slice(-1));
+            content.classList.toggle('open');
+            icon.textContent = content.classList.contains('open') ? '−' : '+';
+        }
+
+        function switchLanguage(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.body.setAttribute('data-lang', lang);
+
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+            });
+
+            document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        }
+
+        window.onload = () => switchLanguage('rw');
+    </script>
 </body>
 </html>
