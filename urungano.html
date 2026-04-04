@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urungano Platform - Inclusive Support</title>
+    <title>Urungano Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            transition: all 0.3s ease;
+        }
         .banner {
             background-image: url('banner-image.png');
             background-size: cover;
@@ -15,7 +20,7 @@
             position: relative;
         }
         .banner-overlay {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.65));
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
             position: absolute;
             inset: 0;
         }
@@ -26,62 +31,96 @@
             border-radius: 18px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
         }
+        .lang-btn {
+            transition: all 0.3s ease;
+        }
+        .lang-btn.active {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50" data-lang="rw">
 
-    <!-- Full-Size Banner -->
+    <!-- Banner -->
     <div class="banner">
         <div class="banner-overlay"></div>
         
+        <!-- Top Navigation -->
         <nav class="flex justify-between items-center px-8 py-6 relative z-50">
             <!-- Logo -->
             <img src="urungano-logo.jpeg" 
                  alt="Urungano Logo" 
                  class="logo-img">
 
-            <!-- Header Buttons -->
+            <!-- Language Switcher -->
+            <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-3xl p-1 shadow-md">
+                <button onclick="switchLanguage('rw')" id="btn-rw"
+                        class="lang-btn active px-6 py-2.5 rounded-3xl text-sm">Kinyarwanda</button>
+                <button onclick="switchLanguage('en')" id="btn-en"
+                        class="lang-btn px-6 py-2.5 rounded-3xl text-sm">English</button>
+            </div>
+
+            <!-- Main Navigation Buttons -->
             <div class="flex gap-4">
-                <a href="srh.html" 
-                   class="bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md">
-                    SRH Services
+                <a href="srh.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
+                   data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">
+                    Ubuzima Bw' Imyororokere
                 </a>
-                <a href="mental-health.html" 
-                   class="bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md">
+                <a href="mental-health.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
+                   data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">
                     Ubuzima bwo mu Mutwe
                 </a>
-                <a href="about-us.html" 
-                   class="bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md">
-                    About Us
+                <a href="about-us.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
+                   data-en="About Us" data-rw="Ibitwerekeye">
+                    Ibitwerekeye
                 </a>
             </div>
         </nav>
 
         <!-- Welcome Text -->
-        <div class="absolute bottom-16 left-1/2 -translate-x-1/2 text-center text-white px-6 max-w-4xl">
-            <h1 class="text-6xl font-bold leading-tight mb-6">
-                Welcome to Urungano Platform
+        <div class="absolute bottom-20 left-1/2 -translate-x-1/2 text-center text-white px-6 max-w-4xl">
+            <h1 id="welcome-title" class="text-5xl md:text-6xl font-bold leading-tight mb-6"
+                data-en="Welcome to Urungano Platform"
+                data-rw="Murakaza neza kuri Urungano Platform">
+                Murakaza neza kuri Urungano Platform
             </h1>
-            <p class="text-2xl text-white/90 max-w-3xl mx-auto">
-                Your inclusive, Kinyarwanda-native home for stigma-free support<br>
-                in Sexual and Reproductive Health (SRH) and Mental Health.
+            <p id="welcome-subtitle" class="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto"
+               data-en="Your inclusive, Kinyarwanda-native home for stigma-free support in Sexual and Reproductive Health and Mental Health."
+               data-rw="Urugo rwanyu rw'ubufasha rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, rw'umwihariko mu Kinyarwanda kandi rutagira akato.">
+                Urugo rwanyu rw'ubufasha rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, rw'umwihariko mu Kinyarwanda kandi rutagira akato.
             </p>
         </div>
     </div>
 
     <!-- Main Chat Section -->
-    <div class="max-w-6xl mx-auto px-6 py-10">
+    <div class="max-w-6xl mx-auto px-6 py-12">
         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden" style="height: 78vh; min-height: 680px;">
+            
+            <!-- Chat Header -->
             <div class="bg-blue-600 px-8 py-6 text-white flex items-center gap-4">
                 <img src="urungano-logo.jpeg" 
                      alt="Urungano Logo" 
                      class="w-14 h-14 object-cover rounded-2xl">
                 <div>
-                    <h2 class="text-2xl font-bold">Urungano AI Assistant</h2>
-                    <p class="text-blue-100">Ni Ibanga• Irizewe • Ubufasha Buhoraho</p>
+                    <h2 id="chat-title" class="text-2xl font-bold"
+                        data-en="Urungano AI Assistant"
+                        data-rw="Urungano AI Assistant">
+                        Urungano AI Assistant
+                    </h2>
+                    <p id="chat-subtitle" class="text-blue-100"
+                       data-en="Anonymous • Secure • Real-time Support"
+                       data-rw="Anonymous • Secure • Real-time Support">
+                        Anonymous • Secure • Real-time Support
+                    </p>
                 </div>
             </div>
 
+            <!-- Chatbot Iframe -->
             <div style="height: calc(100% - 85px);">
                 <iframe
                     src="https://udify.app/chat/4c3chgpwFrrgfL4d"
@@ -93,15 +132,49 @@
         </div>
     </div>
 
-   
+    <!-- Floating Accessibility -->
+    <div class="fixed bottom-8 right-8 bg-white shadow-2xl rounded-3xl p-4 flex gap-3 z-50 border border-slate-100">
+        <button onclick="toggleContrast()" 
+                class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition"
+                data-en="Contrast" data-rw="Contrast">Contrast</button>
+        <button onclick="changeFontSize(2)" 
+                class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition"
+                data-en="A+" data-rw="A+">A+</button>
+        <button onclick="changeFontSize(-2)" 
+                class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition"
+                data-en="A-" data-rw="A-">A-</button>
+    </div>
 
     <script>
-        function toggleContrast() { document.body.classList.toggle('high-contrast'); }
+        // Language Switcher
+        function switchLanguage(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.body.setAttribute('data-lang', lang);
+
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+                if (text) el.textContent = text;
+            });
+
+            // Update active button
+            document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        }
+
+        // Accessibility
+        function toggleContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
         let currentSize = 16;
         function changeFontSize(delta) {
             currentSize += delta;
             document.body.style.fontSize = currentSize + 'px';
         }
+
+        // Default to Kinyarwanda
+        window.onload = () => {
+            switchLanguage('rw');
+        };
     </script>
 </body>
 </html>
