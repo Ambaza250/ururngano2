@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urungano - Ubuzima Bw'Imyororokere n'Ubuzima bwo mu Mutwe</title>
+    
+    <!-- Instant Redirect -->
+    <meta http-equiv="refresh" content="0; url=urungano.html">
+    
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .loading {
+            text-align: center;
+            color: #334155;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <div class="spinner"></div>
+        <p style="font-size: 18px;">Welcome to Urungano...</p>
+        <p style="font-size: 15px; color: #64748b;">Turakuzana kuri urungano.html</p>
+    </div>
+
+    <!-- Fallback link in case redirect doesn't work -->
+    <script>
+        window.location.href = "urungano.html";
+    </script>
+</body>
+</html>
