@@ -24,6 +24,59 @@
         .open .icon {
             transform: rotate(45deg);
         }
+		
+		.hero-banner {
+    position: relative;
+    width: 100%;
+    height: 400px;           /* Adjust height as needed */
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    padding: 20px;
+}
+
+.banner-overlay h1 {
+    font-size: 2.8rem;
+    margin-bottom: 10px;
+}
+
+.banner-overlay p {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+}
+
+.btn {
+    background-color: #e63946;
+    color: white;
+    padding: 12px 28px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background-color: #c1121f;
+}
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
@@ -45,6 +98,15 @@
                         class="lang-btn px-6 py-2.5 rounded-3xl text-sm font-medium">English</button>
             </div>
         </div>
+
+<!-- SRH Banner / Hero Section -->
+<section class="hero-banner">
+    <img src="srh-banner.png" alt="Sexual and Reproductive Health Banner" class="banner-image">
+    
+    <div class="banner-overlay">
+        
+    </div>
+</section>
 
         <!-- Toggle 1: Ukwezi k'umugore -->
         <div class="mb-8">
