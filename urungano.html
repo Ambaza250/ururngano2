@@ -6,12 +6,7 @@
     <title>Urungano Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            transition: all 0.3s ease;
-        }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; transition: all 0.3s ease; }
         .banner {
             background-image: url('banner-image.png');
             background-size: cover;
@@ -39,8 +34,16 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             font-weight: 600;
         }
-        .nav-button {
+        .voice-btn {
             transition: all 0.3s ease;
+        }
+        .voice-btn.listening {
+            background-color: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
         }
     </style>
 </head>
@@ -50,43 +53,30 @@
     <div class="banner">
         <div class="banner-overlay"></div>
         
-        <!-- Top Navigation -->
         <nav class="flex justify-between items-center px-8 py-6 relative z-50">
-            <!-- Logo -->
-            <img src="urungano-logo.jpeg" 
-                 alt="Urungano Logo" 
-                 class="logo-img">
+            <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo-img">
 
             <!-- Language Switcher -->
             <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-3xl p-1 shadow-md">
-                <button onclick="switchLanguage('rw')" id="btn-rw"
-                        class="lang-btn active px-6 py-2.5 rounded-3xl text-sm">Kinyarwanda</button>
-                <button onclick="switchLanguage('en')" id="btn-en"
-                        class="lang-btn px-6 py-2.5 rounded-3xl text-sm">English</button>
+                <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-6 py-2.5 rounded-3xl text-sm">Kinyarwanda</button>
+                <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-6 py-2.5 rounded-3xl text-sm">English</button>
             </div>
 
-            <!-- Main Navigation Buttons -->
+            <!-- Navigation -->
             <div class="flex gap-4">
                 <a href="srh.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
-                   data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">
-                    Ubuzima Bw' Imyororokere
-                </a>
+                   data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
                 <a href="mental-health.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
-                   data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">
-                    Ubuzima bwo mu Mutwe
-                </a>
+                   data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
                 <a href="about-us.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
-                   data-en="About Us" data-rw="Ibitwerekeye">
-                    Ibitwerekeye
-                </a>
+                   data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
             </div>
         </nav>
 
         <!-- Welcome Text -->
         <div class="absolute bottom-20 left-1/2 -translate-x-1/2 text-center text-white px-6 max-w-4xl">
             <h1 id="welcome-title" class="text-5xl md:text-6xl font-bold leading-tight mb-6"
-                data-en="Welcome to Urungano Platform"
-                data-rw="Murakaza neza kuri Urungano Platform">
+                data-en="Welcome to Urungano Platform" data-rw="Murakaza neza kuri Urungano Platform">
                 Murakaza neza kuri Urungano Platform
             </h1>
             <p id="welcome-subtitle" class="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto"
@@ -102,25 +92,30 @@
         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden" style="height: 78vh; min-height: 680px;">
             
             <!-- Chat Header -->
-            <div class="bg-blue-600 px-8 py-6 text-white flex items-center gap-4">
-                <img src="urungano-logo.jpeg" 
-                     alt="Urungano Logo" 
-                     class="w-14 h-14 object-cover rounded-2xl">
-                <div>
-                    <h2 id="chat-title" class="text-2xl font-bold"
-                        data-en="Urungano AI Assistant"
-                        data-rw="Urungano AI Assistant">
-                        Urungano AI Assistant
-                    </h2>
-                    <p id="chat-subtitle" class="text-blue-100"
-                       data-en="Anonymous • Secure • Real-time Support"
-                       data-rw="Anonymous • Secure • Real-time Support">
-                        Anonymous • Secure • Real-time Support
-                    </p>
+            <div class="bg-blue-600 px-8 py-6 text-white flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-14 h-14 object-cover rounded-2xl">
+                    <div>
+                        <h2 id="chat-title" class="text-2xl font-bold"
+                            data-en="Urungano AI Assistant" data-rw="Urungano AI Assistant">
+                            Urungano AI Assistant
+                        </h2>
+                        <p id="chat-subtitle" class="text-blue-100"
+                           data-en="Anonymous • Secure • Real-time Support" data-rw="Anonymous • Secure • Real-time Support">
+                            Anonymous • Secure • Real-time Support
+                        </p>
+                    </div>
                 </div>
+
+                <!-- Voice Button -->
+                <button onclick="toggleVoice()" id="voiceBtn"
+                        class="voice-btn bg-white text-blue-600 hover:bg-blue-100 px-6 py-3 rounded-2xl font-medium flex items-center gap-2">
+                    <span id="micIcon">🎤</span>
+                    <span id="voiceText" data-en="Speak" data-rw="Vuga">Vuga</span>
+                </button>
             </div>
 
-            <!-- Chatbot Iframe -->
+            <!-- Udify Chatbot -->
             <div style="height: calc(100% - 85px);">
                 <iframe
                     src="https://udify.app/chat/4c3chgpwFrrgfL4d"
@@ -134,47 +129,104 @@
 
     <!-- Floating Accessibility -->
     <div class="fixed bottom-8 right-8 bg-white shadow-2xl rounded-3xl p-4 flex gap-3 z-50 border border-slate-100">
-        <button onclick="toggleContrast()" 
-                class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition"
-                data-en="Contrast" data-rw="Contrast">Contrast</button>
-        <button onclick="changeFontSize(2)" 
-                class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition"
-                data-en="A+" data-rw="A+">A+</button>
-        <button onclick="changeFontSize(-2)" 
-                class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition"
-                data-en="A-" data-rw="A-">A-</button>
+        <button onclick="toggleContrast()" class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition" data-en="Contrast" data-rw="Contrast">Contrast</button>
+        <button onclick="changeFontSize(2)" class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition" data-en="A+" data-rw="A+">A+</button>
+        <button onclick="changeFontSize(-2)" class="bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-2xl text-sm font-medium transition" data-en="A-" data-rw="A-">A-</button>
     </div>
 
     <script>
+        let recognition = null;
+        let isListening = false;
+
+        function toggleVoice() {
+            const btn = document.getElementById('voiceBtn');
+            const text = document.getElementById('voiceText');
+
+            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+                alert("Speech recognition is not supported in your browser. Please use Chrome or Edge.");
+                return;
+            }
+
+            if (!recognition) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = document.body.getAttribute('data-lang') === 'rw' ? 'rw-RW' : 'en-US';
+                recognition.interimResults = false;
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    // You can send this transcript to your chatbot if needed
+                    console.log("User said:", transcript);
+                    // For now, we'll speak back a simple response
+                    speakResponse("Murakoze. Nshobora kugufasha iki?");
+                };
+
+                recognition.onerror = () => {
+                    stopListening();
+                };
+                recognition.onend = () => {
+                    stopListening();
+                };
+            }
+
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        function startListening() {
+            isListening = true;
+            const btn = document.getElementById('voiceBtn');
+            btn.classList.add('listening');
+            document.getElementById('voiceText').textContent = document.body.getAttribute('data-lang') === 'rw' ? 'Umva...' : 'Listening...';
+            recognition.start();
+        }
+
+        function stopListening() {
+            isListening = false;
+            const btn = document.getElementById('voiceBtn');
+            btn.classList.remove('listening');
+            document.getElementById('voiceText').textContent = document.body.getAttribute('data-lang') === 'rw' ? 'Vuga' : 'Speak';
+            if (recognition) recognition.stop();
+        }
+
+        function speakResponse(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = document.body.getAttribute('data-lang') === 'rw' ? 'rw-RW' : 'en-US';
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         // Language Switcher
         function switchLanguage(lang) {
             document.documentElement.setAttribute('lang', lang);
             document.body.setAttribute('data-lang', lang);
 
             document.querySelectorAll('[data-en]').forEach(el => {
-                const text = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-rw');
-                if (text) el.textContent = text;
+                el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
             });
 
-            // Update active button
             document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+            // Update voice recognition language
+            if (recognition) {
+                recognition.lang = lang === 'rw' ? 'rw-RW' : 'en-US';
+            }
         }
 
         // Accessibility
-        function toggleContrast() {
-            document.body.classList.toggle('high-contrast');
-        }
+        function toggleContrast() { document.body.classList.toggle('high-contrast'); }
         let currentSize = 16;
         function changeFontSize(delta) {
             currentSize += delta;
             document.body.style.fontSize = currentSize + 'px';
         }
 
-        // Default to Kinyarwanda
-        window.onload = () => {
-            switchLanguage('rw');
-        };
+        window.onload = () => switchLanguage('rw');
     </script>
 </body>
 </html>
