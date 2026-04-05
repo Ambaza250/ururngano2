@@ -7,10 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
-        /* Banner Styles */
+
+        /* Banner */
         .hero-banner {
-            height: 480px;
+            min-height: 260px;
+            height: 40vw;
+            max-height: 480px;
             position: relative;
             overflow: hidden;
         }
@@ -27,67 +29,93 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            padding: 1rem;
         }
 
-        .accordion-btn {
-            transition: all 0.3s ease;
+        /* Language button */
+        .lang-btn { transition: all 0.3s ease; }
+        .lang-btn.active {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
         }
+
+        /* Accordion */
+        .accordion-btn { transition: all 0.3s ease; }
         .accordion-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-out;
         }
-        .accordion-content.open {
-            max-height: 4000px;
-        }
-        .icon {
-            transition: transform 0.3s ease;
-        }
-        .open .icon {
-            transform: rotate(45deg);
-        }
+        .accordion-content.open { max-height: 4000px; }
+        .icon { transition: transform 0.3s ease; }
+
+        /* Mobile menu */
+        #mobile-menu { display: none; }
+        #mobile-menu.open { display: flex; }
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
 
     <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="urungano-logo.jpeg" 
-                     alt="Urungano Logo" 
-                     class="w-12 h-12 object-cover rounded-2xl">
-                <h1 class="text-2xl font-bold text-blue-600">Urungano</h1>
+        <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+            <div class="flex justify-between items-center gap-2">
+
+                <!-- Logo + Title -->
+                <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                         class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+                    <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
+                </div>
+
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+                    <button onclick="switchLanguage('rw')" id="btn-rw"
+                            class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en"
+                            class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop nav links -->
+                <div class="hidden md:flex gap-6 text-sm font-medium">
+                    <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                    <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="text-blue-600 font-semibold" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()"
+                        class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
 
-            <!-- Language Switcher -->
-            <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow">
-                <button onclick="switchLanguage('rw')" id="btn-rw" 
-                        class="lang-btn active px-5 py-2 rounded-3xl text-sm">Kinyarwanda</button>
-                <button onclick="switchLanguage('en')" id="btn-en" 
-                        class="lang-btn px-5 py-2 rounded-3xl text-sm">English</button>
-            </div>
-
-            <!-- Navigation Links -->
-            <div class="flex gap-6 text-sm font-medium">
-                <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
-                <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-                <a href="mental-health.html" class="text-blue-600 font-semibold" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
+                <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                <a href="srh.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="block py-2.5 px-2 rounded-xl text-blue-600 font-semibold bg-blue-50" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
             </div>
         </div>
     </nav>
 
-    <!-- Mental Health Hero Banner -->
+    <!-- Hero Banner -->
     <div class="hero-banner">
-        <img src="mental-illness-banner.png" 
-             alt="Ubuzima bwo mu Mutwe">
+        <img src="mental-illness-banner.png" alt="Ubuzima bwo mu Mutwe">
         <div class="banner-overlay">
-            <div>
-                <h1 class="text-white text-5xl md:text-6xl font-bold leading-tight mb-4">
+            <div class="px-4">
+                <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-2 md:mb-4"
+                    data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">
                     Ubuzima bwo mu Mutwe
                 </h1>
-                <p class="text-white text-xl md:text-2xl max-w-2xl mx-auto">
+                <p class="text-white text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto"
+                   data-en="Learn, understand, and take care of your mental well-being"
+                   data-rw="Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe">
                     Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe
                 </p>
             </div>
@@ -95,39 +123,43 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-5xl mx-auto px-6 py-12">
-        
-        <!-- Your existing lessons go here -->
-        <div class="text-center mb-12">
-            <h1 id="page-title" class="text-4xl font-bold text-slate-800" 
+    <div class="max-w-4xl mx-auto px-3 py-6 md:px-6 md:py-12">
+
+        <!-- Page heading -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 id="page-title" class="text-2xl md:text-4xl font-bold text-slate-800"
                 data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">
                 Ubuzima bwo mu Mutwe
-            </h1>
-            <p id="page-subtitle" class="text-slate-600 text-lg mt-3"
+            </h2>
+            <p id="page-subtitle" class="text-slate-600 text-base md:text-lg mt-2 md:mt-3"
                data-en="Learn, understand, and take care of your mental well-being"
                data-rw="Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe">
                 Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe
             </p>
         </div>
 
-         <div class="mb-8">
-            <button onclick="toggleSection('lesson1')" 
-                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
-                <span data-en="Lesson 1: Understanding Mental Health" data-rw="Isomo rya 1: Gusobanukirwa Ubuzima bwo mu Mutwe">
+        <!-- Lesson 1 -->
+        <div class="mb-5 md:mb-8">
+            <button onclick="toggleSection('lesson1')"
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left flex justify-between items-center text-base md:text-xl font-semibold">
+                <span class="pr-3" data-en="Lesson 1: Understanding Mental Health" data-rw="Isomo rya 1: Gusobanukirwa Ubuzima bwo mu Mutwe">
                     Isomo rya 1: Gusobanukirwa Ubuzima bwo mu Mutwe
                 </span>
-                <span id="icon1" class="icon text-3xl text-blue-600">+</span>
+                <span id="iconlesson1" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
-            <div id="lesson1" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
-                <p class="mt-6 text-slate-700" data-en="Mental health is as important as physical health. It is how we think, feel, and relate to others." 
-                   data-rw="Ubuzima bwo mu mutwe ni ingenzi nko kwita ku mubiri. Ni uburyo utekereza, uko wiyumva, n’uko ubana n’abandi.">
-                    Ubuzima bwo mu mutwe ni ingenzi nko kwita ku mubiri. Ni uburyo utekereza, uko wiyumva, n’uko ubana n’abandi.
+            <div id="lesson1" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="Mental health is as important as physical health. It is how we think, feel, and relate to others."
+                   data-rw="Ubuzima bwo mu mutwe ni ingenzi nko kwita ku mubiri. Ni uburyo utekereza, uko wiyumva, n'uko ubana n'abandi.">
+                    Ubuzima bwo mu mutwe ni ingenzi nko kwita ku mubiri. Ni uburyo utekereza, uko wiyumva, n'uko ubana n'abandi.
                 </p>
-                <p class="mt-4 text-slate-700" data-en="Common signs: difficulty sleeping, constant stress, feeling hopeless, or isolating yourself." 
-                   data-rw="Ibimenyetso by’ibanze: kutaryama neza, kumva uhorana umunzi, kwiheba, no kwigunga cyane.">
-                    Ibimenyetso by’ibanze: kutaryama neza, kumva uhorana umunzi, kwiheba, no kwigunga cyane.
+                <p class="mt-3 md:mt-4 text-slate-700 text-sm md:text-base"
+                   data-en="Common signs: difficulty sleeping, constant stress, feeling hopeless, or isolating yourself."
+                   data-rw="Ibimenyetso by'ibanze: kutaryama neza, kumva uhorana umunzi, kwiheba, no kwigunga cyane.">
+                    Ibimenyetso by'ibanze: kutaryama neza, kumva uhorana umunzi, kwiheba, no kwigunga cyane.
                 </p>
-                <p class="mt-6 font-medium text-blue-600" data-en="Remember: If you feel bad mentally, it is not weakness. Talk about it!" 
+                <p class="mt-5 md:mt-6 font-medium text-blue-600 text-sm md:text-base"
+                   data-en="Remember: If you feel bad mentally, it is not weakness. Talk about it!"
                    data-rw="Inama: Niba wiyumva nabi mu mutwe, si intege nke. Vuga ibikubaho!">
                     Inama: Niba wiyumva nabi mu mutwe, si intege nke. Vuga ibikubaho!
                 </p>
@@ -135,24 +167,27 @@
         </div>
 
         <!-- Lesson 2 -->
-        <div class="mb-8">
-            <button onclick="toggleSection('lesson2')" 
-                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
-                <span data-en="Lesson 2: Coping with Stress and Sadness" data-rw="Isomo rya 2: Guhangana n’Imihangayiko n’Agahinda">
-                    Isomo rya 2: Guhangana n’Imihangayiko n’Agahinda
+        <div class="mb-5 md:mb-8">
+            <button onclick="toggleSection('lesson2')"
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left flex justify-between items-center text-base md:text-xl font-semibold">
+                <span class="pr-3" data-en="Lesson 2: Coping with Stress and Sadness" data-rw="Isomo rya 2: Guhangana n'Imihangayiko n'Agahinda">
+                    Isomo rya 2: Guhangana n'Imihangayiko n'Agahinda
                 </span>
-                <span id="icon2" class="icon text-3xl text-blue-600">+</span>
+                <span id="iconlesson2" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
-            <div id="lesson2" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
-                <p class="mt-6 text-slate-700" data-en="When you feel overwhelmed, pause, take deep breaths, and think of small things that make you happy." 
+            <div id="lesson2" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="When you feel overwhelmed, pause, take deep breaths, and think of small things that make you happy."
                    data-rw="Uburyo bwo kuruhura umutwe: Hagarara gato, uhumeke utura, maze utekereze ku bintu bito bigushimisha.">
                     Uburyo bwo kuruhura umutwe: Hagarara gato, uhumeke utura, maze utekereze ku bintu bito bigushimisha.
                 </p>
-                <p class="mt-4 text-slate-700" data-en="Avoid alcohol and drugs – they make problems worse." 
-                   data-rw="Kwirinda inzira mbi: Inzoga n’ibiyobyabwenge ntibikemura ibibazo, ahubwo birabyongera.">
-                    Kwirinda inzira mbi: Inzoga n’ibiyobyabwenge ntibikemura ibibazo, ahubwo birabyongera.
+                <p class="mt-3 md:mt-4 text-slate-700 text-sm md:text-base"
+                   data-en="Avoid alcohol and drugs – they make problems worse."
+                   data-rw="Kwirinda inzira mbi: Inzoga n'ibiyobyabwenge ntibikemura ibibazo, ahubwo birabyongera.">
+                    Kwirinda inzira mbi: Inzoga n'ibiyobyabwenge ntibikemura ibibazo, ahubwo birabyongera.
                 </p>
-                <p class="mt-6 font-medium text-blue-600" data-en="Seeking help is strength, not weakness." 
+                <p class="mt-5 md:mt-6 font-medium text-blue-600 text-sm md:text-base"
+                   data-en="Seeking help is strength, not weakness."
                    data-rw="Kwemera ko ukeneye ubufasha ni ubutwari, si ikimwaro.">
                     Kwemera ko ukeneye ubufasha ni ubutwari, si ikimwaro.
                 </p>
@@ -160,20 +195,22 @@
         </div>
 
         <!-- Lesson 3 -->
-        <div class="mb-8">
-            <button onclick="toggleSection('lesson3')" 
-                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
-                <span data-en="Lesson 3: Mental Health and Reproductive Health" data-rw="Isomo rya 3: Ubuzima bwo mu Mutwe n’Imyororokere">
-                    Isomo rya 3: Ubuzima bwo mu Mutwe n’Imyororokere
+        <div class="mb-5 md:mb-8">
+            <button onclick="toggleSection('lesson3')"
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left flex justify-between items-center text-base md:text-xl font-semibold">
+                <span class="pr-3" data-en="Lesson 3: Mental Health and Reproductive Health" data-rw="Isomo rya 3: Ubuzima bwo mu Mutwe n'Imyororokere">
+                    Isomo rya 3: Ubuzima bwo mu Mutwe n'Imyororokere
                 </span>
-                <span id="icon3" class="icon text-3xl text-blue-600">+</span>
+                <span id="iconlesson3" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
-            <div id="lesson3" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
-                <p class="mt-6 text-slate-700" data-en="Unplanned pregnancy can cause emotional stress. Counseling helps." 
-                   data-rw="Ihungabana n’inda zitateganyijwe: Umwangavu wasamye inda akenera gushyigikirwa mu mutwe.">
-                    Ihungabana n’inda zitateganyijwe: Umwangavu wasamye inda akenera gushyigikirwa mu mutwe.
+            <div id="lesson3" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="Unplanned pregnancy can cause emotional stress. Counseling helps."
+                   data-rw="Ihungabana n'inda zitateganyijwe: Umwangavu wasamye inda akenera gushyigikirwa mu mutwe.">
+                    Ihungabana n'inda zitateganyijwe: Umwangavu wasamye inda akenera gushyigikirwa mu mutwe.
                 </p>
-                <p class="mt-4 text-slate-700" data-en="Take calm decisions regarding sexual activity and think about future consequences." 
+                <p class="mt-3 md:mt-4 text-slate-700 text-sm md:text-base"
+                   data-en="Take calm decisions regarding sexual activity and think about future consequences."
                    data-rw="Gufata ibyemezo bituje: Igihe ufite ibishuko mu mibonano mpuzabitsina, banza utekereze ku ngaruka zabyo.">
                     Gufata ibyemezo bituje: Igihe ufite ibishuko mu mibonano mpuzabitsina, banza utekereze ku ngaruka zabyo.
                 </p>
@@ -181,21 +218,26 @@
         </div>
 
         <!-- Lesson 4 -->
-        <div class="mb-12">
-            <button onclick="toggleSection('lesson4')" 
-                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold">
-                <span data-en="Lesson 4: Seeking Help and Supporting Others" data-rw="Isomo rya 4: Uburyo bwo Kubona Ubufasha n’Inshingano">
-                    Isomo rya 4: Uburyo bwo Kubona Ubufasha n’Inshingano
+        <div class="mb-8 md:mb-12">
+            <button onclick="toggleSection('lesson4')"
+                    class="accordion-btn w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left flex justify-between items-center text-base md:text-xl font-semibold">
+                <span class="pr-3" data-en="Lesson 4: Seeking Help and Supporting Others" data-rw="Isomo rya 4: Uburyo bwo Kubona Ubufasha n'Inshingano">
+                    Isomo rya 4: Uburyo bwo Kubona Ubufasha n'Inshingano
                 </span>
-                <span id="icon4" class="icon text-3xl text-blue-600">+</span>
+                <span id="iconlesson4" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
-            <div id="lesson4" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
-                <p class="mt-6 text-slate-700" data-en="If you have thoughts of self-harm, persistent sadness for more than two weeks, or feel like you no longer want to live, seek help immediately." 
+            <div id="lesson4" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="If you have thoughts of self-harm, persistent sadness for more than two weeks, or feel like you no longer want to live, seek help immediately."
                    data-rw="Niba ufite ibitekerezo byo kwigirira nabi, agahinda kamaze ibyumweru birenga bibiri, cyangwa kumva utagishaka kubaho, shaka ubufasha uyu munsi.">
                     Niba ufite ibitekerezo byo kwigirira nabi, agahinda kamaze ibyumweru birenga bibiri, cyangwa kumva utagishaka kubaho, shaka ubufasha uyu munsi.
                 </p>
-                <p class="mt-8 font-medium" data-en="How to help someone struggling:" data-rw="Dore uburyo wafasha umuntu ufite ibibazo by’ubuzima bwo mu mutwe:">Dore uburyo wafasha umuntu ufite ibibazo by’ubuzima bwo mu mutwe:</p>
-                <ul class="list-disc pl-6 space-y-2 mt-4 text-slate-700">
+                <p class="mt-6 md:mt-8 font-medium text-sm md:text-base"
+                   data-en="How to help someone struggling:"
+                   data-rw="Dore uburyo wafasha umuntu ufite ibibazo by'ubuzima bwo mu mutwe:">
+                    Dore uburyo wafasha umuntu ufite ibibazo by'ubuzima bwo mu mutwe:
+                </p>
+                <ul class="list-disc pl-5 md:pl-6 space-y-2 mt-3 md:mt-4 text-slate-700 text-sm md:text-base">
                     <li data-en="Listen without judgment" data-rw="Mumve utamuciriye urubanza">Mumve utamuciriye urubanza</li>
                     <li data-en="Encourage them to seek professional help" data-rw="Mugire inama yo kugana inzobere">Mugire inama yo kugana inzobere</li>
                     <li data-en="Check in regularly and show you care" data-rw="Gira gahunda yo kumukurikirana">Gira gahunda yo kumukurikirana</li>
@@ -205,8 +247,8 @@
 
         <!-- Back Button -->
         <div class="text-center">
-            <a href="urungano.html" 
-               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-10 py-4 rounded-2xl transition"
+            <a href="urungano.html"
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3.5 md:px-10 md:py-4 rounded-2xl transition text-sm md:text-base"
                data-en="← Back to Home" data-rw="← Subira ku rupapuro rw'ibanze">
                 ← Subira ku rupapuro rw'ibanze
             </a>
@@ -214,9 +256,13 @@
     </div>
 
     <script>
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('open');
+        }
+
         function toggleSection(section) {
             const content = document.getElementById(section);
-            const icon = document.getElementById('icon' + section.slice(-1));
+            const icon = document.getElementById('icon' + section);
             content.classList.toggle('open');
             icon.textContent = content.classList.contains('open') ? '−' : '+';
         }
@@ -237,5 +283,3 @@
     </script>
 </body>
 </html>
-
-    
