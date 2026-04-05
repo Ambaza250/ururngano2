@@ -7,61 +7,88 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
+
         .hero-bg {
             background-image: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('banner-image.png');
             background-size: cover;
             background-position: center;
-            height: 460px;
+            min-height: 260px;
+            height: 40vw;
+            max-height: 460px;
+            display: flex;
+            align-items: center;
         }
-        .lang-btn {
-            transition: all 0.3s ease;
-        }
+
+        .lang-btn { transition: all 0.3s ease; }
         .lang-btn.active {
             background-color: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             font-weight: 600;
         }
+
+        /* Mobile menu */
+        #mobile-menu { display: none; }
+        #mobile-menu.open { display: flex; }
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
 
     <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="urungano-logo.jpeg" 
-                     alt="Urungano Logo" 
-                     class="w-12 h-12 object-cover rounded-2xl">
-                <h1 class="text-2xl font-bold text-blue-600">Urungano</h1>
+        <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+            <div class="flex justify-between items-center gap-2">
+
+                <!-- Logo + Title -->
+                <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                         class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+                    <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
+                </div>
+
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+                    <button onclick="switchLanguage('rw')" id="btn-rw"
+                            class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en"
+                            class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop nav links -->
+                <div class="hidden md:flex gap-6 text-sm font-medium">
+                    <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                    <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="text-blue-600 font-semibold" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()"
+                        class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
 
-            <!-- Language Switcher -->
-            <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow">
-                <button onclick="switchLanguage('rw')" id="btn-rw" 
-                        class="lang-btn active px-5 py-2 rounded-3xl text-sm">Kinyarwanda</button>
-                <button onclick="switchLanguage('en')" id="btn-en" 
-                        class="lang-btn px-5 py-2 rounded-3xl text-sm">English</button>
-            </div>
-
-            <!-- Navigation Links -->
-            <div class="flex gap-6 text-sm font-medium">
-                <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
-                <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-                <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                <a href="about-us.html" class="text-blue-600 font-semibold" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
+                <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                <a href="srh.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="block py-2.5 px-2 rounded-xl text-blue-600 font-semibold bg-blue-50" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Banner -->
-    <div class="hero-bg flex items-center text-white">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <h1 id="about-title" class="text-5xl font-bold mb-6"
-                data-en="About Urungano Platform" 
+    <div class="hero-bg text-white">
+        <div class="w-full max-w-4xl mx-auto px-4 text-center md:px-6">
+            <h1 id="about-title" class="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-6"
+                data-en="About Urungano Platform"
                 data-rw="Ibitwerekeye Urungano Platform">
                 Ibitwerekeye Urungano Platform
             </h1>
-            <p id="about-subtitle" class="text-xl max-w-2xl mx-auto"
+            <p id="about-subtitle" class="text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-white/90"
                data-en="A safe, inclusive, and Kinyarwanda-native platform for stigma-free support in Sexual and Reproductive Health and Mental Health."
                data-rw="Urubuga rw'ubufasha rwizewe, rw'umwihariko mu Kinyarwanda, rutagira akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.">
                 Urubuga rw'ubufasha rwizewe, rw'umwihariko mu Kinyarwanda, rutagira akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.
@@ -69,34 +96,35 @@
         </div>
     </div>
 
-    <div class="max-w-5xl mx-auto px-6 py-16">
+    <!-- Main Content -->
+    <div class="max-w-5xl mx-auto px-4 py-10 md:px-6 md:py-16">
 
         <!-- Mission -->
-        <div class="mb-16">
-            <h2 id="mission-title" class="text-3xl font-bold text-slate-800 mb-6"
+        <div class="mb-10 md:mb-16">
+            <h2 id="mission-title" class="text-2xl md:text-3xl font-bold text-slate-800 mb-3 md:mb-6"
                 data-en="Our Mission" data-rw="Ubutumwa bwacu">Ubutumwa bwacu</h2>
-            <p id="mission-text" class="text-lg leading-relaxed text-slate-600"
+            <p id="mission-text" class="text-base md:text-lg leading-relaxed text-slate-600"
                data-en="Urungano Platform was created to provide accessible, reliable, and stigma-free support for Sexual and Reproductive Health (SRH) and Mental Health in Rwanda. We believe every girl, woman, and family deserves accurate information and help without fear or shame."
                data-rw="Urungano Platform yashinzwe kugira ngo iboneze ubufasha bw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe mu buryo bworoshye, bwizewe, kandi butagira akato. Twifuza ko buri mukobwa, umugore n'umuryango wose yabona amakuru n'ubufasha atagomba kwihanganira ubwoba cyangwa isoni.">
                 Urungano Platform yashinzwe kugira ngo iboneze ubufasha bw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe mu buryo bworoshye, bwizewe, kandi butagira akato. Twifuza ko buri mukobwa, umugore n'umuryango wose yabona amakuru n'ubufasha atagomba kwihanganira ubwoba cyangwa isoni.
             </p>
         </div>
 
-        <!-- Vision -->
-        <div class="grid md:grid-cols-2 gap-12 mb-20">
+        <!-- Vision + Mission grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-20">
             <div>
-                <h3 id="vision-title" class="text-2xl font-semibold text-blue-600 mb-4"
+                <h3 id="vision-title" class="text-xl md:text-2xl font-semibold text-blue-600 mb-3 md:mb-4"
                     data-en="Our Vision" data-rw="Vision yacu">Vision yacu</h3>
-                <p id="vision-text" class="text-slate-600"
+                <p id="vision-text" class="text-slate-600 text-sm md:text-base leading-relaxed"
                    data-en="To be the leading platform for SRH and Mental Health support in Rwanda, where every person can access reliable, professional help in their preferred language."
                    data-rw="Kuba urubuga rw'ibanze rw'ubufasha mu Rwanda rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, aho buri muntu yabona ubufasha bwizewe, bw'umwuga, kandi mu rurimi yumva neza.">
                     Kuba urubuga rw'ibanze rw'ubufasha mu Rwanda rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, aho buri muntu yabona ubufasha bwizewe, bw'umwuga, kandi mu rurimi yumva neza.
                 </p>
             </div>
             <div>
-                <h3 id="mission2-title" class="text-2xl font-semibold text-blue-600 mb-4"
+                <h3 id="mission2-title" class="text-xl md:text-2xl font-semibold text-blue-600 mb-3 md:mb-4"
                     data-en="Our Mission" data-rw="Mission yacu">Mission yacu</h3>
-                <p id="mission2-text" class="text-slate-600"
+                <p id="mission2-text" class="text-slate-600 text-sm md:text-base leading-relaxed"
                    data-en="To deliver trusted information, AI-powered support, and cycle tracking tools in simple Kinyarwanda and English, to prevent diseases, promote equality, and help people live with dignity."
                    data-rw="Gutanga amakuru yizewe, ubufasha bwa AI, n'uburyo bwo gukurikirana ukwezi mu buryo bworoshye mu Kinyarwanda n'icyongereza, kugira ngo dukumire indwara, duteze imbere uburinganire, kandi dufashe abantu kwiyubaha no kwirinda.">
                     Gutanga amakuru yizewe, ubufasha bwa AI, n'uburyo bwo gukurikirana ukwezi mu buryo bworoshye mu Kinyarwanda n'icyongereza, kugira ngo dukumire indwara, duteze imbere uburinganire, kandi dufashe abantu kwiyubaha no kwirinda.
@@ -105,48 +133,68 @@
         </div>
 
         <!-- Values -->
-        <div class="mb-16">
-            <h3 id="values-title" class="text-3xl font-bold text-center text-slate-800 mb-10"
+        <div class="mb-10 md:mb-16">
+            <h3 id="values-title" class="text-2xl md:text-3xl font-bold text-center text-slate-800 mb-8 md:mb-10"
                 data-en="Our Values" data-rw="Ibintu dufatiraho">Ibintu dufatiraho</h3>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-8 rounded-3xl shadow-sm">
-                    <div class="text-4xl mb-4">🔒</div>
-                    <h4 id="value1" class="font-semibold text-xl mb-2" data-en="Privacy & Safety" data-rw="Umutekano n'Ubwihisho">Umutekano n'Ubwihisho</h4>
-                    <p id="value1-text" class="text-slate-600" data-en="Every conversation is private and secure." data-rw="Buri kiganiro n'ubufasha bikorwa mu buryo bw'umwihariko kandi ntibikoreshwa n'undi muntu.">Buri kiganiro n'ubufasha bikorwa mu buryo bw'umwihariko kandi ntibikoreshwa n'undi muntu.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-8">
+                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm">
+                    <div class="text-3xl md:text-4xl mb-3 md:mb-4">🔒</div>
+                    <h4 id="value1" class="font-semibold text-lg md:text-xl mb-2"
+                        data-en="Privacy & Safety" data-rw="Umutekano n'Ubwihisho">Umutekano n'Ubwihisho</h4>
+                    <p id="value1-text" class="text-slate-600 text-sm md:text-base"
+                       data-en="Every conversation is private and secure."
+                       data-rw="Buri kiganiro n'ubufasha bikorwa mu buryo bw'umwihariko kandi ntibikoreshwa n'undi muntu.">
+                        Buri kiganiro n'ubufasha bikorwa mu buryo bw'umwihariko kandi ntibikoreshwa n'undi muntu.
+                    </p>
                 </div>
-                <div class="bg-white p-8 rounded-3xl shadow-sm">
-                    <div class="text-4xl mb-4">🌍</div>
-                    <h4 id="value2" class="font-semibold text-xl mb-2" data-en="Kinyarwanda-Native" data-rw="Kinyarwanda-native">Kinyarwanda-native</h4>
-                    <p id="value2-text" class="text-slate-600" data-en="All information is available in clear Kinyarwanda." data-rw="Amakuru yose ari mu Kinyarwanda cy'umwimerere kandi cyumvikana.">Amakuru yose ari mu Kinyarwanda cy'umwimerere kandi cyumvikana.</p>
+                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm">
+                    <div class="text-3xl md:text-4xl mb-3 md:mb-4">🌍</div>
+                    <h4 id="value2" class="font-semibold text-lg md:text-xl mb-2"
+                        data-en="Kinyarwanda-Native" data-rw="Kinyarwanda-native">Kinyarwanda-native</h4>
+                    <p id="value2-text" class="text-slate-600 text-sm md:text-base"
+                       data-en="All information is available in clear Kinyarwanda."
+                       data-rw="Amakuru yose ari mu Kinyarwanda cy'umwimerere kandi cyumvikana.">
+                        Amakuru yose ari mu Kinyarwanda cy'umwimerere kandi cyumvikana.
+                    </p>
                 </div>
-                <div class="bg-white p-8 rounded-3xl shadow-sm">
-                    <div class="text-4xl mb-4">❤️</div>
-                    <h4 id="value3" class="font-semibold text-xl mb-2" data-en="Stigma-Free" data-rw="Nta gato">Nta gato</h4>
-                    <p id="value3-text" class="text-slate-600" data-en="We believe in dignity and respect for all." data-rw="Twifuza gukura akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.">Twifuza gukura akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.</p>
+                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm sm:col-span-2 md:col-span-1">
+                    <div class="text-3xl md:text-4xl mb-3 md:mb-4">❤️</div>
+                    <h4 id="value3" class="font-semibold text-lg md:text-xl mb-2"
+                        data-en="Stigma-Free" data-rw="Nta gato">Nta gato</h4>
+                    <p id="value3-text" class="text-slate-600 text-sm md:text-base"
+                       data-en="We believe in dignity and respect for all."
+                       data-rw="Twifuza gukura akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.">
+                        Twifuza gukura akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.
+                    </p>
                 </div>
             </div>
         </div>
 
         <!-- Call to Action -->
-        <div class="bg-blue-600 text-white rounded-3xl p-12 text-center">
-            <h3 id="cta-title" class="text-3xl font-bold mb-4"
+        <div class="bg-blue-600 text-white rounded-3xl px-6 py-10 md:p-12 text-center">
+            <h3 id="cta-title" class="text-2xl md:text-3xl font-bold mb-3 md:mb-4"
                 data-en="Ready to start your journey?" data-rw="Urifuza gutangira urugendo rwawe?">
                 Urifuza gutangira urugendo rwawe?
             </h3>
-            <p id="cta-text" class="text-blue-100 mb-8 max-w-xl mx-auto"
-               data-en="Urungano is here to support you. Talk to our AI assistant anytime." 
+            <p id="cta-text" class="text-blue-100 mb-6 md:mb-8 max-w-xl mx-auto text-sm md:text-base"
+               data-en="Urungano is here to support you. Talk to our AI assistant anytime."
                data-rw="Urungano iri hano kugira ngo igufashe. Vugana n'Urungano AI igihe cyose.">
                 Urungano iri hano kugira ngo igufashe. Vugana n'Urungano AI igihe cyose.
             </p>
-            <a href="urungano.html" 
-               class="inline-block bg-white text-blue-600 font-semibold px-10 py-4 rounded-2xl hover:bg-slate-100 transition"
+            <a href="urungano.html"
+               class="inline-block bg-white text-blue-600 font-semibold px-8 py-3.5 md:px-10 md:py-4 rounded-2xl hover:bg-slate-100 transition text-sm md:text-base"
                data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">
                 Vugana na Urungano AI
             </a>
         </div>
+
     </div>
 
     <script>
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('open');
+        }
+
         function switchLanguage(lang) {
             document.documentElement.setAttribute('lang', lang);
             document.body.setAttribute('data-lang', lang);
