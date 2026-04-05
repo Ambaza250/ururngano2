@@ -16,8 +16,11 @@
             background-image: url('banner-image.png');
             background-size: cover;
             background-position: center;
-            height: 520px;
+            min-height: 420px;
             position: relative;
+        }
+        @media (min-width: 768px) {
+            .banner { min-height: 520px; }
         }
         .banner-overlay {
             background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
@@ -25,11 +28,15 @@
             inset: 0;
         }
         .logo-img {
-            width: 72px;
-            height: 72px;
+            width: 52px;
+            height: 52px;
             object-fit: cover;
-            border-radius: 18px;
+            border-radius: 14px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) {
+            .logo-img { width: 72px; height: 72px; border-radius: 18px; }
         }
         .lang-btn {
             transition: all 0.3s ease;
@@ -51,9 +58,51 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
+
+        /* Mobile nav drawer */
+        #mobile-menu {
+            display: none;
+        }
+        #mobile-menu.open {
+            display: flex;
+        }
+
+        /* Chat section responsive height */
+        .chat-container {
+            height: 78vh;
+            min-height: 500px;
+        }
+        @media (max-width: 640px) {
+            .chat-container {
+                height: 80vh;
+                min-height: 420px;
+                border-radius: 1.25rem;
+            }
+        }
+
+        /* Avatar responsive */
+        #ai-avatar {
+            bottom: 1rem;
+            right: 1rem;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar { bottom: 2rem; right: 2rem; }
+        }
+        #ai-avatar .avatar-img-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
+        }
+        #ai-avatar .tooltip {
+            width: 220px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .tooltip { width: 288px; }
+        }
     </style>
 </head>
-
 
 <body class="bg-slate-50" data-lang="rw">
 
@@ -61,33 +110,54 @@
     <div class="banner">
         <div class="banner-overlay"></div>
         
-        <nav class="flex justify-between items-center px-8 py-6 relative z-50">
-            <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo-img">
+        <!-- NAV -->
+        <nav class="relative z-50 px-4 py-4 md:px-8 md:py-6">
+            <div class="flex items-center justify-between gap-2">
+                <!-- Logo -->
+                <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo-img">
 
-            <!-- Language Switcher -->
-            <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-3xl p-1 shadow-md">
-                <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-6 py-2.5 rounded-3xl text-sm">Kinyarwanda</button>
-                <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-6 py-2.5 rounded-3xl text-sm">English</button>
+                <!-- Language Switcher (always visible) -->
+                <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-3xl p-1 shadow-md">
+                    <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex gap-3">
+                    <a href="srh.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden bg-white/90 text-slate-800 rounded-xl p-2.5 shadow-md focus:outline-none" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
 
-            <!-- Navigation -->
-            <div class="flex gap-4">
-                <a href="srh.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-2 mt-3 md:hidden">
+                <a href="srh.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
                    data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-                <a href="mental-health.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
+                <a href="mental-health.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
                    data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                <a href="about-us.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-7 py-3 rounded-2xl transition shadow-md"
+                <a href="about-us.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
                    data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
             </div>
         </nav>
 
         <!-- Welcome Text -->
-        <div class="absolute bottom-20 left-1/2 -translate-x-1/2 text-center text-white px-6 max-w-4xl">
-            <h1 id="welcome-title" class="text-5xl md:text-6xl font-bold leading-tight mb-6"
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-white px-4 w-full max-w-4xl md:bottom-20">
+            <h1 id="welcome-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 md:mb-6"
                 data-en="Welcome to Urungano Platform" data-rw="Murakaza neza kuri Urungano Platform">
                 Murakaza neza kuri Urungano Platform
             </h1>
-            <p id="welcome-subtitle" class="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto"
+            <p id="welcome-subtitle" class="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-3xl mx-auto"
                data-en="Your inclusive, Kinyarwanda-native home for stigma-free support in Sexual and Reproductive Health and Mental Health."
                data-rw="Urugo rwanyu rw'ubufasha rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, rw'umwihariko mu Kinyarwanda kandi rutagira akato.">
                 Urugo rwanyu rw'ubufasha rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, rw'umwihariko mu Kinyarwanda kandi rutagira akato.
@@ -96,19 +166,19 @@
     </div>
 
     <!-- Main Chat Section -->
-    <div class="max-w-6xl mx-auto px-6 py-12">
-        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden" style="height: 78vh; min-height: 680px;">
+    <div class="max-w-6xl mx-auto px-3 py-6 md:px-6 md:py-12">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden chat-container">
             
             <!-- Chat Header -->
-            <div class="bg-blue-600 px-8 py-6 text-white flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-14 h-14 object-cover rounded-2xl">
-                    <div>
-                        <h2 id="chat-title" class="text-2xl font-bold"
+            <div class="bg-blue-600 px-4 py-4 md:px-8 md:py-6 text-white flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-10 h-10 md:w-14 md:h-14 object-cover rounded-2xl flex-shrink-0">
+                    <div class="min-w-0">
+                        <h2 id="chat-title" class="text-base md:text-2xl font-bold truncate"
                             data-en="Urungano AI Assistant" data-rw="Urungano AI Assistant">
                             Urungano AI Assistant
                         </h2>
-                        <p id="chat-subtitle" class="text-blue-100"
+                        <p id="chat-subtitle" class="text-blue-100 text-xs md:text-sm truncate"
                            data-en="Anonymous • Secure • Real-time Support" data-rw="Anonymous • Secure • Real-time Support">
                             Anonymous • Secure • Real-time Support
                         </p>
@@ -117,14 +187,14 @@
 
                 <!-- Voice Button -->
                 <button onclick="toggleVoiceInput()" id="voiceBtn"
-                        class="voice-btn bg-white text-blue-600 hover:bg-blue-100 px-6 py-3 rounded-2xl font-medium flex items-center gap-2 shadow">
+                        class="voice-btn bg-white text-blue-600 hover:bg-blue-100 px-3 py-2.5 md:px-6 md:py-3 rounded-2xl font-medium flex items-center gap-1.5 shadow flex-shrink-0 text-sm md:text-base">
                     <span id="micIcon">🎤</span>
-                    <span id="voiceText" data-en="Speak" data-rw="Vuga">Vuga</span>
+                    <span id="voiceText" class="hidden sm:inline" data-en="Speak" data-rw="Vuga">Vuga</span>
                 </button>
             </div>
 
             <!-- Udify Chatbot -->
-            <div style="height: calc(100% - 85px);">
+            <div style="height: calc(100% - 80px);">
                 <iframe id="chatFrame"
                     src="https://udify.app/chat/4c3chgpwFrrgfL4d"
                     style="width: 100%; height: 100%;"
@@ -132,19 +202,18 @@
                     allow="microphone">
                 </iframe>
             </div>
-			
-			
         </div>
-
-</div>
     </div>
-
-   
 
     <script>
         let recognition = null;
         let isListening = false;
         let chatFrame = null;
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('open');
+        }
 
         function toggleVoiceInput() {
             if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -160,8 +229,6 @@
                 recognition.onresult = (event) => {
                     const spokenText = event.results[0][0].transcript;
                     console.log("Spoken:", spokenText);
-                    
-                    // Send the spoken text to the Udify chatbot
                     sendToChatbot(spokenText);
                 };
 
@@ -192,28 +259,18 @@
             if (recognition) recognition.stop();
         }
 
-        // Send spoken text to the Udify iframe chatbot
         function sendToChatbot(text) {
             chatFrame = document.getElementById('chatFrame');
-            
-            // This is the best we can do without direct access to the iframe content
-            // We simulate typing the text into the chatbot by focusing and sending a message
             try {
-                // Attempt to inject message (works in some iframe setups)
                 const message = { type: "user_message", text: text };
                 chatFrame.contentWindow.postMessage(message, "*");
             } catch (e) {
                 console.log("Direct injection limited. Showing spoken text.");
             }
-
-            // Fallback: Show the spoken text in console and speak a confirmation
             console.log("Sent to chatbot:", text);
-            
-            // Optional: Speak a short confirmation
             speakResponse(document.body.getAttribute('data-lang') === 'rw' ? "Murakoze. Ndumva." : "Thank you. I heard you.");
         }
 
-        // Text-to-Speech for chatbot responses (simulated for now)
         function speakResponse(text) {
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(text);
@@ -223,7 +280,6 @@
             }
         }
 
-        // Language Switcher
         function switchLanguage(lang) {
             document.documentElement.setAttribute('lang', lang);
             document.body.setAttribute('data-lang', lang);
@@ -235,11 +291,9 @@
             document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
 
-            // Update voice recognition language
             if (recognition) recognition.lang = lang === 'rw' ? 'rw-RW' : 'en-US';
         }
 
-        // Accessibility
         function toggleContrast() { document.body.classList.toggle('high-contrast'); }
         let currentSize = 16;
         function changeFontSize(delta) {
@@ -251,33 +305,33 @@
             switchLanguage('rw');
         };
     </script>
-	
-	<!-- Urungano AI Sign Language Avatar -->
-<div id="ai-avatar" class="fixed bottom-8 right-8 z-50 flex flex-col items-end cursor-pointer group">
-    <div class="relative">
-        <!-- Avatar with your GIF -->
-        <div class="w-24 h-24 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
-            <img src="signs.gif" 
-                 alt="Urungano AI Signing" 
-                 class="w-full h-full object-cover">
+
+    <!-- Urungano AI Sign Language Avatar -->
+    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
+        <div class="relative">
+            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
+                <img src="signs.gif" 
+                     alt="Urungano AI Signing" 
+                     class="w-full h-full object-cover">
+            </div>
+            
+            <div class="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md ring-2 ring-white">
+                AI
+            </div>
         </div>
         
-        <!-- AI Badge -->
-        <div class="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md ring-2 ring-white">
-            AI
+        <!-- Hover Tooltip -->
+        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
+            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
+                🖐️ Urungano AI Mission
+            </p>
+            <p class="text-slate-600 text-xs leading-relaxed" 
+               data-en="Making health education inclusive and accessible to everyone — including the Deaf community using sign language." 
+               data-rw="Guhindura uburezi bw'ubuzima buba bw'umwihariko kandi bugaragara ku bantu bose — harimo n'abumva nabi binyuze mu rurimi rw'ibimenyetso.">
+                Guhindura uburezi bw'ubuzima buba bw'umwihariko kandi bugaragara ku bantu bose — harimo n'abumva nabi binyuze mu rurimi rw'ibimenyetso.
+            </p>
         </div>
     </div>
-    
-    <!-- Hover Tooltip -->
-    <div class="mt-4 bg-white shadow-2xl rounded-2xl p-5 w-72 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
-        <p class="text-blue-600 font-semibold mb-2 flex items-center gap-2 text-base">
-            🖐️ Urungano AI Mission
-        </p>
-        <p class="text-slate-600 text-sm leading-relaxed" data-en="Making health education inclusive and accessible to everyone — including the Deaf community using sign language." 
-           data-rw="Guhindura uburezi bw'ubuzima buba bw'umwihariko kandi bugaragara ku bantu bose — harimo n'abumva nabi binyuze mu rurimi rw'ibimenyetso.">
-            Guhindura uburezi bw'ubuzima buba bw'umwihariko kandi bugaragara ku bantu bose — harimo n'abumva nabi binyuze mu rurimi rw'ibimenyetso.
-        </p>
-    </div>
-</div>
+
 </body>
 </html>
