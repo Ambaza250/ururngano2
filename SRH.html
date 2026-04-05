@@ -7,10 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
-        /* Banner Styles */
+
+        /* Banner */
         .hero-banner {
-            height: 480px;
+            min-height: 260px;
+            height: 40vw;
+            max-height: 480px;
             position: relative;
             overflow: hidden;
         }
@@ -27,129 +29,155 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            padding: 1rem;
         }
 
-        .accordion-btn {
-            transition: all 0.3s ease;
+        /* Language button */
+        .lang-btn { transition: all 0.3s ease; }
+        .lang-btn.active {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
         }
+
+        /* Accordion */
+        .accordion-btn { transition: all 0.3s ease; }
         .accordion-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-out;
         }
-        .accordion-content.open {
-            max-height: 4000px;
-        }
-        .icon {
-            transition: transform 0.3s ease;
-        }
-        .open .icon {
-            transform: rotate(45deg);
-        }
+        .accordion-content.open { max-height: 4000px; }
+        .icon { transition: transform 0.3s ease; }
+
+        /* Mobile menu */
+        #mobile-menu { display: none; }
+        #mobile-menu.open { display: flex; }
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
 
     <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="urungano-logo.jpeg" 
-                     alt="Urungano Logo" 
-                     class="w-12 h-12 object-cover rounded-2xl">
-                <h1 class="text-2xl font-bold text-blue-600">Urungano</h1>
+        <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+            <div class="flex justify-between items-center gap-2">
+
+                <!-- Logo + Title -->
+                <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                         class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+                    <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
+                </div>
+
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+                    <button onclick="switchLanguage('rw')" id="btn-rw"
+                            class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en"
+                            class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop nav links -->
+                <div class="hidden md:flex gap-6 text-sm font-medium">
+                    <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                    <a href="srh.html" class="text-blue-600 font-semibold" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()"
+                        class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
 
-            <!-- Language Switcher -->
-            <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow">
-                <button onclick="switchLanguage('rw')" id="btn-rw" 
-                        class="lang-btn active px-5 py-2 rounded-3xl text-sm">Kinyarwanda</button>
-                <button onclick="switchLanguage('en')" id="btn-en" 
-                        class="lang-btn px-5 py-2 rounded-3xl text-sm">English</button>
-            </div>
-
-            <!-- Navigation Links -->
-            <div class="flex gap-6 text-sm font-medium">
-                <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
-                <a href="srh.html" class="text-blue-600 font-semibold" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-                <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
+                <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                <a href="srh.html" class="block py-2.5 px-2 rounded-xl text-blue-600 font-semibold bg-blue-50" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
             </div>
         </div>
     </nav>
 
     <!-- SRH Hero Banner -->
     <div class="hero-banner">
-        <img src="srh-banner.png" 
-             alt="Ubuzima Bw'Imyororokere">
+        <img src="srh-banner.png" alt="Ubuzima Bw'Imyororokere">
         <div class="banner-overlay">
-            <div>
-                <h1 class="text-white text-5xl md:text-6xl font-bold leading-tight mb-4"
-				data-en="Sexual And Reproductive Health"
-               data-rw="Ubuzima Bw'Imyororokere"
-				>
-                    Ubuzima Bw'Imyororokere
-                </h1>
-               
-            </div>
+            <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
+                data-en="Sexual And Reproductive Health"
+                data-rw="Ubuzima Bw'Imyororokere">
+                Ubuzima Bw'Imyororokere
+            </h1>
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="mb-8">
-            <button onclick="toggleSection('menstruation')" 
-                    class="accordion-btn w-full bg-white hover:bg-blue-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold text-slate-800">
-                <div class="flex items-center gap-4">
-                    <span class="text-3xl">🌸</span>
+    <div class="max-w-4xl mx-auto px-3 py-6 md:px-6 md:py-10">
+
+        <!-- Accordion 1: Menstruation -->
+        <div class="mb-5 md:mb-8">
+            <button onclick="toggleSection('menstruation')"
+                    class="accordion-btn w-full bg-white hover:bg-blue-50 border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left flex justify-between items-center text-base md:text-xl font-semibold text-slate-800">
+                <div class="flex items-center gap-3 md:gap-4">
+                    <span class="text-2xl md:text-3xl">🌸</span>
                     <span data-en="Menstruation" data-rw="Ukwezi k'umugore">Ukwezi k'umugore</span>
                 </div>
-                <span id="icon1" class="icon text-3xl text-blue-600">+</span>
+                <span id="iconmenstruation" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0 ml-2">+</span>
             </button>
-            <div id="menstruation" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
-
-                <h3 class="font-bold text-2xl text-blue-600 mt-8 mb-4" data-en="What can I do to reduce pain during menstruation?" data-rw="Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?">
+            <div id="menstruation" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <h3 class="font-bold text-lg md:text-2xl text-blue-600 mt-6 md:mt-8 mb-3 md:mb-4"
+                    data-en="What can I do to reduce pain during menstruation?"
+                    data-rw="Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?">
                     Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?
                 </h3>
-                <p class="mb-6" data-en="Pain during menstruation is normal but if it becomes unbearable and affects daily activities, seek medical help." 
-                   data-rw="Kubabara mu nda mu gihe cy’imihango ni ibintu bisanzwe ariko iyo ububabare butihanganirwa, ihutire kuya kwa muganga.">
-                    Kubabara mu nda mu gihe cy’imihango ni ibintu bisanzwe ariko iyo ububabare butihanganirwa, ihutire kuya kwa muganga.
+                <p class="mb-5 text-sm md:text-base text-slate-700"
+                   data-en="Pain during menstruation is normal but if it becomes unbearable and affects daily activities, seek medical help."
+                   data-rw="Kubabara mu nda mu gihe cy'imihango ni ibintu bisanzwe ariko iyo ububabare butihanganirwa, ihutire kuya kwa muganga.">
+                    Kubabara mu nda mu gihe cy'imihango ni ibintu bisanzwe ariko iyo ububabare butihanganirwa, ihutire kuya kwa muganga.
                 </p>
 
-                <h4 class="font-semibold mt-6 mb-3" data-en="Helpful tips:" data-rw="Ibintu byagufasha:">Ibintu byagufasha:</h4>
-                <ul class="list-disc pl-6 space-y-3 text-slate-700">
+                <h4 class="font-semibold mt-5 mb-2 md:mt-6 md:mb-3 text-sm md:text-base"
+                    data-en="Helpful tips:" data-rw="Ibintu byagufasha:">Ibintu byagufasha:</h4>
+                <ul class="list-disc pl-5 md:pl-6 space-y-2 md:space-y-3 text-slate-700 text-sm md:text-base">
                     <li data-en="Use warm water or a heating pad on the lower abdomen" data-rw="Gukoresha amazi ashyushye ku nda cyangwa igitambaro cy'ubushyuhe">Gukoresha amazi ashyushye ku nda cyangwa igitambaro cy'ubushyuhe</li>
                     <li data-en="Light exercise like walking or yoga" data-rw="Imyitozo ngororamubiri yoroheje nk'ugendagenda cyangwa yoga">Imyitozo ngororamubiri yoroheje nk'ugendagenda cyangwa yoga</li>
                     <li data-en="Eat balanced meals and drink plenty of water" data-rw="Kurya indyo yuzuye no kunywa amazi menshi">Kurya indyo yuzuye no kunywa amazi menshi</li>
                     <li data-en="Rest and practice deep breathing" data-rw="Kuruhuka no guhumeka byimbitse">Kuruhuka no guhumeka byimbitse</li>
                 </ul>
 
-                <h3 class="font-bold text-2xl text-blue-600 mt-12 mb-4" data-en="Signs that your period is coming" data-rw="Ibimenyetso by'imihango">Ibimenyetso by'imihango</h3>
-                <p data-en="Common signs include headache, lower abdominal pain, breast tenderness, fatigue, and mood changes." 
-                   data-rw="Ibimenyetso bisanzwe: kubabara umutwe, kubabara mu nda, kubyimba amabere, umunaniro, n'impinduka mu myifatire.">Ibimenyetso bisanzwe: kubabara umutwe, kubabara mu nda, kubyimba amabere, umunaniro, n'impinduka mu myifatire.</p>
+                <h3 class="font-bold text-lg md:text-2xl text-blue-600 mt-8 md:mt-12 mb-3 md:mb-4"
+                    data-en="Signs that your period is coming" data-rw="Ibimenyetso by'imihango">Ibimenyetso by'imihango</h3>
+                <p class="text-sm md:text-base text-slate-700"
+                   data-en="Common signs include headache, lower abdominal pain, breast tenderness, fatigue, and mood changes."
+                   data-rw="Ibimenyetso bisanzwe: kubabara umutwe, kubabara mu nda, kubyimba amabere, umunaniro, n'impinduka mu myifatire.">
+                    Ibimenyetso bisanzwe: kubabara umutwe, kubabara mu nda, kubyimba amabere, umunaniro, n'impinduka mu myifatire.
+                </p>
             </div>
         </div>
 
-        <!-- Toggle 2: Virusi itera sida (HIV) -->
-        
-		    <!-- Main Content -->
-   
-
-        <!-- New Lesson 1 -->
-        <div class="mb-8">
-            <button onclick="toggleSection('lesson1')" 
-                    class="accordion-btn w-full flex justify-between items-center bg-white p-6 rounded-2xl shadow hover:shadow-md transition text-left">
-                <span class="text-xl font-semibold" data-en="How to Reduce Menstrual Pain" data-rw="Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?">
+        <!-- Accordion 2: Reduce Menstrual Pain (lesson1) -->
+        <div class="mb-5 md:mb-8">
+            <button onclick="toggleSection('lesson1')"
+                    class="accordion-btn w-full flex justify-between items-center bg-white p-5 md:p-6 rounded-2xl shadow hover:shadow-md transition text-left">
+                <span class="text-base md:text-xl font-semibold pr-3"
+                      data-en="How to Reduce Menstrual Pain"
+                      data-rw="Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?">
                     Ese ni iki nakora ngo ngabanye uburibwe mu gihe cy'imihango?
                 </span>
-                <span id="icon1" class="icon text-3xl text-blue-600">+</span>
+                <span id="iconlesson1" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
-            <div id="lesson1" class="accordion-content bg-white mt-2 rounded-2xl shadow p-8 text-slate-700 leading-relaxed">
-                <p class="mb-6" data-en="Menstrual pain is normal but if it's too strong and affects your daily life, you should see a doctor." 
-                   data-rw="Kuri bwa munda mu gihe cy’imihango ni ibintu bisanzwe ritabwo ari uburwayi ariko igihe ububare butihanganirwa kugeraho bituma udakora inshingano zawe za buri munsi, ihutire kuya kwa muganga.">
-                    Kuri bwa munda mu gihe cy’imihango ni ibintu bisanzwe ritabwo ari uburwayi ariko igihe ububare butihanganirwa kugeraho bituma udakora inshingano zawe za buri munsi, ihutire kuya kwa muganga bagufashe banakugabanyirize ububabare.
+            <div id="lesson1" class="accordion-content bg-white mt-2 rounded-2xl shadow px-5 pb-8 md:p-8 text-slate-700 leading-relaxed text-sm md:text-base">
+                <p class="mb-5 mt-5 md:mt-0"
+                   data-en="Menstrual pain is normal but if it's too strong and affects your daily life, you should see a doctor."
+                   data-rw="Kuri bwa munda mu gihe cy'imihango ni ibintu bisanzwe ritabwo ari uburwayi ariko igihe ububare butihanganirwa kugeraho bituma udakora inshingano zawe za buri munsi, ihutire kuya kwa muganga.">
+                    Kuri bwa munda mu gihe cy'imihango ni ibintu bisanzwe ritabwo ari uburwayi ariko igihe ububare butihanganirwa kugeraho bituma udakora inshingano zawe za buri munsi, ihutire kuya kwa muganga bagufashe banakugabanyirize ububabare.
                 </p>
-                <!-- Add the full content from your first file here if you want more details -->
-                <ul class="list-disc pl-6 space-y-3 text-slate-600">
+                <ul class="list-disc pl-5 md:pl-6 space-y-2 md:space-y-3 text-slate-600">
                     <li data-en="Use a hot water bottle on your lower belly" data-rw="Gukoresha amazi ashyushye mu kwivura">Gukoresha amazi ashyushye mu kwivura</li>
                     <li data-en="Take warm baths" data-rw="Koga amazi ashyushye">Koga amazi ashyushye</li>
                     <li data-en="Do light exercises like walking or yoga" data-rw="Imyitozo ngororamubiri yoroheje">Imyitozo ngororamubiri yoroheje</li>
@@ -158,82 +186,93 @@
             </div>
         </div>
 
-        <!-- New Lesson 2 -->
-        <div class="mb-8">
-            <button onclick="toggleSection('lesson2')" 
-                    class="accordion-btn w-full flex justify-between items-center bg-white p-6 rounded-2xl shadow hover:shadow-md transition text-left">
-                <span class="text-xl font-semibold" data-en="When is a woman most likely to get pregnant?" data-rw="Ni ryari umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama?">
+        <!-- Accordion 3: Pregnancy timing (lesson2) -->
+        <div class="mb-5 md:mb-8">
+            <button onclick="toggleSection('lesson2')"
+                    class="accordion-btn w-full flex justify-between items-center bg-white p-5 md:p-6 rounded-2xl shadow hover:shadow-md transition text-left">
+                <span class="text-base md:text-xl font-semibold pr-3"
+                      data-en="When is a woman most likely to get pregnant?"
+                      data-rw="Ni ryari umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama?">
                     Ni ryari umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama?
                 </span>
-                <span id="icon2" class="icon text-3xl text-blue-600">+</span>
+                <span id="iconlesson2" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
-            <div id="lesson2" class="accordion-content bg-white mt-2 rounded-2xl shadow p-8 text-slate-700 leading-relaxed">
-                <p class="mb-6" data-en="A woman has the highest chance of getting pregnant during ovulation (Uburumbuke)." 
-                   data-rw="Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama iyo ari mu gihe cy’uburumbuke.">
-                    Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama iyo ari mu gihe cy’uburumbuke.
+            <div id="lesson2" class="accordion-content bg-white mt-2 rounded-2xl shadow px-5 pb-8 md:p-8 text-slate-700 leading-relaxed text-sm md:text-base">
+                <p class="mb-4 mt-5 md:mt-0"
+                   data-en="A woman has the highest chance of getting pregnant during ovulation (Uburumbuke)."
+                   data-rw="Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama iyo ari mu gihe cy'uburumbuke.">
+                    Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama iyo ari mu gihe cy'uburumbuke.
                 </p>
-                <!-- Full content from your second file -->
-                <p class="mb-4" data-en="Ovulation is when an egg is released from the ovary." 
+                <p class="mb-4"
+                   data-en="Ovulation is when an egg is released from the ovary."
                    data-rw="Uburumbuke ni igihe igi rirekurwa mu mirantanga.">
                     Uburumbuke ni igihe igi rirekurwa mu mirantanga.
                 </p>
-                <p class="text-slate-600" data-en="This usually happens around day 14 of the menstrual cycle (counting from the last day of your period)." 
-                   data-rw="Igi rirekurwa k’umunsi wa 14 duturutse inyuma (ku munsi wa nyuma w’ukwezi k’umugore).">
-                    Igi rirekurwa k’umunsi wa 14 duturutse inyuma (ku munsi wa nyuma w’ukwezi k’umugore).
+                <p class="text-slate-600"
+                   data-en="This usually happens around day 14 of the menstrual cycle (counting from the last day of your period)."
+                   data-rw="Igi rirekurwa k'umunsi wa 14 duturutse inyuma (ku munsi wa nyuma w'ukwezi k'umugore).">
+                    Igi rirekurwa k'umunsi wa 14 duturutse inyuma (ku munsi wa nyuma w'ukwezi k'umugore).
                 </p>
             </div>
         </div>
 
-<div>
-            <button onclick="toggleSection('hiv')" 
-                    class="accordion-btn w-full bg-white hover:bg-red-50 border border-slate-200 rounded-3xl px-8 py-7 text-left flex justify-between items-center text-xl font-semibold text-slate-800">
-                <div class="flex items-center gap-4">
-                    <span class="text-3xl">🦠</span>
+        <!-- Accordion 4: HIV/AIDS -->
+        <div class="mb-5 md:mb-8">
+            <button onclick="toggleSection('hiv')"
+                    class="accordion-btn w-full bg-white hover:bg-red-50 border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left flex justify-between items-center text-base md:text-xl font-semibold text-slate-800">
+                <div class="flex items-center gap-3 md:gap-4">
+                    <span class="text-2xl md:text-3xl">🦠</span>
                     <span data-en="HIV / AIDS" data-rw="Virusi itera sida (HIV)">Virusi itera sida (HIV)</span>
                 </div>
-                <span id="icon2" class="icon text-3xl text-red-600">+</span>
+                <span id="iconhiv" class="icon text-2xl md:text-3xl text-red-600 flex-shrink-0 ml-2">+</span>
             </button>
-            <div id="hiv" class="accordion-content bg-white rounded-b-3xl px-8 pb-10 border border-t-0 border-slate-200">
-                <h3 class="font-bold text-2xl text-red-600 mt-8 mb-4" data-en="HIV / AIDS" data-rw="Virusi itera sida (HIV)">Virusi itera sida (HIV)</h3>
-                <p class="mb-6" data-en="HIV is a virus that attacks the immune system. If untreated, it can lead to AIDS." 
-                   data-rw="VIH ni virusi yibasira ubudahangarwa bw'umubiri. Iyo itavuwe, ishobora gutera SIDA.">VIH ni virusi yibasira ubudahangarwa bw'umubiri. Iyo itavuwe, ishobora gutera SIDA.</p>
-                
-                <h4 class="font-semibold mt-6 mb-3" data-en="How it spreads:" data-rw="Uko yanduramo:">Uko yanduramo:</h4>
-                <ul class="list-disc pl-6 space-y-2">
+            <div id="hiv" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <h3 class="font-bold text-lg md:text-2xl text-red-600 mt-6 md:mt-8 mb-3 md:mb-4"
+                    data-en="HIV / AIDS" data-rw="Virusi itera sida (HIV)">Virusi itera sida (HIV)</h3>
+                <p class="mb-5 text-sm md:text-base text-slate-700"
+                   data-en="HIV is a virus that attacks the immune system. If untreated, it can lead to AIDS."
+                   data-rw="VIH ni virusi yibasira ubudahangarwa bw'umubiri. Iyo itavuwe, ishobora gutera SIDA.">
+                    VIH ni virusi yibasira ubudahangarwa bw'umubiri. Iyo itavuwe, ishobora gutera SIDA.
+                </p>
+
+                <h4 class="font-semibold mt-5 mb-2 md:mt-6 md:mb-3 text-sm md:text-base"
+                    data-en="How it spreads:" data-rw="Uko yanduramo:">Uko yanduramo:</h4>
+                <ul class="list-disc pl-5 md:pl-6 space-y-2 text-slate-700 text-sm md:text-base">
                     <li data-en="Unprotected sexual intercourse" data-rw="Imibonano mpuzabitsina idakingiye">Imibonano mpuzabitsina idakingiye</li>
                     <li data-en="Sharing contaminated sharp objects" data-rw="Gusangira ibikoresho byanduye">Gusangira ibikoresho byanduye</li>
                     <li data-en="From mother to child" data-rw="Kuva ku nyina ku mwana">Kuva ku nyina ku mwana</li>
                 </ul>
 
-                <h4 class="font-semibold mt-8 mb-3" data-en="How to protect yourself:" data-rw="Uko wirinda:">Uko wirinda:</h4>
-                <ul class="list-disc pl-6 space-y-2">
+                <h4 class="font-semibold mt-6 mb-2 md:mt-8 md:mb-3 text-sm md:text-base"
+                    data-en="How to protect yourself:" data-rw="Uko wirinda:">Uko wirinda:</h4>
+                <ul class="list-disc pl-5 md:pl-6 space-y-2 text-slate-700 text-sm md:text-base">
                     <li data-en="Always use condoms" data-rw="Gukoresha agakingirizo buri gihe">Gukoresha agakingirizo buri gihe</li>
                     <li data-en="Get tested regularly" data-rw="Kwipimisha VIH">Kwipimisha VIH</li>
                     <li data-en="Have one faithful partner" data-rw="Kugira umukunzi umwe gusa">Kugira umukunzi umwe gusa</li>
                 </ul>
             </div>
         </div>
-		
-        <!-- Your previous SRH lessons go here below... -->
-
-    </div>
 
         <!-- Back Button -->
-        <div class="text-center mt-16">
-            <a href="urungano.html" 
-               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-10 py-4 rounded-2xl transition"
+        <div class="text-center mt-10 md:mt-16">
+            <a href="urungano.html"
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3.5 md:px-10 md:py-4 rounded-2xl transition text-sm md:text-base"
                data-en="← Back to Home" data-rw="← Subira ku rupapuro rw'ibanze">
                 ← Subira ku rupapuro rw'ibanze
             </a>
         </div>
+
     </div>
 
-
     <script>
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('open');
+        }
+
         function toggleSection(section) {
             const content = document.getElementById(section);
-            const icon = document.getElementById('icon' + section.replace('lesson',''));
-            
+            const icon = document.getElementById('icon' + section);
+
             content.classList.toggle('open');
             icon.textContent = content.classList.contains('open') ? '−' : '+';
         }
@@ -250,7 +289,6 @@
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
         }
 
-        // Initialize
         window.onload = () => switchLanguage('rw');
     </script>
 </body>
