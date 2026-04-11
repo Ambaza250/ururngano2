@@ -3,45 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Urungano Chat - TEST</title>
+  <title>Urungano Chat</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-    .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-    button { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; margin: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+    button { padding: 14px 24px; margin: 8px 5px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     .signup { background: #28a745; color: white; }
     .login { background: #007bff; color: white; }
-    #status { margin-top: 20px; padding: 15px; font-size: 18px; font-weight: bold; min-height: 60px; background: #f0f0f0; border-radius: 8px; }
+    #status { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; min-height: 60px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🗣️ Urungano Chat - BUTTON TEST</h1>
-    <p>If you see this message, the page loaded correctly.</p>
+    <h1>🗣️ Urungano Chat</h1>
+    <p>Kuganira mu bwiherezo ku buzima bwo mu mutwe n'ubuzima bw'imyororokere</p>
     
-    <h3>Click the buttons → you should see a message below</h3>
+    <h3>Iyandikishe cyangwa Kwinjira</h3>
     
-    <button onclick="signUp()" class="signup">Iyandikishe (Sign Up)</button>
-    <button onclick="logIn()" class="login">Kwinjira (Login)</button>
+    <input id="email" type="email" placeholder="Email yawe" value="ambazasem63@gmail.com">
+    <input id="password" type="password" placeholder="Password yawe (nibura ibimenyetso 6)">
+    
+    <div>
+      <button onclick="signUp()" class="signup">Iyandikishe (Sign Up)</button>
+      <button onclick="logIn()" class="login">Kwinjira (Login)</button>
+    </div>
     
     <div id="status"></div>
   </div>
 
   <script>
-    // These functions are defined FIRST - no Supabase yet
-    function signUp() {
-      document.getElementById('status').innerHTML = 
-        '✅ <span style="color:green">SIGN UP BUTTON WORKS!</span><br>You clicked Iyandikishe';
-      console.log('signUp() was called successfully');
+    // ================== SUPABASE CONFIG ==================
+    const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks'; // ← Make sure this is the FULL key from Supabase
+
+    let supabase;
+
+    // Safe initialization
+    try {
+      supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✅ Supabase client created successfully');
+    } catch (err) {
+      console.error('Supabase init failed:', err);
     }
 
-    function logIn() {
-      document.getElementById('status').innerHTML = 
-        '✅ <span style="color:blue">LOGIN BUTTON WORKS!</span><br>You clicked Kwinjira';
-      console.log('logIn() was called successfully');
+    const statusEl = document.getElementById('status');
+
+    // ====================== SIGN UP ======================
+    async function signUp() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password || password.length < 6) {
+        statusEl.style.background = '#ffebee';
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga rirenze ibimenyetso 6";
+        return;
+      }
+
+      if (!supabase) {
+        statusEl.style.background = '#ffebee';
+        statusEl.textContent = "❌ Supabase ntiyashoboye gufungura. Reba Console.";
+        return;
+      }
+
+      statusEl.style.background = '#fff3e0';
+      statusEl.textContent = "Tegereza... Iyandikishwa rigikomeje";
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+        });
+
+        if (error) {
+          statusEl.style.background = '#ffebee';
+          statusEl.textContent = "❌ Ikosa: " + error.message;
+        } else {
+          statusEl.style.background = '#e8f5e9';
+          statusEl.innerHTML = "✅ Iyandikishwa ryagenze neza!<br>Check your email and click the confirmation link.";
+          console.log("Sign up success:", data);
+        }
+      } catch (err) {
+        statusEl.style.background = '#ffebee';
+        statusEl.textContent = "❌ Error: " + err.message;
+      }
     }
 
-    // Just to show the script is running
-    console.log('✅ JavaScript loaded successfully');
+    // ====================== LOGIN ======================
+    async function logIn() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password) {
+        statusEl.style.background = '#ffebee';
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
+        return;
+      }
+
+      if (!supabase) {
+        statusEl.style.background = '#ffebee';
+        statusEl.textContent = "❌ Supabase ntiyashoboye gufungura.";
+        return;
+      }
+
+      statusEl.style.background = '#fff3e0';
+      statusEl.textContent = "Tegereza... Kwinjira bigikomeje";
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+        if (error) {
+          statusEl.style.background = '#ffebee';
+          statusEl.textContent = "❌ Ikosa: " + error.message;
+        } else {
+          statusEl.style.background = '#e8f5e9';
+          statusEl.textContent = "✅ Murakaza neza! Watsinze kwinjira 🎉";
+          console.log("Login success:", data.user);
+        }
+      } catch (err) {
+        statusEl.style.background = '#ffebee';
+        statusEl.textContent = "❌ Error: " + err.message;
+      }
+    }
+
+    // Show if Supabase loaded
+    console.log('✅ Chat page JavaScript loaded successfully');
   </script>
 </body>
 </html>
