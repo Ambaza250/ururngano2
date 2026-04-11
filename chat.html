@@ -34,20 +34,19 @@
   </div>
 
   <script>
-    // ================== YOUR SUPABASE KEYS ==================
+    // ================== SUPABASE KEYS (Update if needed) ==================
     const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';   // ← Make sure this is the FULL key!!
+    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks'; // ← Replace with your FULL key if this is truncated
 
     const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const statusEl = document.getElementById('status');
 
-    // ====================== SIGN UP ======================
     async function signUp() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       
-      if (!email || !password || password.length < 6) {
-        statusEl.textContent = "❌ Shyira email n'ijambo ry'ibanga rirenze ibimenyetso 6";
+      if (!email || !password) {
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
         return;
       }
 
@@ -55,20 +54,16 @@
       
       const { data, error } = await supabase.auth.signUp({ email, password });
 
-      if (error) {
-        statusEl.textContent = "❌ Ikosa: " + error.message;
-      } else {
-        statusEl.innerHTML = "✅ Iyandikishwa ryagenze neza!<br>Email yawe yoherejwe confirmation link. Kanda iyo link kugira ngo ukomeze.";
-      }
+      if (error) statusEl.textContent = "❌ Ikosa: " + error.message;
+      else statusEl.innerHTML = "✅ Iyandikishwa ryagenze!<br> Kanda link yoherejwe muri email.";
     }
 
-    // ====================== LOGIN ======================
     async function logIn() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       
       if (!email || !password) {
-        statusEl.textContent = "❌ Shyira email n'ijambo ry'ibanga";
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
         return;
       }
 
@@ -76,12 +71,8 @@
       
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) {
-        statusEl.textContent = "❌ Ikosa: " + error.message;
-      } else {
-        statusEl.textContent = "✅ Murakaza neza! Watsinze kwinjira. 🎉";
-        console.log("Logged in user:", data.user);
-      }
+      if (error) statusEl.textContent = "❌ Ikosa: " + error.message;
+      else statusEl.textContent = "✅ Watsinze kwinjira! Murakaza neza 🎉";
     }
   </script>
 </body>
