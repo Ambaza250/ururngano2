@@ -6,13 +6,13 @@
   <title>Urungano Chat</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; }
-    button { padding: 12px 20px; margin: 5px; border: none; border-radius: 6px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+    button { padding: 14px 24px; margin: 8px 5px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     .signup { background: #28a745; color: white; }
     .login { background: #007bff; color: white; }
-    #status { margin-top: 15px; font-weight: bold; }
+    #status { margin-top: 20px; padding: 10px; border-radius: 6px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -23,7 +23,7 @@
     <h3>Iyandikishe cyangwa Kwinjira</h3>
     
     <input id="email" type="email" placeholder="Email yawe" value="ambazasem63@gmail.com">
-    <input id="password" type="password" placeholder="Password">
+    <input id="password" type="password" placeholder="Password yawe (nibura ibimenyetso 6)">
     
     <div>
       <button onclick="signUp()" class="signup">Iyandikishe (Sign Up)</button>
@@ -33,6 +33,7 @@
     <div id="status"></div>
   </div>
 
+  <!-- IMPORTANT: Script must be at the bottom -->
   <script src="chat.js"></script>
 </body>
 </html>
