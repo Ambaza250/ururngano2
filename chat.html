@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Urungano Chat - Debug</title>
+  <title>Urungano Chat</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-    .container { max-width: 700px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; margin: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
     button { padding: 14px 24px; margin: 8px 5px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     .signup { background: #28a745; color: white; }
     .login { background: #007bff; color: white; }
-    #status { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; min-height: 80px; white-space: pre-wrap; }
+    #status { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; min-height: 80px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🗣️ Urungano Chat - Debug Mode</h1>
+    <h1>🗣️ Urungano Chat</h1>
+    <p>Kuganira mu bwiherezo ku buzima bwo mu mutwe n'ubuzima bw'imyororokere</p>
     
     <h3>Iyandikishe cyangwa Kwinjira</h3>
     
@@ -29,58 +30,58 @@
       <button onclick="logIn()" class="login">Kwinjira (Login)</button>
     </div>
     
-    <div id="status">Loading...</div>
+    <div id="status">Loading Supabase...</div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';  // ← Using exactly what you gave
+    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';
 
     let supabase = null;
     const statusEl = document.getElementById('status');
 
-    // Debug info on load
-    function init() {
-      let debugText = "🔍 DEBUG INFO:\n\n";
-      debugText += "URL: " + SUPABASE_URL + "\n";
-      debugText += "Key length: " + SUPABASE_ANON_KEY.length + " characters\n";
-      debugText += "Key starts with: " + SUPABASE_ANON_KEY.substring(0, 40) + "...\n\n";
-
+    // Safe initialization
+    function initSupabase() {
       try {
         supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        debugText += "✅ Supabase.createClient() called without crash\n";
+        console.log('Supabase initialized');
+        statusEl.textContent = "Supabase yashoboye gufungura. Gerageza buttons.";
         statusEl.style.background = "#e8f5e9";
-        statusEl.textContent = debugText + "\nReady. Try clicking the buttons now.";
       } catch (err) {
-        debugText += "❌ ERROR creating client: " + err.message;
+        console.error(err);
+        statusEl.textContent = "❌ Supabase init failed: " + err.message;
         statusEl.style.background = "#ffebee";
-        statusEl.textContent = debugText;
       }
     }
 
-    window.onload = init;
+    // Run initialization when page loads
+    window.onload = initSupabase;
 
     // ====================== SIGN UP ======================
     async function signUp() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
 
+      if (!email || !password) {
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
+        return;
+      }
       if (!supabase) {
-        statusEl.textContent = "❌ Supabase client not initialized. Check debug info above.";
+        statusEl.textContent = "❌ Supabase ntiyashoboye gufungura";
         return;
       }
 
-      statusEl.textContent = "Tegereza... Sign up igikomeje...";
+      statusEl.textContent = "Tegereza... Iyandikishwa rigikomeje";
 
       try {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
-          statusEl.textContent = "❌ Sign Up Error: " + error.message;
+          statusEl.textContent = "❌ Ikosa: " + error.message;
         } else {
-          statusEl.textContent = "✅ Sign Up successful! Check your email for confirmation link.";
+          statusEl.innerHTML = "✅ Iyandikishwa ryagenze neza!<br>Kanda link muri email yawe.";
         }
       } catch (err) {
-        statusEl.textContent = "❌ Unexpected error: " + err.message;
+        statusEl.textContent = "❌ Error: " + err.message;
       }
     }
 
@@ -89,22 +90,26 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
 
+      if (!email || !password) {
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
+        return;
+      }
       if (!supabase) {
-        statusEl.textContent = "❌ Supabase client not initialized.";
+        statusEl.textContent = "❌ Supabase ntiyashoboye gufungura";
         return;
       }
 
-      statusEl.textContent = "Tegereza... Login igikomeje...";
+      statusEl.textContent = "Tegereza... Kwinjira bigikomeje";
 
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-          statusEl.textContent = "❌ Login Error: " + error.message;
+          statusEl.textContent = "❌ Ikosa: " + error.message;
         } else {
-          statusEl.textContent = "✅ Login successful! Welcome " + email;
+          statusEl.textContent = "✅ Murakaza neza! Watsinze kwinjira 🎉";
         }
       } catch (err) {
-        statusEl.textContent = "❌ Unexpected error: " + err.message;
+        statusEl.textContent = "❌ Error: " + err.message;
       }
     }
   </script>
