@@ -7,7 +7,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
@@ -31,62 +31,88 @@
       document.getElementById('chat-section').style.display = section === 'chat' ? 'flex' : 'none';
     }
 
-    // ====================== AUTH ======================
+    // ====================== AUTH + SAVE USER TO FIRESTORE ======================
     window.signUp = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const status = document.getElementById('status');
+
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } catch (e) { status.textContent = "❌ " + e.message; }
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Save user to Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          createdAt: serverTimestamp()
+        });
+
+        status.textContent = "✅ Iyandikishwa ryagenze neza!";
+        status.style.background = "#e8f5e9";
+      } catch (e) {
+        status.textContent = "❌ " + e.message;
+        status.style.background = "#ffebee";
+      }
     };
 
     window.logIn = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const status = document.getElementById('status');
+
       try {
         await signInWithEmailAndPassword(auth, email, password);
-      } catch (e) { status.textContent = "❌ " + e.message; }
+      } catch (e) {
+        status.textContent = "❌ " + e.message;
+        status.style.background = "#ffebee";
+      }
     };
 
-    // ====================== REALTIME CHAT ======================
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        showSection('chat');
-        loadUsers();
-      } else {
-        showSection('auth');
-      }
-    });
-
+    // ====================== LOAD REAL USERS ======================
     async function loadUsers() {
       const list = document.getElementById('users-list');
-      list.innerHTML = `
-        <div class="user-item" onclick="startChat({id:'demo1', email:'user1@test.com', username:'Mukama'})">Mukama</div>
-        <div class="user-item" onclick="startChat({id:'demo2', email:'user2@test.com', username:'Aline'})">Aline</div>
-        <div class="user-item" onclick="startChat({id:'demo3', email:'user3@test.com', username:'Jean'})">Jean</div>
-      `;
+      list.innerHTML = "<p>Tegereza...</p>";
+
+      try {
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        list.innerHTML = "";
+
+        usersSnapshot.forEach(doc => {
+          const userData = doc.data();
+          if (userData.uid === currentUser.uid) return; // Don't show yourself
+
+          const div = document.createElement('div');
+          div.className = "user-item";
+          div.textContent = userData.email;
+          div.onclick = () => startChat(userData);
+          list.appendChild(div);
+        });
+
+        if (list.innerHTML === "") {
+          list.innerHTML = "<p>Nta wundi mukoresha wabonetse kugeza ubu.</p>";
+        }
+      } catch (e) {
+        list.innerHTML = "<p>Ikosa mu kubona abakoresha.</p>";
+      }
     }
 
     window.startChat = (user) => {
       currentChatUser = user;
-      document.getElementById('chat-header').textContent = `Kuganira na ${user.username}`;
+      document.getElementById('chat-header').textContent = `Kuganira na ${user.email}`;
       document.getElementById('messages').innerHTML = "";
 
-      // Unsubscribe previous listener
       if (unsubscribeMessages) unsubscribeMessages();
 
-      const chatId = [currentUser.uid, user.id].sort().join('_');
+      const chatId = [currentUser.uid, user.uid].sort().join('_');
 
       const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
 
       unsubscribeMessages = onSnapshot(q, (snapshot) => {
         const messagesDiv = document.getElementById('messages');
         messagesDiv.innerHTML = "";
-        snapshot.forEach(doc => {
-          const msg = doc.data();
+        snapshot.forEach(d => {
+          const msg = d.data();
           const div = document.createElement('div');
           div.className = `message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`;
           div.textContent = msg.text;
@@ -101,7 +127,7 @@
       const text = input.value.trim();
       if (!text || !currentChatUser) return;
 
-      const chatId = [currentUser.uid, currentChatUser.id].sort().join('_');
+      const chatId = [currentUser.uid, currentChatUser.uid].sort().join('_');
 
       try {
         await addDoc(collection(db, "chats", chatId, "messages"), {
@@ -117,6 +143,17 @@
     };
 
     window.logout = () => signOut(auth);
+
+    // Check login status
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        showSection('chat');
+        loadUsers();
+      } else {
+        showSection('auth');
+      }
+    });
   </script>
 
   <style>
@@ -127,7 +164,7 @@
     #auth-section { padding: 40px; text-align: center; }
     #chat-section { display: none; flex: 1; }
     
-    .sidebar { width: 280px; border-right: 1px solid #ddd; padding: 15px; overflow-y: auto; background: #f8f9fa; }
+    .sidebar { width: 300px; border-right: 1px solid #ddd; padding: 15px; overflow-y: auto; background: #f8f9fa; }
     .chat-area { flex: 1; display: flex; flex-direction: column; }
     
     .user-item { padding: 14px; margin: 6px 0; background: white; border-radius: 8px; cursor: pointer; border: 1px solid #eee; }
@@ -145,7 +182,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- AUTH -->
+    <!-- AUTH SECTION -->
     <div id="auth-section">
       <h1>🗣️ Urungano Chat</h1>
       <p>Kuganira mu bwiherezo</p>
@@ -153,10 +190,10 @@
       <input id="password" type="password" placeholder="Password"><br><br>
       <button onclick="signUp()" style="background:#28a745;color:white;padding:12px 30px;margin:5px;">Iyandikishe</button>
       <button onclick="logIn()" style="background:#007bff;color:white;padding:12px 30px;margin:5px;">Kwinjira</button>
-      <div id="status" style="margin-top:20px; font-weight:bold;"></div>
+      <div id="status" style="margin-top:20px; font-weight:bold; min-height:30px;"></div>
     </div>
 
-    <!-- CHAT -->
+    <!-- CHAT SECTION -->
     <div id="chat-section" style="display:none; flex:1; flex-direction:column;">
       <div style="display:flex; flex:1;">
         <div class="sidebar">
