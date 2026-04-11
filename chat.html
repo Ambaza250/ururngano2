@@ -30,88 +30,45 @@
       <button onclick="logIn()" class="login">Kwinjira (Login)</button>
     </div>
     
-    <div id="status">Loading Supabase...</div>
+    <div id="status">Loading...</div>
   </div>
 
   <script>
+    // Put functions FIRST so they are always defined
+    async function signUp() {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = "✅ SIGN UP BUTTON WORKS! (Supabase not connected yet)";
+      statusEl.style.background = "#e8f5e9";
+      console.log("signUp() called");
+    }
+
+    async function logIn() {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = "✅ LOGIN BUTTON WORKS! (Supabase not connected yet)";
+      statusEl.style.background = "#e8f5e9";
+      console.log("logIn() called");
+    }
+
+    // Now try Supabase safely
     const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';
 
     let supabase = null;
-    const statusEl = document.getElementById('status');
 
-    // Safe initialization
     function initSupabase() {
+      const statusEl = document.getElementById('status');
       try {
         supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase initialized');
-        statusEl.textContent = "Supabase yashoboye gufungura. Gerageza buttons.";
+        statusEl.textContent = "✅ Supabase yafunguye. Gerageza buttons.";
         statusEl.style.background = "#e8f5e9";
       } catch (err) {
         console.error(err);
-        statusEl.textContent = "❌ Supabase init failed: " + err.message;
+        statusEl.textContent = "❌ Supabase yanze gufungura.\nKey length: " + SUPABASE_ANON_KEY.length + "\nError: " + err.message;
         statusEl.style.background = "#ffebee";
       }
     }
 
-    // Run initialization when page loads
     window.onload = initSupabase;
-
-    // ====================== SIGN UP ======================
-    async function signUp() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      if (!email || !password) {
-        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
-        return;
-      }
-      if (!supabase) {
-        statusEl.textContent = "❌ Supabase ntiyashoboye gufungura";
-        return;
-      }
-
-      statusEl.textContent = "Tegereza... Iyandikishwa rigikomeje";
-
-      try {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-          statusEl.textContent = "❌ Ikosa: " + error.message;
-        } else {
-          statusEl.innerHTML = "✅ Iyandikishwa ryagenze neza!<br>Kanda link muri email yawe.";
-        }
-      } catch (err) {
-        statusEl.textContent = "❌ Error: " + err.message;
-      }
-    }
-
-    // ====================== LOGIN ======================
-    async function logIn() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      if (!email || !password) {
-        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
-        return;
-      }
-      if (!supabase) {
-        statusEl.textContent = "❌ Supabase ntiyashoboye gufungura";
-        return;
-      }
-
-      statusEl.textContent = "Tegereza... Kwinjira bigikomeje";
-
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          statusEl.textContent = "❌ Ikosa: " + error.message;
-        } else {
-          statusEl.textContent = "✅ Murakaza neza! Watsinze kwinjira 🎉";
-        }
-      } catch (err) {
-        statusEl.textContent = "❌ Error: " + err.message;
-      }
-    }
   </script>
 </body>
 </html>
