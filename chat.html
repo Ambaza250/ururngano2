@@ -6,13 +6,13 @@
   <title>Urungano Chat</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; margin: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
     button { padding: 14px 24px; margin: 8px 5px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     .signup { background: #28a745; color: white; }
     .login { background: #007bff; color: white; }
-    #status { margin-top: 20px; padding: 12px; border-radius: 6px; font-weight: bold; background: #f0f0f0; }
+    #status { margin-top: 20px; padding: 12px; border-radius: 6px; font-weight: bold; min-height: 50px; }
   </style>
 </head>
 <body>
@@ -33,7 +33,56 @@
     <div id="status"></div>
   </div>
 
-  <!-- VERY IMPORTANT: Script tag at the bottom -->
-  <script src="chat.js"></script>
+  <script>
+    // ================== YOUR SUPABASE KEYS ==================
+    const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';   // ← Make sure this is the FULL key!!
+
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const statusEl = document.getElementById('status');
+
+    // ====================== SIGN UP ======================
+    async function signUp() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (!email || !password || password.length < 6) {
+        statusEl.textContent = "❌ Shyira email n'ijambo ry'ibanga rirenze ibimenyetso 6";
+        return;
+      }
+
+      statusEl.textContent = "Tegereza...";
+      
+      const { data, error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        statusEl.textContent = "❌ Ikosa: " + error.message;
+      } else {
+        statusEl.innerHTML = "✅ Iyandikishwa ryagenze neza!<br>Email yawe yoherejwe confirmation link. Kanda iyo link kugira ngo ukomeze.";
+      }
+    }
+
+    // ====================== LOGIN ======================
+    async function logIn() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (!email || !password) {
+        statusEl.textContent = "❌ Shyira email n'ijambo ry'ibanga";
+        return;
+      }
+
+      statusEl.textContent = "Tegereza...";
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        statusEl.textContent = "❌ Ikosa: " + error.message;
+      } else {
+        statusEl.textContent = "✅ Murakaza neza! Watsinze kwinjira. 🎉";
+        console.log("Logged in user:", data.user);
+      }
+    }
+  </script>
 </body>
 </html>
