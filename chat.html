@@ -3,77 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Urungano Chat</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Urungano Chat - TEST</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; margin: 0; }
-    .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-    button { padding: 14px 24px; margin: 8px 5px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+    button { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; }
     .signup { background: #28a745; color: white; }
-    .login { background: #000000; color: white; }
-    #status { margin-top: 20px; padding: 12px; border-radius: 6px; font-weight: bold; min-height: 50px; }
+    .login { background: #007bff; color: white; }
+    #status { margin-top: 20px; padding: 15px; font-size: 18px; font-weight: bold; min-height: 60px; background: #f0f0f0; border-radius: 8px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🗣️ Urungano Chat</h1>
-    <p>Kuganira mu bwiherezo ku buzima bwo mu mutwe n'ubuzima bw'imyororokere</p>
+    <h1>🗣️ Urungano Chat - BUTTON TEST</h1>
+    <p>If you see this message, the page loaded correctly.</p>
     
-    <h3>Iyandikishe cyangwa Kwinjira</h3>
+    <h3>Click the buttons → you should see a message below</h3>
     
-    <input id="email" type="email" placeholder="Email yawe" value="ambazasem63@gmail.com">
-    <input id="password" type="password" placeholder="Password yawe (nibura ibimenyetso 6)">
-    
-    <div>
-      <button onclick="signUp()" class="signup">Iyandikishe (Sign Up)</button>
-      <button onclick="logIn()" class="login">Kwinjira (Login)</button>
-    </div>
+    <button onclick="signUp()" class="signup">Iyandikishe (Sign Up)</button>
+    <button onclick="logIn()" class="login">Kwinjira (Login)</button>
     
     <div id="status"></div>
   </div>
 
   <script>
-    // ================== SUPABASE KEYS (Update if needed) ==================
-    const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks'; // ← Replace with your FULL key if this is truncated
-
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const statusEl = document.getElementById('status');
-
-    async function signUp() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      if (!email || !password) {
-        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
-        return;
-      }
-
-      statusEl.textContent = "Tegereza...";
-      
-      const { data, error } = await supabase.auth.signUp({ email, password });
-
-      if (error) statusEl.textContent = "❌ Ikosa: " + error.message;
-      else statusEl.innerHTML = "✅ Iyandikishwa ryagenze!<br> Kanda link yoherejwe muri email.";
+    // These functions are defined FIRST - no Supabase yet
+    function signUp() {
+      document.getElementById('status').innerHTML = 
+        '✅ <span style="color:green">SIGN UP BUTTON WORKS!</span><br>You clicked Iyandikishe';
+      console.log('signUp() was called successfully');
     }
 
-    async function logIn() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      if (!email || !password) {
-        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
-        return;
-      }
-
-      statusEl.textContent = "Tegereza...";
-      
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) statusEl.textContent = "❌ Ikosa: " + error.message;
-      else statusEl.textContent = "✅ Watsinze kwinjira! Murakaza neza 🎉";
+    function logIn() {
+      document.getElementById('status').innerHTML = 
+        '✅ <span style="color:blue">LOGIN BUTTON WORKS!</span><br>You clicked Kwinjira';
+      console.log('logIn() was called successfully');
     }
+
+    // Just to show the script is running
+    console.log('✅ JavaScript loaded successfully');
   </script>
 </body>
 </html>
