@@ -7,7 +7,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
@@ -31,7 +31,7 @@
       document.getElementById('chat-section').style.display = section === 'chat' ? 'flex' : 'none';
     }
 
-    // ====================== AUTH + SAVE USER TO FIRESTORE ======================
+    // ====================== SIGN UP ======================
     window.signUp = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -41,14 +41,14 @@
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Save user to Firestore
+        // Save to Firestore
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
           email: user.email,
           createdAt: serverTimestamp()
         });
 
-        status.textContent = "✅ Iyandikishwa ryagenze neza!";
+        status.textContent = "✅ Iyandikishwa ryagenze neza! Wishyure muri email kugira ngo ukomeze.";
         status.style.background = "#e8f5e9";
       } catch (e) {
         status.textContent = "❌ " + e.message;
@@ -72,35 +72,38 @@
     // ====================== LOAD REAL USERS ======================
     async function loadUsers() {
       const list = document.getElementById('users-list');
-      list.innerHTML = "<p>Tegereza...</p>";
+      list.innerHTML = "<p>Tegereza... Tureba abakoresha...</p>";
 
       try {
-        const usersSnapshot = await getDocs(collection(db, "users"));
+        const snapshot = await getDocs(collection(db, "users"));
         list.innerHTML = "";
 
-        usersSnapshot.forEach(doc => {
-          const userData = doc.data();
-          if (userData.uid === currentUser.uid) return; // Don't show yourself
+        let count = 0;
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.uid === currentUser.uid) return;
 
+          count++;
           const div = document.createElement('div');
           div.className = "user-item";
-          div.textContent = userData.email;
-          div.onclick = () => startChat(userData);
+          div.textContent = data.email;
+          div.onclick = () => startChat(data);
           list.appendChild(div);
         });
 
-        if (list.innerHTML === "") {
-          list.innerHTML = "<p>Nta wundi mukoresha wabonetse kugeza ubu.</p>";
+        if (count === 0) {
+          list.innerHTML = "<p style='color:#666;'>Nta wundi mukoresha wabonetse kugeza ubu.<br> Iyandikishe konti nshya ukoresheje email yindi.</p>";
         }
       } catch (e) {
-        list.innerHTML = "<p>Ikosa mu kubona abakoresha.</p>";
+        console.error(e);
+        list.innerHTML = "<p style='color:red;'>Ikosa: " + e.message + "</p>";
       }
     }
 
     window.startChat = (user) => {
       currentChatUser = user;
       document.getElementById('chat-header').textContent = `Kuganira na ${user.email}`;
-      document.getElementById('messages').innerHTML = "";
+      document.getElementById('messages').innerHTML = `<p style="text-align:center; color:#28a745;">💬 Chat yatangiye na ${user.email}</p>`;
 
       if (unsubscribeMessages) unsubscribeMessages();
 
@@ -109,16 +112,16 @@
       const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
 
       unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        const messagesDiv = document.getElementById('messages');
-        messagesDiv.innerHTML = "";
+        const div = document.getElementById('messages');
+        div.innerHTML = "";
         snapshot.forEach(d => {
           const msg = d.data();
-          const div = document.createElement('div');
-          div.className = `message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`;
-          div.textContent = msg.text;
-          messagesDiv.appendChild(div);
+          const mdiv = document.createElement('div');
+          mdiv.className = `message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`;
+          mdiv.textContent = msg.text;
+          div.appendChild(mdiv);
         });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        div.scrollTop = div.scrollHeight;
       });
     };
 
@@ -129,22 +132,17 @@
 
       const chatId = [currentUser.uid, currentChatUser.uid].sort().join('_');
 
-      try {
-        await addDoc(collection(db, "chats", chatId, "messages"), {
-          text: text,
-          senderId: currentUser.uid,
-          senderEmail: currentUser.email,
-          createdAt: serverTimestamp()
-        });
-        input.value = "";
-      } catch (e) {
-        console.error(e);
-      }
+      await addDoc(collection(db, "chats", chatId, "messages"), {
+        text: text,
+        senderId: currentUser.uid,
+        createdAt: serverTimestamp()
+      });
+
+      input.value = "";
     };
 
     window.logout = () => signOut(auth);
 
-    // Check login status
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
@@ -182,18 +180,18 @@
 </head>
 <body>
   <div class="container">
-    <!-- AUTH SECTION -->
+    <!-- AUTH -->
     <div id="auth-section">
       <h1>🗣️ Urungano Chat</h1>
       <p>Kuganira mu bwiherezo</p>
-      <input id="email" type="email" placeholder="Email yawe" value="ambazasem63@gmail.com"><br><br>
+      <input id="email" type="email" placeholder="Email yawe"><br><br>
       <input id="password" type="password" placeholder="Password"><br><br>
       <button onclick="signUp()" style="background:#28a745;color:white;padding:12px 30px;margin:5px;">Iyandikishe</button>
       <button onclick="logIn()" style="background:#007bff;color:white;padding:12px 30px;margin:5px;">Kwinjira</button>
-      <div id="status" style="margin-top:20px; font-weight:bold; min-height:30px;"></div>
+      <div id="status" style="margin-top:20px; font-weight:bold; min-height:40px;"></div>
     </div>
 
-    <!-- CHAT SECTION -->
+    <!-- CHAT -->
     <div id="chat-section" style="display:none; flex:1; flex-direction:column;">
       <div style="display:flex; flex:1;">
         <div class="sidebar">
