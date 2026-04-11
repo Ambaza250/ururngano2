@@ -4,7 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Urungano Chat</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module">
+    // ================== IMPORT FIREBASE ==================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+    // ================== YOUR FIREBASE CONFIG ==================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+      authDomain: "urungano-chat-50d62.firebaseapp.com",
+      projectId: "urungano-chat-50d62",
+      storageBucket: "urungano-chat-50d62.firebasestorage.app",
+      messagingSenderId: "730372170670",
+      appId: "1:730372170670:web:91300da03f18f488afde3f",
+      measurementId: "G-T4S2T4BCKG"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ====================== SIGN UP ======================
+    window.signUp = async function() {
+      const statusEl = document.getElementById('status');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password || password.length < 6) {
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga rirenze ibimenyetso 6";
+        statusEl.style.background = "#ffebee";
+        return;
+      }
+
+      statusEl.textContent = "Tegereza... Iyandikishwa rigikomeje...";
+      statusEl.style.background = "#fff3e0";
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        statusEl.textContent = "✅ Iyandikishwa ryagenze neza! Murakaza neza " + email;
+        statusEl.style.background = "#e8f5e9";
+        console.log("User created:", userCredential.user);
+      } catch (error) {
+        statusEl.textContent = "❌ Ikosa: " + error.message;
+        statusEl.style.background = "#ffebee";
+      }
+    };
+
+    // ====================== LOGIN ======================
+    window.logIn = async function() {
+      const statusEl = document.getElementById('status');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password) {
+        statusEl.textContent = "❌ Andika email n'ijambo ry'ibanga";
+        statusEl.style.background = "#ffebee";
+        return;
+      }
+
+      statusEl.textContent = "Tegereza... Kwinjira bigikomeje...";
+      statusEl.style.background = "#fff3e0";
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        statusEl.textContent = "✅ Murakaza neza! Watsinze kwinjira 🎉";
+        statusEl.style.background = "#e8f5e9";
+        console.log("Logged in user:", userCredential.user);
+      } catch (error) {
+        statusEl.textContent = "❌ Ikosa: " + error.message;
+        statusEl.style.background = "#ffebee";
+      }
+    };
+  </script>
+
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; margin: 0; }
     .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -12,7 +86,7 @@
     button { padding: 14px 24px; margin: 8px 5px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     .signup { background: #28a745; color: white; }
     .login { background: #007bff; color: white; }
-    #status { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; min-height: 80px; }
+    #status { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; min-height: 70px; }
   </style>
 </head>
 <body>
@@ -30,45 +104,7 @@
       <button onclick="logIn()" class="login">Kwinjira (Login)</button>
     </div>
     
-    <div id="status">Loading...</div>
+    <div id="status">Ready...</div>
   </div>
-
-  <script>
-    // Put functions FIRST so they are always defined
-    async function signUp() {
-      const statusEl = document.getElementById('status');
-      statusEl.textContent = "✅ SIGN UP BUTTON WORKS! (Supabase not connected yet)";
-      statusEl.style.background = "#e8f5e9";
-      console.log("signUp() called");
-    }
-
-    async function logIn() {
-      const statusEl = document.getElementById('status');
-      statusEl.textContent = "✅ LOGIN BUTTON WORKS! (Supabase not connected yet)";
-      statusEl.style.background = "#e8f5e9";
-      console.log("logIn() called");
-    }
-
-    // Now try Supabase safely
-    const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';
-
-    let supabase = null;
-
-    function initSupabase() {
-      const statusEl = document.getElementById('status');
-      try {
-        supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        statusEl.textContent = "✅ Supabase yafunguye. Gerageza buttons.";
-        statusEl.style.background = "#e8f5e9";
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent = "❌ Supabase yanze gufungura.\nKey length: " + SUPABASE_ANON_KEY.length + "\nError: " + err.message;
-        statusEl.style.background = "#ffebee";
-      }
-    }
-
-    window.onload = initSupabase;
-  </script>
 </body>
 </html>
