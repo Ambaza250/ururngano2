@@ -249,32 +249,71 @@
         </div>
     </div>
 
-<section class="helpline-section">
-    <div class="helpline-card">
-      <h2 id="helpline-title">Imirongo itangirwaho ubufasha</h2>
-      <p id="helpline-subtitle" style="margin:15px 0 35px; color:#444; font-size:1.1rem;">
-        Koresha izi nomero mu gihe cy’ibanze cyangwa ubufasha bwihutirwa
-      </p>
-      
-      <div>
-        <a href="tel:112" class="helpline-btn" id="police-btn">
-          📞 <strong>112</strong> <small id="police-label">Police</small>
-        </a>
+<!-- Emergency Contacts Section -->
+<section class="emergency-section py-12 bg-red-50 border-t-4 border-red-500">
+    <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center mb-8 text-red-700" 
+            data-en="Emergency Contacts" 
+            data-rw="Imirongo itangirwaho ubufasha">
+            Emergency Contacts
+        </h2>
         
-        <a href="tel:114" class="helpline-btn" id="mental-btn">
-          📞 <strong>114</strong> <small id="mental-label">RBC Mental Health</small>
-        </a>
-        
-        <a href="tel:3550" class="helpline-btn" id="isange-btn">
-          📞 <strong>3550</strong> <small id="isange-label">Isange One Stop Center</small>
-        </a>
-      </div>
+        <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto" 
+           data-en="If you are in immediate danger or need urgent help, call these numbers right away. Help is available 24/7." 
+           data-rw="Koresha izi nomero mu gihe cy’ibanze cyangwa ubufasha bwihutirwa. Ubufasha burahari saa 24/7.">
+            If you are in immediate danger or need urgent help, call these numbers right away. Help is available 24/7.
+        </p>
 
-      <p class="pc-instruction" id="pc-instruction">
-        Kuri mudasobwa: Kanda kuri nomero ukayikoresha kuri telefone yawe
-      </p>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Phone 1 -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-all">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-3xl">🆘</div>
+                    <div>
+                        <h3 class="font-semibold text-lg" data-en="Mental Health Helpline" data-rw="Ubufasha bw'Ubuzima bwo mu Mutwe">Mental Health Helpline</h3>
+                        <p class="text-red-600 font-bold text-xl">114</p>
+                    </div>
+                </div>
+                <a href="tel:114" 
+                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-xl transition-all">
+                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
+                </a>
+            </div>
+
+            <!-- Phone 2 -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-all">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-3xl">🏥</div>
+                    <div>
+                        <h3 class="font-semibold text-lg" data-en="Isange One Stop Center" data-rw="Isange One Stop Center">Isange One Stop Center</h3>
+                        <p class="text-red-600 font-bold text-xl">3550</p>
+                    </div>
+                </div>
+                <a href="tel:3550" 
+                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-xl transition-all">
+                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
+                </a>
+            </div>
+
+            <!-- Phone 3 (Add more if you have) -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-all">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-3xl">🚨</div>
+                    <div>
+                        <h3 class="font-semibold text-lg" data-en="Police & General Emergency" data-rw="Polisi n'Ubufasha bw'Ihutirwa">Police & General Emergency</h3>
+                        <p class="text-red-600 font-bold text-xl">112</p>
+                    </div>
+                </div>
+                <a href="tel:112" 
+                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-xl transition-all">
+                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
+                </a>
+            </div>
+
+        </div>
     </div>
-  </section>
+</section>
 
     
 <!-- Footer -->
