@@ -91,9 +91,30 @@
       }
     };
 
-    async function loadUsers() { /* ... unchanged ... */ }
-    window.startChat = (user) => { /* ... unchanged ... */ };
-    window.sendMessage = async () => { /* ... unchanged ... */ };
+    async function loadUsers() {
+      const list = document.getElementById('users-list');
+      list.innerHTML = "<p>Tegereza...</p>";
+
+      const snapshot = await getDocs(collection(db, "users"));
+      list.innerHTML = "";
+
+      let count = 0;
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.uid === currentUser.uid) return;
+        count++;
+        const div = document.createElement('div');
+        div.className = "user-item";
+        div.innerHTML = `<strong>${data.username || 'No name'}</strong><br><small>${data.email}</small>`;
+        div.onclick = () => startChat(data);
+        list.appendChild(div);
+      });
+
+      if (count === 0) list.innerHTML = "<p>Nta wundi mukoresha wabonetse kugeza ubu.</p>";
+    }
+
+    window.startChat = (user) => { /* unchanged */ };
+    window.sendMessage = async () => { /* unchanged */ };
     window.logout = () => signOut(auth);
 
     onAuthStateChanged(auth, (user) => {
@@ -115,8 +136,8 @@
 
     .header-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 25px; background: white; border-bottom: 1px solid #e2e8f0; }
     .logo { height: 52px; border-radius: 8px; }
-    .toggle { background: #f1f5f9; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
-    .back-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .toggle { background: #f1f5f9; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; user-select: none; }
+    .back-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; }
 
     #auth-section, #chat-section { flex: 1; }
     #auth-section { display: none; align-items: center; justify-content: center; }
@@ -138,7 +159,7 @@
 <body>
   <div class="container">
 
-    <!-- AUTH SECTION -->
+    <!-- ====================== AUTH / LOGIN SECTION ====================== -->
     <div id="auth-section">
       <div class="auth-card">
         <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo" style="margin-bottom:20px;">
@@ -156,20 +177,23 @@
 
         <div id="status" style="margin-top:15px; font-weight:500; min-height:40px;"></div>
 
+        <!-- Back to Home -->
         <button onclick="window.location.href='index.html'" id="back-home-auth" class="back-btn" style="margin-top:20px; width:100%;">← Ahabanza</button>
 
+        <!-- Language Toggle - Login Page -->
         <div style="margin-top:25px;">
           <span onclick="toggleLanguage()" class="toggle" id="lang-toggle-auth">Kinyarwanda | English</span>
         </div>
       </div>
     </div>
 
-    <!-- CHAT SECTION -->
+    <!-- ====================== CHAT SECTION ====================== -->
     <div id="chat-section">
       <div class="sidebar">
         <div class="header-bar" style="border:none; padding:15px 0;">
           <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo">
           <div style="display:flex; align-items:center; gap:12px;">
+            <!-- Language Toggle - Chat Page -->
             <span onclick="toggleLanguage()" class="toggle" id="lang-toggle">Kinyarwanda | English</span>
             <button onclick="window.location.href='index.html'" id="back-home-chat" class="back-btn">← Ahabanza</button>
           </div>
@@ -199,15 +223,16 @@
       isEnglish = !isEnglish;
       const text = isEnglish ? "English | Kinyarwanda" : "Kinyarwanda | English";
       
+      // Update both toggles
       document.getElementById('lang-toggle').textContent = text;
       document.getElementById('lang-toggle-auth').textContent = text;
 
-      // Translate Back to Home button
+      // Translate Back button
       const backText = isEnglish ? "← Home" : "← Ahabanza";
       document.getElementById('back-home-auth').textContent = backText;
       document.getElementById('back-home-chat').textContent = backText;
 
-      // Other translations
+      // Other UI texts
       if (isEnglish) {
         document.getElementById('chat-subtitle').textContent = "Private & Safe Conversation";
         document.getElementById('signup-btn').textContent = "Sign Up";
