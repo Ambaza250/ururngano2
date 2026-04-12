@@ -144,100 +144,45 @@
     </style>
 </head>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-// Replace with your actual Google Maps API Key
-const GOOGLE_MAPS_API_KEY = "AIzaSyArxDEH4zjuMPz66KqX_hix166Hs2Wco-s";
+    let map;
+    let userMarker;
 
-let map;
-let userMarker;
-let currentMarkers = [];
+    function initMap() {
+        map = L.map('map').setView([-1.9441, 30.0619], 12); // Center on Kigali
 
-function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -1.9441, lng: 30.0619 }, // Default: Kigali
-        zoom: 13,
-        mapTypeControl: false,
-        streetViewControl: false,
-    });
-}
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
 
-async function getUserLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-
-                map.setCenter(pos);
-                map.setZoom(14);
-
-                // User location marker
-                if (userMarker) userMarker.setMap(null);
-                userMarker = new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    title: "You are here",
-                    icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                });
-
-                // Auto search after getting location
-                findNearbyPlaces("hospital");
-            },
-            () => {
-                alert("Location access denied. Showing Kigali area.");
-            }
-        );
-    } else {
-        alert("Geolocation is not supported by your browser.");
+        // Optional: Add a search control (very useful)
+        L.Control.geocoder().addTo(map);
     }
-}
 
-function findNearbyPlaces(type) {
-    // Clear previous markers
-    currentMarkers.forEach(m => m.setMap(null));
-    currentMarkers = [];
+    function locateUser() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const latlng = [pos.coords.latitude, pos.coords.longitude];
+                map.flyTo(latlng, 14);
 
-    const service = new google.maps.places.PlacesService(map);
-
-    service.nearbySearch({
-        location: map.getCenter(),
-        radius: 15000,           // 15km radius
-        keyword: type,
-        type: type === "hospital" ? "hospital" : undefined
-    }, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            results.forEach(place => {
-                const marker = new google.maps.Marker({
-                    map: map,
-                    position: place.geometry.location,
-                    title: place.name
-                });
-
-                currentMarkers.push(marker);
-
-                // Info window
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `<strong>${place.name}</strong><br>${place.vicinity || ''}`
-                });
-
-                marker.addListener("click", () => {
-                    infoWindow.open(map, marker);
-                });
+                if (userMarker) userMarker.remove();
+                userMarker = L.marker(latlng).addTo(map)
+                    .bindPopup("You are here").openPopup();
             });
-        } else {
-            alert("No results found nearby. Try zooming out or changing location.");
         }
-    });
-}
+    }
 
-// Initialize map when page loads
-window.onload = initMap;
+    function searchOnMap(keyword) {
+        alert(`Searching for "${keyword}"... \n\nUse the search box on the map for best results.`);
+        // Advanced version can use Nominatim API for real search
+    }
+
+    window.onload = initMap;
 </script>
-
 <body class="bg-slate-50" data-lang="rw">
 
     <!-- Banner -->
@@ -410,7 +355,7 @@ window.onload = initMap;
 </section>
 
 
-<!-- Find Help Near You Section -->
+<!-- Find Help Near You - OpenStreetMap Version -->
 <section class="nearby-help py-16 bg-gray-50" id="nearby-help">
     <div class="max-w-6xl mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-4 text-red-700" 
@@ -418,46 +363,39 @@ window.onload = initMap;
             data-rw="Shaka Ubufasha Buri Hafi Yawe">
             Find Help Near You
         </h2>
+        
         <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" 
-           data-en="Allow location access to see the nearest Police Stations, Hospitals, and Isange One Stop Centers." 
-           data-rw="Emera ubushobozi bwo kumenya aho uri kugira ngo ubone amaposi, ibitaro n'ibigo by'Isange One Stop biri hafi yawe.">
-            Allow location access to see the nearest Police Stations, Hospitals, and Isange One Stop Centers.
+           data-en="Search for Police Stations, Hospitals, or Isange One Stop Centers directly on the map." 
+           data-rw="Shaka Amapolisi, Ibitaro, cyangwa Ibigo by'Isange One Stop Center ku meza.">
+            Search for Police Stations, Hospitals, or Isange One Stop Centers directly on the map.
         </p>
 
         <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
-            <!-- Map Container -->
-            <div id="map" class="w-full h-[500px]"></div>
+            <!-- Map -->
+            <div id="map" style="height: 520px; width: 100%;"></div>
 
             <!-- Controls -->
             <div class="p-6 bg-white border-t flex flex-wrap gap-4 justify-center">
-                <button onclick="findNearbyPlaces('police')" 
-                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium flex items-center gap-2 transition-all">
-                    🚔 Police Stations
+                <button onclick="searchOnMap('police')" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium flex items-center gap-2">
+                    🚔 Police
                 </button>
-                <button onclick="findNearbyPlaces('hospital')" 
-                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-medium flex items-center gap-2 transition-all">
-                    🏥 Hospitals
+                <button onclick="searchOnMap('hospital')" 
+                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-medium flex items-center gap-2">
+                    🏥 Hospital
                 </button>
-                <button onclick="findNearbyPlaces('Isange One Stop Center')" 
-                        class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-medium flex items-center gap-2 transition-all">
-                    🌸 Isange Centers
+                <button onclick="searchOnMap('Isange')" 
+                        class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-medium flex items-center gap-2">
+                    🌸 Isange Center
                 </button>
-                <button onclick="getUserLocation()" 
-                        class="px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-2xl font-medium flex items-center gap-2 transition-all">
-                    📍 Refresh My Location
+                <button onclick="locateUser()" 
+                        class="px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-2xl font-medium flex items-center gap-2">
+                    📍 My Location
                 </button>
             </div>
         </div>
-
-        <p class="text-xs text-center text-gray-500 mt-6">
-            <span data-en="Your location is only used while on this page and never stored." 
-                  data-rw="Aho uri hakoreshwa gusa kuri iyi page kandi ayo  makuru ntabikwa.">
-                Your location is only used while on this page and never stored.
-            </span>
-        </p>
     </div>
 </section>
-
     
 <!-- Footer -->
 <footer style="background-color: #1d4ed8; color: white; margin-top: 3rem;">
