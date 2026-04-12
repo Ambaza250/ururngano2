@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Urungano Chat</title>
+  
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
@@ -148,18 +149,14 @@
       input.value = "";
     };
 
-    // ====================== TYPING INDICATOR ======================
     window.handleTyping = () => {
       if (!currentChatUser) return;
-      const chatId = [currentUser.uid, currentChatUser.uid].sort().join('_');
-      // Simple typing simulation for now (can be enhanced later)
       clearTimeout(typingTimeout);
       typingTimeout = setTimeout(() => {}, 2000);
     };
 
     window.logout = () => signOut(auth);
 
-    // ====================== AUTH STATE ======================
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
@@ -196,36 +193,66 @@
     .safety-banner {
       background: #fff3cd; color: #856404; padding: 12px; text-align: center; font-size: 14px; border-bottom: 1px solid #ffeaa7;
     }
+
+    .header-bar {
+      display: flex; align-items: center; justify-content: space-between; 
+      padding: 12px 20px; background: #28a745; color: white;
+    }
+    .logo { height: 50px; }
+    .toggle { font-size: 16px; cursor: pointer; }
+    .back-btn {
+      background: white; color: #28a745; border: 2px solid #28a745;
+      padding: 8px 16px; border-radius: 8px; font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- AUTH SECTION -->
+
+    <!-- AUTH & CHAT SECTION -->
     <div id="auth-section">
+      <!-- Top Bar -->
+      <div class="header-bar">
+        <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo">
+        <div>
+          <span onclick="toggleLanguage()" class="toggle" id="lang-toggle">Kinyarwanda | English</span>
+        </div>
+        <button onclick="window.location.href='index.html'" class="back-btn">← Home</button>
+      </div>
+
       <h1>🗣️ Urungano Chat</h1>
-      <p>Kuganira mu bwiherezo</p>
+      <p id="chat-subtitle">Kuganira mu bwiherezo</p>
       
       <input id="username" type="text" placeholder="Username (nk' @Mukama250)" style="margin-bottom:10px;"><br>
       <input id="email" type="email" placeholder="Email yawe"><br><br>
       <input id="password" type="password" placeholder="Password"><br><br>
       
-      <button onclick="signUp()" style="background:#28a745;color:white;padding:12px 30px;margin:5px;">Iyandikishe</button>
-      <button onclick="logIn()" style="background:#007bff;color:white;padding:12px 30px;margin:5px;">Kwinjira</button>
+      <button onclick="signUp()" style="background:#28a745;color:white;padding:12px 30px;margin:5px;" id="signup-btn">Iyandikishe</button>
+      <button onclick="logIn()" style="background:#007bff;color:white;padding:12px 30px;margin:5px;" id="login-btn">Kwinjira</button>
       <div id="status" style="margin-top:20px; font-weight:bold; min-height:40px;"></div>
     </div>
 
     <!-- CHAT SECTION -->
     <div id="chat-section" style="display:none; flex:1; flex-direction:column;">
+      <!-- Top Bar -->
+      <div class="header-bar">
+        <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo">
+        <div>
+          <span onclick="toggleLanguage()" class="toggle" id="lang-toggle">Kinyarwanda | English</span>
+        </div>
+        <button onclick="window.location.href='index.html'" class="back-btn">← Home</button>
+      </div>
+
       <div class="safety-banner">
         ⚠️ Iyi chat ntabwo ari inama y'ubuzima cyangwa ubujyanama. Ni umwanya wo kuganira gusa. Koresha neza.
       </div>
       
       <div style="display:flex; flex:1;">
         <div class="sidebar">
-          <h3>Abandi bakoresha</h3>
+          <h3 id="users-title">Abandi bakoresha</h3>
           <div id="users-list"></div>
           <br><br>
-          <button onclick="logout()" style="width:100%; padding:12px; background:#dc3545; color:white; border:none; border-radius:8px;">Sohoka</button>
+          <button onclick="logout()" style="width:100%; padding:12px; background:#dc3545; color:white; border:none; border-radius:8px;" id="logout-btn">Sohoka</button>
         </div>
 
         <div class="chat-area">
@@ -233,11 +260,37 @@
           <div id="messages"></div>
           <div class="input-area">
             <input id="message-input" placeholder="Andika message..." onkeypress="if(event.key==='Enter') sendMessage()" onkeyup="handleTyping()">
-            <button onclick="sendMessage()">Ohereza</button>
+            <button onclick="sendMessage()" id="send-btn">Ohereza</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <script>
+    // Simple Language Toggle
+    let isEnglish = false;
+
+    function toggleLanguage() {
+      isEnglish = !isEnglish;
+      document.getElementById('lang-toggle').textContent = isEnglish ? "English | Kinyarwanda" : "Kinyarwanda | English";
+
+      if (isEnglish) {
+        document.getElementById('chat-subtitle').textContent = "Private Conversation";
+        document.getElementById('signup-btn').textContent = "Sign Up";
+        document.getElementById('login-btn').textContent = "Login";
+        document.getElementById('users-title').textContent = "Other Users";
+        document.getElementById('logout-btn').textContent = "Logout";
+        document.getElementById('send-btn').textContent = "Send";
+      } else {
+        document.getElementById('chat-subtitle').textContent = "Kuganira mu bwiherezo";
+        document.getElementById('signup-btn').textContent = "Iyandikishe";
+        document.getElementById('login-btn').textContent = "Kwinjira";
+        document.getElementById('users-title').textContent = "Abandi bakoresha";
+        document.getElementById('logout-btn').textContent = "Sohoka";
+        document.getElementById('send-btn').textContent = "Ohereza";
+      }
+    }
+  </script>
 </body>
 </html>
