@@ -142,47 +142,85 @@
       display: none;
     }
     </style>
-</head>
 
+    <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Geocoder for powerful search box -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    
+</head>
 
 <script>
     let map;
-    let userMarker;
 
     function initMap() {
-        map = L.map('map').setView([-1.9441, 30.0619], 12); // Center on Kigali
+        // Center on Rwanda (Kigali)
+        map = L.map('map', {
+            zoomControl: true,
+            attributionControl: true
+        }).setView([-1.9441, 30.0619], 12);
 
+        // OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors',
             maxZoom: 19
         }).addTo(map);
 
-        // Optional: Add a search control (very useful)
-        L.Control.geocoder().addTo(map);
+        // Powerful Search Box (Nominatim)
+        L.Control.geocoder({
+            defaultMarkGeocode: true,
+            position: 'topleft',
+            placeholder: 'Search Police, Hospital, Isange...',
+            geocoder: L.Control.Geocoder.nominatim({
+                geocodingQueryParams: {
+                    countrycodes: 'rw',     // Optimize for Rwanda only
+                    limit: 8
+                }
+            })
+        }).addTo(map);
+
+        // Optional: Add a scale
+        L.control.scale().addTo(map);
     }
 
+    // Get user's current location
     function locateUser() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                const latlng = [pos.coords.latitude, pos.coords.longitude];
-                map.flyTo(latlng, 14);
-
-                if (userMarker) userMarker.remove();
-                userMarker = L.marker(latlng).addTo(map)
-                    .bindPopup("You are here").openPopup();
-            });
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    map.flyTo([lat, lng], 14, { duration: 2 });
+                    
+                    L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+                        })
+                    }).addTo(map)
+                      .bindPopup("<b>You are here</b><br>Search nearby services now")
+                      .openPopup();
+                },
+                () => {
+                    alert("Location access denied. You can still search manually.");
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by your browser.");
         }
     }
 
-    function searchOnMap(keyword) {
-        alert(`Searching for "${keyword}"... \n\nUse the search box on the map for best results.`);
-        // Advanced version can use Nominatim API for real search
-    }
-
+    // Initialize when page loads
     window.onload = initMap;
 </script>
+
+    
 <body class="bg-slate-50" data-lang="rw">
 
     <!-- Banner -->
@@ -355,7 +393,7 @@
 </section>
 
 
-<!-- Find Help Near You - OpenStreetMap Version -->
+<!-- Find Help Near You - OpenStreetMap -->
 <section class="nearby-help py-16 bg-gray-50" id="nearby-help">
     <div class="max-w-6xl mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-4 text-red-700" 
@@ -365,35 +403,33 @@
         </h2>
         
         <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" 
-           data-en="Search for Police Stations, Hospitals, or Isange One Stop Centers directly on the map." 
-           data-rw="Shaka Amapolisi, Ibitaro, cyangwa Ibigo by'Isange One Stop Center ku meza.">
-            Search for Police Stations, Hospitals, or Isange One Stop Centers directly on the map.
+           data-en="Search for Police Stations, Hospitals, or Isange One Stop Centers. Type your location (e.g. Kigali, Remera, Musanze) for better results." 
+           data-rw="Shaka Amapolisi, Ibitaro, cyangwa Ibigo by'Isange. Andika aho uri (nk' Kigali, Remera, Musanze) kugira ubufasha bwiza.">
+            Search for Police Stations, Hospitals, or Isange One Stop Centers. Type your location (e.g. Kigali, Remera, Musanze) for better results.
         </p>
 
         <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
             <!-- Map -->
             <div id="map" style="height: 520px; width: 100%;"></div>
 
-            <!-- Controls -->
-            <div class="p-6 bg-white border-t flex flex-wrap gap-4 justify-center">
-                <button onclick="searchOnMap('police')" 
-                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium flex items-center gap-2">
-                    🚔 Police
-                </button>
-                <button onclick="searchOnMap('hospital')" 
-                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-medium flex items-center gap-2">
-                    🏥 Hospital
-                </button>
-                <button onclick="searchOnMap('Isange')" 
-                        class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-medium flex items-center gap-2">
-                    🌸 Isange Center
-                </button>
+            <!-- Bottom Bar -->
+            <div class="p-5 bg-white border-t flex flex-wrap gap-4 justify-center items-center">
                 <button onclick="locateUser()" 
-                        class="px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-2xl font-medium flex items-center gap-2">
-                    📍 My Location
+                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-medium flex items-center gap-2 transition-all">
+                    📍 Use My Current Location
                 </button>
+                <div class="text-sm text-gray-500 text-center">
+                    <span data-en="💡 Tip: Search 'Police Kigali', 'Hospital', or 'Isange'" 
+                          data-rw="💡 Inama: Shaka 'Police Kigali', 'Hospital', cyangwa 'Isange'">
+                        💡 Tip: Search "Police Kigali", "Hospital", or "Isange"
+                    </span>
+                </div>
             </div>
         </div>
+
+        <p class="text-xs text-center text-gray-500 mt-6">
+            Your location stays private • Powered by OpenStreetMap
+        </p>
     </div>
 </section>
     
