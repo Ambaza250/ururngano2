@@ -29,6 +29,103 @@
         /* Mobile menu */
         #mobile-menu { display: none; }
         #mobile-menu.open { display: flex; }
+
+        /* ==================== ABOUT US PAGE STYLING ==================== */
+.about-page {
+  padding: 60px 20px;
+  background: linear-gradient(180deg, #f8f9fa, #ffffff);
+  min-height: 100vh;
+}
+
+.about-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 50px 40px;
+}
+
+.about-container h1 {
+  font-size: 2.4rem;
+  color: #007bff;
+  margin-bottom: 30px;
+  text-align: center;
+  border-bottom: 3px solid #28a745;
+  padding-bottom: 15px;
+}
+
+.about-container h2 {
+  font-size: 1.8rem;
+  color: #28a745;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.about-container h2::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: #007bff;
+  border-radius: 4px;
+}
+
+.about-section {
+  margin-bottom: 40px;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.about-section p {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
+  border-left: 6px solid #28a745;
+}
+
+.about-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.about-section li {
+  background: #f8f9fa;
+  margin-bottom: 15px;
+  padding: 18px 20px;
+  border-radius: 10px;
+  border-left: 6px solid #007bff;
+  position: relative;
+}
+
+.about-section li::before {
+  content: "✅";
+  position: absolute;
+  left: -10px;
+  top: 18px;
+  font-size: 1.4rem;
+}
+
+.about-section li:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 30px 20px;
+  }
+  .about-container h1 {
+    font-size: 2rem;
+  }
+  .about-container h2 {
+    font-size: 1.6rem;
+  }
+}
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
@@ -96,79 +193,53 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="max-w-5xl mx-auto px-4 py-10 md:px-6 md:py-16">
+  <main class="about-page">
+    <div class="about-container">
+      
+      <h1 data-rw="Amakuru kuri Twe" data-en="About Us">Amakuru kuri Twe (About Us)</h1>
+      
+      <div class="about-section">
+        <p data-rw="Urungano ni urubuga rw'ikoranabuhanga rwashyiriweho korohereza urubyiruko rw'u Rwanda kubona amakuru k'ubuzima bw'imyororokere (SRH) hamwe n'ubuzima bwo mu mutwe muburyo hifashishijwe Telefone ngendanwa na mudasobwa. Twibanda cyane ku gukuraho inzitizi z’isoni n’itotezwa, tugamije ko buri muntu wese, hibandwa kubafite ubumuga, abona amakuru yizewe mu muhezo no mu bwisanzure binyuze kuri internet(Urungano AI, content creation) cyangwa ubutumwa bugufi (SMS/USSD)." 
+           data-en="Urungano is a digital platform designed to make it easier for Rwandan youth to access information on Sexual and Reproductive Health (SRH) and Mental Health through mobile phones and computers. We focus on removing barriers of shame and stigma, ensuring that every person, especially those with disabilities, can access reliable information privately and freely through the internet (Urungano AI, content creation) or short messages (SMS/USSD).">
+          Urungano ni urubuga rw'ikoranabuhanga rwashyiriweho korohereza urubyiruko rw'u Rwanda kubona amakuru k'ubuzima bw'imyororokere (SRH) hamwe n'ubuzima bwo mu mutwe muburyo hifashishijwe Telefone ngendanwa na mudasobwa. Twibanda cyane ku gukuraho inzitizi z’isoni n’itotezwa, tugamije ko buri muntu wese, hibandwa kubafite ubumuga, abona amakuru yizewe mu muhezo no mu bwisanzure binyuze kuri internet(Urungano AI, content creation) cyangwa ubutumwa bugufi (SMS/USSD).
+        </p>
+      </div>
 
-        <!-- Mission -->
-        <div class="mb-10 md:mb-16">
-            <h2 id="mission-title" class="text-2xl md:text-3xl font-bold text-slate-800 mb-3 md:mb-6"
-                data-en="Our Mission" data-rw="Ubutumwa bwacu">Ubutumwa bwacu</h2>
-            <p id="mission-text" class="text-base md:text-lg leading-relaxed text-slate-600"
-               data-en="Urungano Platform was created to provide accessible, reliable, and stigma-free support for Sexual and Reproductive Health (SRH) and Mental Health in Rwanda. We believe every girl, woman, and family deserves accurate information and help without fear or shame."
-               data-rw="Urungano Platform yashinzwe kugira ngo iboneze ubufasha bw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe mu buryo bworoshye, bwizewe, kandi butagira akato. Twifuza ko buri mukobwa, umugore n'umuryango wose yabona amakuru n'ubufasha atagomba kwihanganira ubwoba cyangwa isoni.">
-                Urungano Platform yashinzwe kugira ngo iboneze ubufasha bw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe mu buryo bworoshye, bwizewe, kandi butagira akato. Twifuza ko buri mukobwa, umugore n'umuryango wose yabona amakuru n'ubufasha atagomba kwihanganira ubwoba cyangwa isoni.
-            </p>
-        </div>
+      <h2 data-rw="Inshingano" data-en="Mission">Inshingano (Mission)</h2>
+      <div class="about-section">
+        <p data-rw="Inshingano yacu ni ukubaka umuryango w’urubyiruko rufite amakuru ahagije ku buzima bw'imyororokere n'ubuzima bwo mu mutwe hibandwa kubafite ubumuga, binyuze mu gukoresha ikoranabuhanga ry'ubwenge buhangano (Artificial Intelligence) n’uburyo bw’itumanaho bugera kuri bose (Ubutumwa bugufi,USSD), kugira ngo dutange ubufasha bwihuse, bwizewe kandi butandukanya amateka n’ukuri kuri bose." 
+           data-en="Our mission is to build a community of young people with sufficient knowledge on reproductive health and mental health, with special focus on people with disabilities, by using artificial intelligence technology and inclusive communication methods (SMS, USSD), to provide fast, reliable and accurate support that distinguishes facts from myths for everyone.">
+          Inshingano yacu ni ukubaka umuryango w’urubyiruko rufite amakuru ahagije ku buzima bw'imyororokere n'ubuzima bwo mu mutwe hibandwa kubafite ubumuga, binyuze mu gukoresha ikoranabuhanga ry'ubwenge buhangano (Artificial Intelligence) n’uburyo bw’itumanaho bugera kuri bose (Ubutumwa bugufi,USSD), kugira ngo dutange ubufasha bwihuse, bwizewe kandi butandukanya amateka n’ukuri kuri bose.
+        </p>
+      </div>
 
-        <!-- Vision + Mission grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-20">
-            <div>
-                <h3 id="vision-title" class="text-xl md:text-2xl font-semibold text-blue-600 mb-3 md:mb-4"
-                    data-en="Our Vision" data-rw="Vision yacu">Vision yacu</h3>
-                <p id="vision-text" class="text-slate-600 text-sm md:text-base leading-relaxed"
-                   data-en="To be the leading platform for SRH and Mental Health support in Rwanda, where every person can access reliable, professional help in their preferred language."
-                   data-rw="Kuba urubuga rw'ibanze rw'ubufasha mu Rwanda rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, aho buri muntu yabona ubufasha bwizewe, bw'umwuga, kandi mu rurimi yumva neza.">
-                    Kuba urubuga rw'ibanze rw'ubufasha mu Rwanda rw'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe, aho buri muntu yabona ubufasha bwizewe, bw'umwuga, kandi mu rurimi yumva neza.
-                </p>
-            </div>
-            <div>
-                <h3 id="mission2-title" class="text-xl md:text-2xl font-semibold text-blue-600 mb-3 md:mb-4"
-                    data-en="Our Mission" data-rw="Mission yacu">Mission yacu</h3>
-                <p id="mission2-text" class="text-slate-600 text-sm md:text-base leading-relaxed"
-                   data-en="To deliver trusted information, AI-powered support, and cycle tracking tools in simple Kinyarwanda and English, to prevent diseases, promote equality, and help people live with dignity."
-                   data-rw="Gutanga amakuru yizewe, ubufasha bwa AI, n'uburyo bwo gukurikirana ukwezi mu buryo bworoshye mu Kinyarwanda n'icyongereza, kugira ngo dukumire indwara, duteze imbere uburinganire, kandi dufashe abantu kwiyubaha no kwirinda.">
-                    Gutanga amakuru yizewe, ubufasha bwa AI, n'uburyo bwo gukurikirana ukwezi mu buryo bworoshye mu Kinyarwanda n'icyongereza, kugira ngo dukumire indwara, duteze imbere uburinganire, kandi dufashe abantu kwiyubaha no kwirinda.
-                </p>
-            </div>
-        </div>
-
-        <!-- Values -->
-        <div class="mb-10 md:mb-16">
-            <h3 id="values-title" class="text-2xl md:text-3xl font-bold text-center text-slate-800 mb-8 md:mb-10"
-                data-en="Our Values" data-rw="Ibintu dufatiraho">Ibintu dufatiraho</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-8">
-                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm">
-                    <div class="text-3xl md:text-4xl mb-3 md:mb-4">🔒</div>
-                    <h4 id="value1" class="font-semibold text-lg md:text-xl mb-2"
-                        data-en="Privacy & Safety" data-rw="Umutekano n'Ubwihisho">Umutekano n'Ubwihisho</h4>
-                    <p id="value1-text" class="text-slate-600 text-sm md:text-base"
-                       data-en="Every conversation is private and secure."
-                       data-rw="Buri kiganiro n'ubufasha bikorwa mu buryo bw'umwihariko kandi ntibikoreshwa n'undi muntu.">
-                        Buri kiganiro n'ubufasha bikorwa mu buryo bw'umwihariko kandi ntibikoreshwa n'undi muntu.
-                    </p>
-                </div>
-                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm">
-                    <div class="text-3xl md:text-4xl mb-3 md:mb-4">🌍</div>
-                    <h4 id="value2" class="font-semibold text-lg md:text-xl mb-2"
-                        data-en="Kinyarwanda-Native" data-rw="Ikinyarwanda Gusa">Ikinyarwanda Gusa</h4>
-                    <p id="value2-text" class="text-slate-600 text-sm md:text-base"
-                       data-en="All information is available in clear Kinyarwanda."
-                       data-rw="Amakuru yose ari mu Kinyarwanda cy'umwimerere kandi cyumvikana.">
-                        Amakuru yose ari mu Kinyarwanda cy'umwimerere kandi cyumvikana.
-                    </p>
-                </div>
-                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm sm:col-span-2 md:col-span-1">
-                    <div class="text-3xl md:text-4xl mb-3 md:mb-4">❤️</div>
-                    <h4 id="value3" class="font-semibold text-lg md:text-xl mb-2"
-                        data-en="Stigma-Free" data-rw="Nta kato">Nta kato</h4>
-                    <p id="value3-text" class="text-slate-600 text-sm md:text-base"
-                       data-en="We believe in dignity and respect for all."
-                       data-rw="Twifuza gukura akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.">
-                        Twifuza gukura akato ku bijyanye n'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.
-                    </p>
-                </div>
-            </div>
-        </div>
+      <h2 data-rw="Intego" data-en="Objectives">Intego (Objectives)</h2>
+      <div class="about-section">
+        <ul>
+          <li data-rw="Gutanga amakuru n’ubujyanama ku buzima bwo mu mutwe no kwirinda indwara zandurira mu mibonano mpuzabitsina (STIs/HIV)." 
+              data-en="Provide information and guidance on mental health and prevention of sexually transmitted infections (STIs/HIV).">
+            Gutanga amakuru n’ubujyanama ku buzima bwo mu mutwe no kwirinda indwara zandurira mu mibonano mpuzabitsina (STIs/HIV).
+          </li>
+          <li data-rw="Gufasha abakobwa n'abagore uburyo bwo gukurikirana ukwezi k'umugore (Period tracking) n’uburumbuke mu buryo bworoshye." 
+              data-en="Help girls and women track their menstrual cycle (Period tracking) and fertility in a simple way.">
+            Gufasha abakobwa n'abagore uburyo bwo gukurikirana ukwezi k'umugore (Period tracking) n’uburumbuke mu buryo bworoshye.
+          </li>
+          <li data-rw="Guharanira ko abafite ubumuga (abatabona, abatumva) babona amakuru mu buryo bwihariye (Hifashishijwe amarenga, Indangururamajwi byubakanywe nuru rubuga)." 
+              data-en="Ensure that people with disabilities (visually impaired, hearing impaired) access information in accessible formats (using sign language and audio features built into the platform).">
+            Guharanira ko abafite ubumuga (abatabona, abatumva) babona amakuru mu buryo bwihariye (Hifashishijwe amarenga, Indangururamajwi byubakanywe nuru rubuga).
+          </li>
+          <li data-rw="Gufasha urubyiruko guhangana n'ibibazo byo mu mutwe nk'agahinda gakabije, kwigunga, kwiheba binyuze hifashishijwe ubwenge buhangano AI ndetse na ganira n'urungano (Uruganiriro rwibanga ruhuza abakoresha uru rubuga, bakaganira kubibazo bahira nabyo, bagahumurizanya ndetse bagafashanya kubivamo)." 
+              data-en="Help youth deal with mental health issues such as severe depression, loneliness, and despair through artificial intelligence AI and private conversations with Urungano (a safe chat room that connects users to discuss their problems, comfort each other, and support one another).">
+            Gufasha urubyiruko guhangana n'ibibazo byo mu mutwe nk'agahinda gakabije, kwigunga, kwiheba binyuze hifashishijwe ubwenge buhangano AI ndetse na ganira n'urungano (Uruganiriro rwibanga ruhuza abakoresha uru rubuga, bakaganira kubibazo bahira nabyo, bagahumurizanya ndetse bagafashanya kubivamo).
+          </li>
+          <li data-rw="Kwizeza abakoresha urubuga rwacu ko amakuru yabo n'ibyo babaza ubwenge buhangano (AI) bigirwa ibanga rikomeye." 
+              data-en="Assure users of our platform that their information and what they ask the artificial intelligence (AI) remains highly confidential.">
+            Kwizeza abakoresha urubuga rwacu ko amakuru yabo n'ibyo babaza ubwenge buhangano (AI) bigirwa ibanga rikomeye.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
 
         <!-- Call to Action -->
         <div class="bg-blue-600 text-white rounded-3xl px-6 py-10 md:p-12 text-center">
