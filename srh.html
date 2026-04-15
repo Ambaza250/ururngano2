@@ -231,6 +231,28 @@ body { font-family: 'Inter', sans-serif; }
     line-height: 1.4;
 }
 
+        .lesson-card {
+    transition: all 0.3s ease;
+}
+
+.lesson-card:hover {
+    box-shadow: 0 10px 25px rgba(236, 72, 153, 0.12);
+    transform: translateY(-2px);
+}
+
+.lesson-header {
+    font-size: 1.1rem;
+}
+
+.lesson-content {
+    border-top: 1px solid #f3e8ff;
+    background: #fdf4ff;
+}
+
+.lesson-icon {
+    transition: transform 0.4s ease;
+}
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -1003,6 +1025,51 @@ window.switchLanguage = function(lang) {
         }
 
         window.onload = () => switchLanguage('rw');
+
+        // Lesson Toggle Function
+window.toggleLesson = function(btn) {
+    const content = btn.nextElementSibling;
+    const icon = btn.querySelector('.lesson-icon');
+    
+    content.classList.toggle('hidden');
+    
+    if (content.classList.contains('hidden')) {
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        icon.style.transform = 'rotate(180deg)';
+    }
+};
+
+// Update lessons when language changes
+const originalSwitch = window.switchLanguage;
+window.switchLanguage = function(lang) {
+    if (originalSwitch) originalSwitch(lang);
+    
+    // Re-render visible lessons if needed
+    document.querySelectorAll('.lesson-content').forEach(content => {
+        if (!content.classList.contains('hidden')) {
+            // Force refresh if you want dynamic update
+        }
+    });
+};
+
+        // Bilingual switch for calculator using data-rw / data-en (exactly like the normal files)
+    function switchCalcLang(lang) {
+        // Update toggle buttons
+        document.getElementById('calc-lang-rw').classList.toggle('bg-emerald-600', lang === 'rw');
+        document.getElementById('calc-lang-rw').classList.toggle('text-white', lang === 'rw');
+        document.getElementById('calc-lang-en').classList.toggle('bg-emerald-600', lang === 'en');
+        document.getElementById('calc-lang-en').classList.toggle('text-white', lang === 'en');
+
+        // Switch all elements that have data-rw and data-en
+        document.querySelectorAll('[data-rw]').forEach(el => {
+            if (lang === 'rw') {
+                el.innerHTML = el.getAttribute('data-rw');
+            } else {
+                el.innerHTML = el.getAttribute('data-en');
+            }
+        });
+    }
 </script>
 </body>
 </html>
