@@ -78,46 +78,52 @@
 </head>
 <body class="bg-gray-50 text-gray-900">
     <!-- HEADER - EXACTLY CONGRUENT WITH ALL OTHER PAGES -->
-    <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="urungano-logo.jpeg" alt="Urungano Logo" class="h-10 w-auto">
-                <div>
-                    <h1 class="title-font text-2xl font-semibold text-emerald-600">Urungano</h1>
-                    <p class="text-xs text-gray-500 -mt-1">Youth SRH & Mental Health</p>
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+            <div class="flex justify-between items-center gap-2">
+
+                <!-- Logo + Title -->
+                <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                         class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+                    <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
                 </div>
+
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+                    <button onclick="switchLanguage('rw')" id="btn-rw"
+                            class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en"
+                            class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop nav links -->
+                <div class="hidden md:flex gap-6 text-sm font-medium">
+                    <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                    <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="text-blue-600 font-semibold" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()"
+                        class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
-            
-            <div class="flex items-center gap-8">
-                <a href="index.html" class="text-sm font-medium hover:text-emerald-600 transition-colors">Ahabanza</a>
-                <a href="urungano.html" class="text-sm font-medium hover:text-emerald-600 transition-colors">Urungano</a>
-                <a href="mental-health.html" class="text-sm font-medium hover:text-emerald-600 transition-colors">Ubuzima bwo mu mutwe</a>
-                <a href="srh.html" class="text-sm font-medium text-emerald-600 border-b-2 border-emerald-600 pb-1">Ubuzima Bw'Imyororokere</a>
-                <a href="chat.html" class="flex items-center gap-2 bg-emerald-600 text-white px-6 py-2 rounded-2xl hover:bg-emerald-700 transition-all text-sm font-medium">
-                    <i class="fas fa-robot"></i>
-                    <span>AI Chat</span>
-                </a>
-                
-                <!-- Bilingual Toggle -->
-                <div class="flex items-center bg-gray-100 rounded-3xl p-1 text-sm font-medium">
-                    <button onclick="switchLanguage('rw')" 
-                            class="px-5 py-1 rounded-3xl transition-all flex items-center gap-1" 
-                            id="lang-rw">
-                        <span>Kinyarwanda</span>
-                    </button>
-                    <button onclick="switchLanguage('en')" 
-                            class="px-5 py-1 rounded-3xl transition-all flex items-center gap-1" 
-                            id="lang-en">
-                        <span>English</span>
-                    </button>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-sm font-semibold">AM</div>
-                </div>
+
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
+                <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                <a href="srh.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="block py-2.5 px-2 rounded-xl text-blue-600 font-semibold bg-blue-50" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
             </div>
         </div>
     </nav>
+
 
     <!-- SRH BANNER - EXACTLY LIKE IN mental-health.html -->
     <div class="hero-banner">
