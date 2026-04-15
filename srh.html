@@ -59,6 +59,178 @@ body { font-family: 'Inter', sans-serif; }
         #mobile-menu { display: none; }
         #mobile-menu.open { display: flex; }
 
+        .ct-wrap {
+    padding: 20px 10px;
+}
+
+.ct-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.15);
+    overflow: hidden;
+    border: 1px solid #fce7f3;
+}
+
+.ct-header {
+    background: linear-gradient(135deg, #f472b6, #db2777);
+    color: white;
+    text-align: center;
+    padding: 25px 20px;
+}
+
+.ct-icon {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.ct-header h3 {
+    font-size: 1.35rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.ct-header p {
+    opacity: 0.95;
+    margin-top: 6px;
+    font-size: 0.95rem;
+}
+
+.ct-form {
+    padding: 25px;
+}
+
+.ct-input-group {
+    margin-bottom: 18px;
+}
+
+.ct-input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.ct-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #f3e8ff;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.ct-input:focus {
+    border-color: #db2777;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.1);
+}
+
+.ct-toggle {
+    margin: 20px 0;
+    cursor: pointer;
+}
+
+.ct-toggle-slider {
+    background: #f3e8ff;
+    border-radius: 50px;
+    padding: 12px 16px;
+    transition: all 0.3s;
+}
+
+.ct-toggle input:checked + .ct-toggle-slider {
+    background: #fce7f3;
+}
+
+.ct-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #db2777, #be185d);
+    color: white;
+    border: none;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+
+.ct-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(219, 39, 119, 0.3);
+}
+
+.ct-results {
+    padding: 20px 25px;
+    background: #fdf4ff;
+    border-top: 1px solid #f3e8ff;
+}
+
+.ct-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+}
+
+.ct-result-card {
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.ct-result-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.ct-result-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.ct-result-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #831843;
+    margin: 4px 0;
+}
+
+.ct-result-sub {
+    font-size: 0.8rem;
+    color: #9f1239;
+}
+
+.ct-tip {
+    background: #fef3c7;
+    padding: 14px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.95rem;
+    margin: 18px 0;
+    color: #92400e;
+}
+
+.ct-error {
+    color: #ef4444;
+    text-align: center;
+    margin: 12px 0;
+    font-size: 0.9rem;
+    min-height: 20px;
+}
+
+.ct-disclaimer {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.4;
+}
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -565,124 +737,123 @@ body { font-family: 'Inter', sans-serif; }
             </div>
         </div>
 
-        <!-- FULL INTERACTIVE MENSTRUAL CYCLE CALCULATOR -->
-<!-- Cycle Tracker / Menstrual Calculator - Centered & Optimized -->
-<div id="cycleTracker" class="ct-wrap mx-auto max-w-2xl mb-8">
+       
+        
+       <!-- ==================== STYLED CYCLE TRACKER ==================== -->
+<div id="cycleTracker" class="ct-wrap mx-auto max-w-lg">
     
-    <div class="ct-header text-center">
-        <div class="ct-header-icon mx-auto">🌸</div>
-        <h3 data-en="Menstrual Cycle Tracker" data-rw="Kubara Ukwezi k'Umugore">Kubara Ukwezi k'Umugore</h3>
-        <p data-en="Track your cycle, ovulation & fertile days" 
-           data-rw="Kumenya imihango, uburumbuke n'iminsi yo gusama">
-           Kumenya imihango, uburumbuke n'iminsi yo gusama
-        </p>
-    </div>
-
-    <div class="ct-body">
-        <div class="ct-field">
-            <label class="ct-label" data-en="Date your last period started" 
-                   data-rw="Itariki imihango yawe iheruka yatangiye">
-                Itariki imihango yawe iheruka yatangiye
-            </label>
-            <input type="date" id="ct-last-date" class="ct-input">
+    <div class="ct-card">
+        <div class="ct-header">
+            <div class="ct-icon">🌸</div>
+            <h3 data-en="Menstrual Cycle Tracker" data-rw="Kubara Ukwezi k'Umugore">Kubara Ukwezi k'Umugore</h3>
+            <p data-en="Track your cycle, ovulation & fertile days" 
+               data-rw="Kumenya imihango, uburumbuke n'iminsi yo gusama">
+               Kumenya imihango, uburumbuke n'iminsi yo gusama
+            </p>
         </div>
 
-        <div class="ct-row grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="ct-field">
-                <label class="ct-label" data-en="Average cycle length (days)" 
-                       data-rw="Uburebure bw'ukwezi (iminsi)">
-                    Uburebure bw'ukwezi (iminsi)
+        <div class="ct-form">
+            <div class="ct-input-group">
+                <label data-en="Date your last period started" data-rw="Itariki imihango yawe iheruka yatangiye">
+                    Itariki imihango yawe iheruka yatangiye
                 </label>
-                <select id="ct-cycle-len" class="ct-input">
-                    <option value="21">21</option>
-                    <option value="22">22</option>
-                    <option value="23">23</option>
-                    <option value="24">24</option>
-                    <option value="25">25</option>
-                    <option value="26">26</option>
-                    <option value="27">27</option>
-                    <option value="28" selected>28</option>
-                    <option value="29">29</option>
-                    <option value="30">30</option>
-                    <option value="31">31</option>
-                    <option value="32">32</option>
-                    <option value="33">33</option>
-                    <option value="34">34</option>
-                    <option value="35">35</option>
-                </select>
+                <input type="date" id="ct-last-date" class="ct-input">
             </div>
 
-            <div class="ct-field">
-                <label class="ct-label" data-en="Period duration (days)" 
-                       data-rw="Iminsi imihango imara">
-                    Iminsi imihango imara
-                </label>
-                <select id="ct-period-dur" class="ct-input">
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5" selected>5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                </select>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="ct-input-group">
+                    <label data-en="Average cycle length (days)" data-rw="Uburebure bw'ukwezi (iminsi)">
+                        Uburebure bw'ukwezi (iminsi)
+                    </label>
+                    <select id="ct-cycle-len" class="ct-input">
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28" selected>28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                        <option value="32">32</option>
+                        <option value="33">33</option>
+                        <option value="34">34</option>
+                        <option value="35">35</option>
+                    </select>
+                </div>
+
+                <div class="ct-input-group">
+                    <label data-en="Period duration (days)" data-rw="Iminsi imihango imara">
+                        Iminsi imihango imara
+                    </label>
+                    <select id="ct-period-dur" class="ct-input">
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                    </select>
+                </div>
             </div>
+
+            <div class="ct-toggle" onclick="toggleIrregular()">
+                <input type="checkbox" id="ct-irregular" hidden>
+                <div class="ct-toggle-slider">
+                    <span class="ct-toggle-label" data-en="My cycle is irregular" 
+                          data-rw="Ukwezi kwanjye guhindagurika">
+                        Ukwezi kwanjye guhindagurika
+                    </span>
+                </div>
+            </div>
+
+            <div id="ct-error" class="ct-error"></div>
+
+            <button onclick="calculateCycle()" class="ct-btn" type="button"
+                    data-en="Calculate My Cycle" data-rw="Bara Ukwezi Kwanjye">
+                Bara Ukwezi Kwanjye
+            </button>
         </div>
 
-        <div class="ct-toggle-wrap text-center my-6" onclick="toggleIrregular()">
-            <button class="ct-toggle" id="ct-irregular-toggle" type="button"></button>
-            <span class="ct-toggle-label" data-en="My cycle is irregular" 
-                  data-rw="Ukwezi kwanjye guhindagurika">
-                Ukwezi kwanjye guhindagurika
-            </span>
-        </div>
-
-        <div class="ct-error text-center" id="ct-error"></div>
-
-        <button onclick="calculateCycle()" class="ct-btn mx-auto block" type="button"
-                data-en="Calculate My Cycle" data-rw="Bara Ukwezi Kwanjye">
-            Bara Ukwezi Kwanjye
-        </button>
-
-        <!-- Results -->
-        <div class="ct-results hidden" id="ct-results">
-            <div class="ct-results-title text-center" data-en="Your Results" data-rw="Ibisubizo Byawe">
-                Ibisubizo Byawe
-            </div>
+        <!-- Results Section -->
+        <div id="ct-results" class="ct-results hidden">
+            <h4 data-en="Your Results" data-rw="Ibisubizo Byawe" class="text-center">Ibisubizo Byawe</h4>
             
-            <div class="ct-cards grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="ct-card pink">
-                    <div class="ct-card-icon">📅</div>
-                    <div class="ct-card-label" data-en="Next Period" data-rw="Imihango Itaha">Imihango Itaha</div>
-                    <div class="ct-card-value" id="ct-next-period">—</div>
-                    <div class="ct-card-sub" id="ct-next-period-sub"></div>
+            <div class="ct-results-grid">
+                <div class="ct-result-card">
+                    <div class="ct-result-icon">📅</div>
+                    <div class="ct-result-label" data-en="Next Period" data-rw="Imihango Itaha">Imihango Itaha</div>
+                    <div class="ct-result-value" id="ct-next-period"></div>
+                    <div class="ct-result-sub" id="ct-next-period-sub"></div>
                 </div>
 
-                <div class="ct-card green">
-                    <div class="ct-card-icon">🌿</div>
-                    <div class="ct-card-label" data-en="Ovulation Day" data-rw="Umunsi w'Uburumbuke">Umunsi w'Uburumbuke</div>
-                    <div class="ct-card-value" id="ct-ovulation">—</div>
-                    <div class="ct-card-sub" id="ct-ovulation-sub"></div>
+                <div class="ct-result-card">
+                    <div class="ct-result-icon">🌿</div>
+                    <div class="ct-result-label" data-en="Ovulation Day" data-rw="Umunsi w'Uburumbuke">Umunsi w'Uburumbuke</div>
+                    <div class="ct-result-value" id="ct-ovulation"></div>
+                    <div class="ct-result-sub" id="ct-ovulation-sub"></div>
                 </div>
 
-                <div class="ct-card amber">
-                    <div class="ct-card-icon">✨</div>
-                    <div class="ct-card-label" data-en="Fertile Window" data-rw="Igihe cy'Uburumbuke">Igihe cy'Uburumbuke</div>
-                    <div class="ct-card-value" id="ct-fertile">—</div>
-                    <div class="ct-card-sub" id="ct-fertile-sub"></div>
+                <div class="ct-result-card">
+                    <div class="ct-result-icon">✨</div>
+                    <div class="ct-result-label" data-en="Fertile Window" data-rw="Igihe cy'Uburumbuke">Igihe cy'Uburumbuke</div>
+                    <div class="ct-result-value" id="ct-fertile"></div>
+                    <div class="ct-result-sub" id="ct-fertile-sub"></div>
                 </div>
             </div>
 
-            <div class="ct-tip text-center" id="ct-tip"></div>
+            <div id="ct-tip" class="ct-tip"></div>
 
-            <p class="ct-disclaimer text-center" 
-               data-en="⚠️ This tool is for educational purposes only. It is not a contraceptive method. Consult a health professional."
-               data-rw="⚠️ Ubu buryo ni ubw'uburezi gusa. Ntibugomba gukoreshwa nk'uburyo bwo kwirinda gusama. Baza inzobere mu buzima.">
-                ⚠️ Ubu buryo ni ubw'uburezi gusa. Ntibugomba gukoreshwa nk'uburyo bwo kwirinda gusama. Baza inzobere mu buzima.
+            <p class="ct-disclaimer" 
+               data-en="⚠️ This is for educational purposes only. Not a contraceptive method."
+               data-rw="⚠️ Ubu ni ubw'uburezi gusa. Ntibugomba gukoreshwa nk'uburyo bwo kwirinda gusama.">
+                ⚠️ Ubu ni ubw'uburezi gusa. Ntibugomba gukoreshwa nk'uburyo bwo kwirinda gusama.
             </p>
         </div>
     </div>
 </div>
+    
         <div class="flex justify-center mt-16">
             <a href="urungano.html" class="inline-flex items-center gap-3 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-8 py-4 rounded-3xl font-medium transition-all">
                 ← Subira ku rupapuro rw'ibanze
