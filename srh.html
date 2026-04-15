@@ -29,6 +29,51 @@
         details[open] .accordion-header {
             border-bottom: 1px solid #10b98120;
         }
+        .hero-banner {
+            min-height: 260px;
+            height: 40vw;
+            max-height: 480px;
+            position: relative;
+            overflow: hidden;
+
+            .hero-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.75));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        /* Language button */
+        .lang-btn { transition: all 0.3s ease; }
+        .lang-btn.active {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
+        /* Accordion */
+        .accordion-btn { transition: all 0.3s ease; }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .accordion-content.open { max-height: 4000px; }
+        .icon { transition: transform 0.3s ease; }
+
+        /* Mobile menu */
+        #mobile-menu { display: none; }
+        #mobile-menu.open { display: flex; }
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -75,23 +120,25 @@
     </nav>
 
     <!-- SRH BANNER - EXACTLY LIKE IN mental-health.html -->
-    <div class="w-full">
-        <img src="SRH-banner.png" alt="Ubuzima Bw'Imyororokere" class="w-full h-auto object-cover">
-    </div>
+    <div class="hero-banner">
+        <img src="SRH-banner.png" alt="Ubuzima bwo mu Mutwe">
+        <div class="banner-overlay">
+            <div class="px-4">
+                <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-2 md:mb-4"
+                    data-en="Sexual Health" data-rw="Ubuzima Bw'Imyororokere">
+                    Ubuzima Bw'Imyororokere
+                </h1>
+                <p class="text-white text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto"
+                   data-en="🌸 Menstruation Period • 🦠 HIV/AIDS (HIV)"
+                   data-rw="🌸 Ukwezi k'umugore • 🦠 Virusi itera SIDA (HIV)">
+                    🌸 Ukwezi k'umugore • 🦠 Virusi itera SIDA (HIV)
 
-    <div class="max-w-5xl mx-auto px-6 py-10">
-        <div class="flex justify-between items-start mb-8">
-            <div>
-                <h1 id="page-title" class="title-font text-4xl font-semibold text-emerald-700">Ubuzima Bw'Imyororokere</h1>
-                <p id="page-subtitle" class="text-emerald-600 mt-2 text-lg">🌸 Ukwezi k'umugore • 🦠 Virusi itera SIDA (HIV)</p>
-            </div>
-            <div class="text-right">
-                <span class="inline-flex items-center gap-2 bg-white shadow-sm px-4 py-2 rounded-3xl text-sm font-medium text-gray-600">
-                    <i class="fas fa-leaf text-emerald-500"></i>
-                    Information yizewe
-                </span>
+
+                </p>
             </div>
         </div>
+    </div>
+
 
         <!-- ====================== KINYARWANDA CONTENT (FULL EXACT TEXT FROM YOUR PDFs) ====================== -->
         <div id="rw-content">
