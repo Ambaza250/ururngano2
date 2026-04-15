@@ -566,41 +566,123 @@ body { font-family: 'Inter', sans-serif; }
         </div>
 
         <!-- FULL INTERACTIVE MENSTRUAL CYCLE CALCULATOR -->
-        <div class="mt-16 bg-white rounded-3xl shadow-sm p-8 border border-emerald-100">
-            <h2 id="calc-title" class="text-3xl font-semibold mb-2">📅 Kubara Ukwezi k'Umugore</h2>
-            <p id="calc-subtitle" class="text-gray-600 mb-8">Menstrual Cycle Calculator – Track your cycle, fertile window &amp; ovulation</p>
-            
-            <div class="grid md:grid-cols-2 gap-8">
-                <div>
-                    <div class="mb-6">
-                        <label id="label-last" class="block text-sm font-medium mb-2">Itariki ya nyuma y'imihango yatangiye</label>
-                        <input type="date" id="last-period" class="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label id="label-length" class="block text-sm font-medium mb-2">Igihe cy'ukwezi (iminsi)</label>
-                        <div class="flex items-center gap-4">
-                            <input type="range" id="cycle-length-slider" min="21" max="35" value="28" class="flex-1 accent-emerald-600">
-                            <input type="number" id="cycle-length" value="28" min="21" max="35" class="w-20 text-center border border-gray-300 rounded-2xl py-3 font-semibold">
-                        </div>
-                    </div>
-                    <button onclick="calculateCycle()" 
-                            class="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-4 rounded-3xl flex items-center justify-center gap-3 text-lg">
-                        <i class="fas fa-calculator"></i>
-                        <span id="btn-text">Bara ubu</span>
-                    </button>
-                </div>
+<!-- Cycle Tracker / Menstrual Calculator - Centered & Optimized -->
+<div id="cycleTracker" class="ct-wrap mx-auto max-w-2xl mb-8">
+    
+    <div class="ct-header text-center">
+        <div class="ct-header-icon mx-auto">🌸</div>
+        <h3 data-en="Menstrual Cycle Tracker" data-rw="Kubara Ukwezi k'Umugore">Kubara Ukwezi k'Umugore</h3>
+        <p data-en="Track your cycle, ovulation & fertile days" 
+           data-rw="Kumenya imihango, uburumbuke n'iminsi yo gusama">
+           Kumenya imihango, uburumbuke n'iminsi yo gusama
+        </p>
+    </div>
 
-                <div id="results" class="hidden">
-                    <div class="bg-emerald-50 rounded-3xl p-6 space-y-6">
-                        <div class="flex justify-between"><span class="font-medium">Imihango itaha:</span> <span id="next-period" class="font-semibold text-emerald-700"></span></div>
-                        <div class="flex justify-between"><span class="font-medium">Umunsi w'uburumbuke (ovulation):</span> <span id="ovulation" class="font-semibold text-emerald-700"></span></div>
-                        <div class="flex justify-between"><span class="font-medium">Igihe cyo gusama (fertile window):</span> <span id="fertile" class="font-semibold text-emerald-700"></span></div>
-                        <div class="text-xs text-gray-500 pt-4 border-t">⚠️ This is for educational purposes only. Not a substitute for professional medical advice.</div>
-                    </div>
-                </div>
+    <div class="ct-body">
+        <div class="ct-field">
+            <label class="ct-label" data-en="Date your last period started" 
+                   data-rw="Itariki imihango yawe iheruka yatangiye">
+                Itariki imihango yawe iheruka yatangiye
+            </label>
+            <input type="date" id="ct-last-date" class="ct-input">
+        </div>
+
+        <div class="ct-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="ct-field">
+                <label class="ct-label" data-en="Average cycle length (days)" 
+                       data-rw="Uburebure bw'ukwezi (iminsi)">
+                    Uburebure bw'ukwezi (iminsi)
+                </label>
+                <select id="ct-cycle-len" class="ct-input">
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                    <option value="24">24</option>
+                    <option value="25">25</option>
+                    <option value="26">26</option>
+                    <option value="27">27</option>
+                    <option value="28" selected>28</option>
+                    <option value="29">29</option>
+                    <option value="30">30</option>
+                    <option value="31">31</option>
+                    <option value="32">32</option>
+                    <option value="33">33</option>
+                    <option value="34">34</option>
+                    <option value="35">35</option>
+                </select>
+            </div>
+
+            <div class="ct-field">
+                <label class="ct-label" data-en="Period duration (days)" 
+                       data-rw="Iminsi imihango imara">
+                    Iminsi imihango imara
+                </label>
+                <select id="ct-period-dur" class="ct-input">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5" selected>5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                </select>
             </div>
         </div>
 
+        <div class="ct-toggle-wrap text-center my-6" onclick="toggleIrregular()">
+            <button class="ct-toggle" id="ct-irregular-toggle" type="button"></button>
+            <span class="ct-toggle-label" data-en="My cycle is irregular" 
+                  data-rw="Ukwezi kwanjye guhindagurika">
+                Ukwezi kwanjye guhindagurika
+            </span>
+        </div>
+
+        <div class="ct-error text-center" id="ct-error"></div>
+
+        <button onclick="calculateCycle()" class="ct-btn mx-auto block" type="button"
+                data-en="Calculate My Cycle" data-rw="Bara Ukwezi Kwanjye">
+            Bara Ukwezi Kwanjye
+        </button>
+
+        <!-- Results -->
+        <div class="ct-results hidden" id="ct-results">
+            <div class="ct-results-title text-center" data-en="Your Results" data-rw="Ibisubizo Byawe">
+                Ibisubizo Byawe
+            </div>
+            
+            <div class="ct-cards grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="ct-card pink">
+                    <div class="ct-card-icon">📅</div>
+                    <div class="ct-card-label" data-en="Next Period" data-rw="Imihango Itaha">Imihango Itaha</div>
+                    <div class="ct-card-value" id="ct-next-period">—</div>
+                    <div class="ct-card-sub" id="ct-next-period-sub"></div>
+                </div>
+
+                <div class="ct-card green">
+                    <div class="ct-card-icon">🌿</div>
+                    <div class="ct-card-label" data-en="Ovulation Day" data-rw="Umunsi w'Uburumbuke">Umunsi w'Uburumbuke</div>
+                    <div class="ct-card-value" id="ct-ovulation">—</div>
+                    <div class="ct-card-sub" id="ct-ovulation-sub"></div>
+                </div>
+
+                <div class="ct-card amber">
+                    <div class="ct-card-icon">✨</div>
+                    <div class="ct-card-label" data-en="Fertile Window" data-rw="Igihe cy'Uburumbuke">Igihe cy'Uburumbuke</div>
+                    <div class="ct-card-value" id="ct-fertile">—</div>
+                    <div class="ct-card-sub" id="ct-fertile-sub"></div>
+                </div>
+            </div>
+
+            <div class="ct-tip text-center" id="ct-tip"></div>
+
+            <p class="ct-disclaimer text-center" 
+               data-en="⚠️ This tool is for educational purposes only. It is not a contraceptive method. Consult a health professional."
+               data-rw="⚠️ Ubu buryo ni ubw'uburezi gusa. Ntibugomba gukoreshwa nk'uburyo bwo kwirinda gusama. Baza inzobere mu buzima.">
+                ⚠️ Ubu buryo ni ubw'uburezi gusa. Ntibugomba gukoreshwa nk'uburyo bwo kwirinda gusama. Baza inzobere mu buzima.
+            </p>
+        </div>
+    </div>
+</div>
         <div class="flex justify-center mt-16">
             <a href="urungano.html" class="inline-flex items-center gap-3 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-8 py-4 rounded-3xl font-medium transition-all">
                 ← Subira ku rupapuro rw'ibanze
@@ -617,83 +699,139 @@ body { font-family: 'Inter', sans-serif; }
     </footer>
 
     <script>
+// Cycle Tracker Logic
+document.getElementById('ct-last-date').setAttribute('max', new Date().toISOString().split('T')[0]);
+
+let ctIrregular = false;
+
+window.toggleIrregular = function() {
+    ctIrregular = !ctIrregular;
+    document.getElementById('ct-irregular-toggle').classList.toggle('on', ctIrregular);
+};
+
+function ctFormatDate(date, lang) {
+    const en = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const rw = ['Mutarama','Gashyantare','Werurwe','Mata','Gicurasi','Kamena','Nyakanga','Kanama','Nzeri','Ukwakira','Ugushyingo','Ukuboza'];
+    
+    const month = lang === 'en' ? en[date.getMonth()] : rw[date.getMonth()];
+    return lang === 'en' 
+        ? `${month} ${date.getDate()}, ${date.getFullYear()}` 
+        : `${date.getDate()} ${month} ${date.getFullYear()}`;
+}
+
+function ctDaysFromNow(date, lang) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const diff = Math.round((date - now) / 86400000);
+    
+    if (diff === 0) return lang === 'en' ? 'Today' : 'Uyu munsi';
+    if (diff === 1) return lang === 'en' ? 'Tomorrow' : 'Ejo hazaza';
+    if (diff < 0) return lang === 'en' ? `${Math.abs(diff)} days ago` : `Hashize iminsi ${Math.abs(diff)}`;
+    return lang === 'en' ? `In ${diff} days` : `Mu minsi ${diff}`;
+}
+
+window.calculateCycle = function() {
+    const lang = document.body.getAttribute('data-lang') || 'rw';
+    const val = document.getElementById('ct-last-date').value;
+    const err = document.getElementById('ct-error');
+
+    if (!val) {
+        err.textContent = lang === 'en' 
+            ? 'Please select the date your last period started.' 
+            : 'Hitamo itariki imihango yawe iheruka yatangiye.';
+        err.classList.add('show');
+        return;
+    }
+    err.classList.remove('show');
+
+    const p = val.split('-');
+    const last = new Date(+p[0], +p[1]-1, +p[2]);
+    const cycleLen = parseInt(document.getElementById('ct-cycle-len').value);
+
+    const nextPeriod = new Date(last);
+    nextPeriod.setDate(nextPeriod.getDate() + cycleLen);
+
+    const ovulation = new Date(nextPeriod);
+    ovulation.setDate(ovulation.getDate() - 14);
+
+    const fertileStart = new Date(ovulation);
+    fertileStart.setDate(fertileStart.getDate() - 5);
+    const fertileEnd = new Date(ovulation);
+    fertileEnd.setDate(fertileEnd.getDate() + 1);
+
+    // Fill results
+    document.getElementById('ct-next-period').textContent = ctFormatDate(nextPeriod, lang);
+    document.getElementById('ct-next-period-sub').textContent = ctDaysFromNow(nextPeriod, lang);
+    
+    document.getElementById('ct-ovulation').textContent = ctFormatDate(ovulation, lang);
+    document.getElementById('ct-ovulation-sub').textContent = ctDaysFromNow(ovulation, lang);
+    
+    document.getElementById('ct-fertile').textContent = 
+        ctFormatDate(fertileStart, lang) + ' – ' + ctFormatDate(fertileEnd, lang);
+    document.getElementById('ct-fertile-sub').textContent = 
+        lang === 'en' ? '6-day fertile window' : 'Iminsi 6 yo gusama';
+
+    // Smart tip
+    const now = new Date(); now.setHours(0,0,0,0);
+    let tip = '';
+    if (ctIrregular) {
+        tip = lang === 'en' 
+            ? '💡 Since your cycle is irregular, these dates are estimates. Track your last 3–6 cycles for better accuracy.' 
+            : '💡 Ukwezi kwawe gutihanganira, ibisubizo ni integanya gusa. Komeza ubike amakuru y\'amezi 3-6 kugira ngo birusheho gutunga.';
+    } else if (now >= fertileStart && now <= fertileEnd) {
+        tip = lang === 'en' 
+            ? '✨ You are currently in your fertile window!' 
+            : '✨ Uri mu gihe cy\'uburumbuke ubu!';
+    } else if (now < fertileStart) {
+        tip = lang === 'en' 
+            ? '🌸 Your fertile window is coming up soon.' 
+            : '🌸 Igihe cy\'uburumbuke kiri hafi.';
+    } else {
+        tip = lang === 'en' 
+            ? '🌙 You have passed ovulation. Focus on self-care.' 
+            : '🌙 Uburumbuke bwarangiye. Kwita ku mubiri wawe.';
+    }
+    document.getElementById('ct-tip').textContent = tip;
+
+    const results = document.getElementById('ct-results');
+    results.classList.remove('hidden');
+    results.classList.add('show');
+    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+// Update results when language changes
+const originalSwitch = window.switchLanguage;
+window.switchLanguage = function(lang) {
+    if (originalSwitch) originalSwitch(lang);
+    const results = document.getElementById('ct-results');
+    if (results.classList.contains('show')) {
+        calculateCycle();
+    }
+};
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('open');
+        }
+
+        function toggleSection(section) {
+            const content = document.getElementById(section);
+            const icon = document.getElementById('icon' + section);
+            content.classList.toggle('open');
+            icon.textContent = content.classList.contains('open') ? '−' : '+';
+        }
+
         function switchLanguage(lang) {
-            const rwContent = document.getElementById('rw-content');
-            const enContent = document.getElementById('en-content');
-            const btnRw = document.getElementById('lang-rw');
-            const btnEn = document.getElementById('lang-en');
-            const title = document.getElementById('page-title');
-            const subtitle = document.getElementById('page-subtitle');
+            document.documentElement.setAttribute('lang', lang);
+            document.body.setAttribute('data-lang', lang);
 
-            if (lang === 'rw') {
-                rwContent.classList.remove('hidden');
-                enContent.classList.add('hidden');
-                btnRw.classList.add('bg-emerald-600', 'text-white');
-                btnEn.classList.remove('bg-emerald-600', 'text-white');
-                title.textContent = "Ubuzima Bw'Imyororokere";
-                subtitle.innerHTML = '🌸 Ukwezi k\'umugore • 🦠 Virusi itera SIDA (HIV)';
-            } else {
-                rwContent.classList.add('hidden');
-                enContent.classList.remove('hidden');
-                btnEn.classList.add('bg-emerald-600', 'text-white');
-                btnRw.classList.remove('bg-emerald-600', 'text-white');
-                title.textContent = "Reproductive Health";
-                subtitle.innerHTML = '🌸 Menstruation • 🦠 HIV / AIDS';
-            }
-            updateCalculatorLabels(lang);
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+            });
+
+            document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
         }
 
-        function updateCalculatorLabels(lang) {
-            if (lang === 'rw') {
-                document.getElementById('label-last').innerHTML = 'Itariki ya nyuma y\'imihango yatangiye';
-                document.getElementById('label-length').innerHTML = 'Igihe cy\'ukwezi (iminsi)';
-                document.getElementById('btn-text').innerHTML = 'Bara ubu';
-                document.getElementById('calc-title').innerHTML = '📅 Kubara Ukwezi k\'Umugore';
-                document.getElementById('calc-subtitle').innerHTML = 'Menstrual Cycle Calculator – Track your cycle, fertile window &amp; ovulation';
-            } else {
-                document.getElementById('label-last').innerHTML = 'Date of last period start';
-                document.getElementById('label-length').innerHTML = 'Average cycle length (days)';
-                document.getElementById('btn-text').innerHTML = 'Calculate';
-                document.getElementById('calc-title').innerHTML = '📅 Menstrual Cycle Calculator';
-                document.getElementById('calc-subtitle').innerHTML = 'Track your cycle, fertile window &amp; ovulation';
-            }
-        }
-
-        function calculateCycle() {
-            const lastDateStr = document.getElementById('last-period').value;
-            if (!lastDateStr) {
-                alert('❌ Hitamo itariki ya nyuma y\'imihango');
-                return;
-            }
-            const lastDate = new Date(lastDateStr);
-            const cycleLength = parseInt(document.getElementById('cycle-length').value);
-
-            const nextPeriod = new Date(lastDate);
-            nextPeriod.setDate(nextPeriod.getDate() + cycleLength);
-
-            const ovulation = new Date(nextPeriod);
-            ovulation.setDate(ovulation.getDate() - 14);
-
-            const fertileStart = new Date(ovulation);
-            fertileStart.setDate(fertileStart.getDate() - 5);
-            const fertileEnd = new Date(ovulation);
-            fertileEnd.setDate(fertileEnd.getDate() + 1);
-
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.classList.remove('hidden');
-
-            document.getElementById('next-period').textContent = nextPeriod.toLocaleDateString('rw-RW', { weekday: 'short', month: 'short', day: 'numeric' });
-            document.getElementById('ovulation').textContent = ovulation.toLocaleDateString('rw-RW', { weekday: 'short', month: 'short', day: 'numeric' });
-            document.getElementById('fertile').textContent = 
-                fertileStart.toLocaleDateString('rw-RW', { month: 'short', day: 'numeric' }) + 
-                ' - ' + 
-                fertileEnd.toLocaleDateString('rw-RW', { month: 'short', day: 'numeric' });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('%c✅ srh.html – Full Kinyarwanda + Full English content + SRH banner added', 'color:#10b981; font-weight:bold');
-            document.getElementById('lang-rw').classList.add('bg-emerald-600', 'text-white');
-        });
-    </script>
+        window.onload = () => switchLanguage('rw');
+</script>
 </body>
 </html>
