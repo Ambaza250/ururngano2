@@ -141,178 +141,6 @@
       color: #666;
       display: none;
     }
-
-        html {
-    color-scheme: light dark;
-}
-
-body {
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.theme-toggle:hover {
-    transform: translateY(-1px);
-}
-
-.theme-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.theme-sun {
-    display: none;
-}
-
-body[data-theme="dark"] .theme-moon {
-    display: none;
-}
-
-body[data-theme="dark"] .theme-sun {
-    display: inline-flex;
-}
-
-body[data-theme="dark"] {
-    background: #0f172a !important;
-    color: #e2e8f0 !important;
-}
-
-body[data-theme="dark"] nav {
-    background: #111827 !important;
-    border-color: #334155 !important;
-}
-
-body[data-theme="dark"] .lang-btn.active {
-    background: #1e293b !important;
-    color: #f8fafc !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-}
-
-body[data-theme="dark"] .theme-toggle {
-    background: #1e293b !important;
-    color: #facc15 !important;
-}
-
-body[data-theme="dark"] #hamburger {
-    background: #1e293b !important;
-    color: #e2e8f0 !important;
-}
-
-body[data-theme="dark"] #mobile-menu {
-    border-color: #334155 !important;
-}
-
-body[data-theme="dark"] a,
-body[data-theme="dark"] h1,
-body[data-theme="dark"] h2,
-body[data-theme="dark"] h3,
-body[data-theme="dark"] h4,
-body[data-theme="dark"] p,
-body[data-theme="dark"] span,
-body[data-theme="dark"] li,
-body[data-theme="dark"] label {
-    color: inherit;
-}
-
-body[data-theme="dark"] .bg-white,
-body[data-theme="dark"] .bg-white\/95,
-body[data-theme="dark"] .bg-slate-50,
-body[data-theme="dark"] .bg-blue-50 {
-    background-color: #111827 !important;
-    color: #e2e8f0 !important;
-}
-
-body[data-theme="dark"] .text-slate-800,
-body[data-theme="dark"] .text-slate-700,
-body[data-theme="dark"] .text-slate-600,
-body[data-theme="dark"] .text-slate-900 {
-    color: #e2e8f0 !important;
-}
-
-body[data-theme="dark"] .text-blue-600 {
-    color: #60a5fa !important;
-}
-
-body[data-theme="dark"] .border,
-body[data-theme="dark"] .border-slate-100,
-body[data-theme="dark"] .border-slate-200,
-body[data-theme="dark"] .border-t {
-    border-color: #334155 !important;
-}
-
-body[data-theme="dark"] .shadow,
-body[data-theme="dark"] .shadow-md {
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35) !important;
-}
-
-body[data-theme="dark"] .accordion-btn,
-body[data-theme="dark"] .lesson-card,
-body[data-theme="dark"] .about-container,
-body[data-theme="dark"] .helpline-card,
-body[data-theme="dark"] .ct-card,
-body[data-theme="dark"] .ct-result-card,
-body[data-theme="dark"] .ct-results,
-body[data-theme="dark"] .about-section p,
-body[data-theme="dark"] .about-section li {
-    background: #111827 !important;
-    color: #e2e8f0 !important;
-    border-color: #334155 !important;
-}
-
-body[data-theme="dark"] .accordion-btn:hover,
-body[data-theme="dark"] .nav-button:hover {
-    background: #1e293b !important;
-}
-
-body[data-theme="dark"] .about-page {
-    background: linear-gradient(180deg, #0f172a, #111827) !important;
-}
-
-body[data-theme="dark"] .helpline-section {
-    background: #0f172a !important;
-}
-
-body[data-theme="dark"] .ct-header {
-    background: linear-gradient(135deg, #be185d, #831843) !important;
-}
-
-body[data-theme="dark"] .ct-results,
-body[data-theme="dark"] .lesson-content {
-    background: #0f172a !important;
-}
-
-body[data-theme="dark"] .ct-input,
-body[data-theme="dark"] input,
-body[data-theme="dark"] textarea,
-body[data-theme="dark"] select {
-    background: #0f172a !important;
-    color: #e2e8f0 !important;
-    border-color: #334155 !important;
-}
-
-body[data-theme="dark"] .ct-toggle-slider {
-    background: #1e293b !important;
-}
-
-body[data-theme="dark"] .ct-tip {
-    background: #3f2f0d !important;
-    color: #fde68a !important;
-}
-
-body[data-theme="dark"] .pc-instruction,
-body[data-theme="dark"] .ct-disclaimer {
-    color: #94a3b8 !important;
-}
-
     </style>
 
     <!-- Leaflet CSS -->
@@ -379,67 +207,49 @@ body[data-theme="dark"] .ct-disclaimer {
         <div class="banner-overlay"></div>
         
         <!-- NAV -->
-<nav class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
-        <div class="flex justify-between items-center gap-2">
+        <nav class="relative z-50 px-4 py-4 md:px-8 md:py-6">
+            <div class="flex items-center justify-between gap-2">
+                <!-- Logo -->
+                <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo-img">
 
-            <div class="flex items-center gap-2 md:gap-3 min-w-0">
-                <img src="urungano-logo.jpeg" alt="Urungano Logo"
-                     class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
-                <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
-            </div>
-
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow">
-                    <button onclick="switchLanguage('rw')" id="btn-rw"
-                            class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
-                    <button onclick="switchLanguage('en')" id="btn-en"
-                            class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+                <!-- Language Switcher (always visible) -->
+                <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-3xl p-1 shadow-md">
+                    <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">English</button>
                 </div>
 
-                <button id="theme-toggle"
-                        type="button"
-                        onclick="toggleTheme()"
-                        class="theme-toggle bg-slate-100 text-slate-800 rounded-2xl p-3 shadow"
-                        aria-label="Toggle dark mode"
-                        title="Toggle dark mode">
-                    <span class="theme-icon theme-moon" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M21 12.79A9 9 0 0 1 11.21 3c0-.34.02-.67.06-1A1 1 0 0 0 9.8.94 10 10 0 1 0 23.06 14.2a1 1 0 0 0-1.15-1.41c-.3.04-.61.06-.91.06Z"/>
-                        </svg>
-                    </span>
-                    <span class="theme-icon theme-sun" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-8a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm14.95 6.54a1 1 0 0 1-1.41 1.41l-.7-.7a1 1 0 1 1 1.41-1.41l.7.7ZM6.16 6.16A1 1 0 0 1 4.75 4.75l.7-.7a1 1 0 1 1 1.41 1.41l-.7.7Zm12.09-1.41a1 1 0 0 1 1.41 0l.7.7a1 1 0 0 1-1.41 1.41l-.7-.7a1 1 0 0 1 0-1.41ZM5.45 17.84a1 1 0 0 1 1.41 0l.7.7A1 1 0 0 1 6.16 20l-.7-.7a1 1 0 0 1 0-1.41Z"/>
-                        </svg>
-                    </span>
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex gap-3">
+                    <a href="srh.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                    <a href="chat.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden bg-white/90 text-slate-800 rounded-xl p-2.5 shadow-md focus:outline-none" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
                 </button>
             </div>
 
-            <div class="hidden md:flex gap-6 text-sm font-medium">
-                <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
-                <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-                <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-2 mt-3 md:hidden">
+                <a href="srh.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                <a href="chat.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
             </div>
-
-            <button id="hamburger" onclick="toggleMobileMenu()"
-                    class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-
-        <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
-            <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
-            <a href="srh.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-            <a href="mental-health.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-            <a href="about-us.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
-        </div>
-    </div>
-</nav>
-
+        </nav>
 
         <!-- Welcome Text -->
         <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-white px-4 w-full max-w-4xl md:bottom-20">
@@ -822,23 +632,30 @@ body[data-theme="dark"] .ct-disclaimer {
         </div>
     </div>
 
-    <script>
-    function applyTheme(theme) {
-        document.body.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    }
-
-    function toggleTheme() {
-        const currentTheme = document.body.getAttribute('data-theme') || 'light';
-        const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
-        applyTheme(nextTheme);
-    }
-
-    (function () {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        applyTheme(savedTheme);
-    })();
-</script>
-
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
