@@ -7,11 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Poppins:wght@400;500;600&amp;display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap');
         
         body { font-family: 'Inter', sans-serif; }
 
-        /* Banner - exactly congruent with mental-health.html */
         .hero-banner {
             min-height: 260px;
             height: 40vw;
@@ -35,7 +34,6 @@
             padding: 1rem;
         }
 
-        /* Language button - exactly congruent */
         .lang-btn { transition: all 0.3s ease; }
         .lang-btn.active {
             background-color: white;
@@ -43,7 +41,6 @@
             font-weight: 600;
         }
 
-        /* Accordion - exactly congruent */
         .accordion-btn { transition: all 0.3s ease; }
         .accordion-content {
             max-height: 0;
@@ -53,11 +50,9 @@
         .accordion-content.open { max-height: 4000px; }
         .icon { transition: transform 0.3s ease; }
 
-        /* Mobile menu - exactly congruent */
         #mobile-menu { display: none; }
         #mobile-menu.open { display: flex; }
 
-        /* Calculator styles (kept exactly from existing srh.html) */
         .ct-wrap { padding: 20px 10px; }
         .ct-card {
             background: white;
@@ -150,7 +145,6 @@
         .ct-error { color: #ef4444; text-align: center; margin: 12px 0; font-size: 0.9rem; min-height: 20px; }
         .ct-disclaimer { font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 20px; line-height: 1.4; }
 
-        /* Lesson cards */
         .lesson-card { transition: all 0.3s ease; }
         .lesson-card:hover {
             box-shadow: 0 10px 25px rgba(236, 72, 153, 0.12);
@@ -166,19 +160,15 @@
 </head>
 <body class="bg-slate-50" data-lang="rw">
 
-    <!-- Navigation - EXACTLY congruent with mental-health.html (only active link changed) -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
             <div class="flex justify-between items-center gap-2">
-
-                <!-- Logo + Title -->
                 <div class="flex items-center gap-2 md:gap-3 min-w-0">
                     <img src="urungano-logo.jpeg" alt="Urungano Logo"
                          class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
                     <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
                 </div>
 
-                <!-- Language Switcher -->
                 <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
                     <button onclick="switchLanguage('rw')" id="btn-rw"
                             class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
@@ -186,7 +176,6 @@
                             class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
                 </div>
 
-                <!-- Desktop nav links -->
                 <div class="hidden md:flex gap-6 text-sm font-medium">
                     <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
                     <a href="srh.html" class="text-blue-600 font-semibold" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
@@ -194,7 +183,6 @@
                     <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
                 </div>
 
-                <!-- Mobile hamburger -->
                 <button id="hamburger" onclick="toggleMobileMenu()"
                         class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -203,7 +191,6 @@
                 </button>
             </div>
 
-            <!-- Mobile menu dropdown -->
             <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
                 <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
                 <a href="srh.html" class="block py-2.5 px-2 rounded-xl text-blue-600 font-semibold bg-blue-50" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
@@ -213,7 +200,6 @@
         </div>
     </nav>
 
-    <!-- Hero Banner - congruent design, SRH specific content & image -->
     <div class="hero-banner">
         <img src="SRH-banner.png" alt="Ubuzima Bw'Imyororokere">
         <div class="banner-overlay">
@@ -231,10 +217,7 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="max-w-4xl mx-auto px-3 py-6 md:px-6 md:py-12">
-
-        <!-- Page heading -->
         <div class="text-center mb-8 md:mb-12">
             <h2 id="page-title" class="text-2xl md:text-4xl font-bold text-slate-800"
                 data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">
@@ -247,119 +230,110 @@
             </p>
         </div>
 
-        <!-- ALL LESSONS (6 complete lessons with full bilingual information) -->
         <div class="space-y-6">
-
-            <!-- Lesson 1 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
                 <button onclick="toggleSection('lesson1')" 
                         class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-seedling text-emerald-500 lesson-icon"></i>
-                        <span data-en="Lesson 1: Puberty &amp; Body Changes" data-rw="Isomo 1: Imyaka y'urubyiruko n'ihindurwa ry'umubiri">Isomo 1: Imyaka y'urubyiruko n'ihindurwa ry'umubiri</span>
+                        <span data-en="Lesson 1: Understanding Menstruation" data-rw="Isomo 1: Gusobanukirwa Imihango">Isomo 1: Gusobanukirwa Imihango</span>
                     </span>
                     <i class="fas fa-chevron-down icon"></i>
                 </button>
                 <div id="lesson1" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
-                    <div data-en="During puberty your body goes through many changes. Girls may start menstruating, boys may experience voice changes and growth spurts. These are normal and healthy." data-rw="Mu myaka y'urubyiruko umubiri wawe uhindura ibintu byinshi. Abakobwa batangira kugira imyanya y'ukwezi, abahungu bakora ijwi n'ibindi. Ibi ni ibisanzwe kandi byiza.">
-                        Mu myaka y'urubyiruko umubiri wawe uhindura ibintu byinshi. Abakobwa batangira kugira imyanya y'ukwezi, abahungu bakora ijwi n'ibindi. Ibi ni ibisanzwe kandi byiza.
+                    <div data-en="Menstruation is a normal sign that a girl's body is growing well and moving from childhood toward adulthood. It happens when the uterus had prepared for a possible pregnancy, but no pregnancy occurs, so the lining breaks down and comes out as blood through the vagina. Menstrual bleeding usually lasts about 3 to 5 days, although for some girls or women it may be shorter or longer. If bleeding goes beyond 7 days, it is important to seek help from a health worker." data-rw="Imihango ni ikimenyetso gisanzwe kigaragaza ko umubiri w'umukobwa uri gukura neza kandi uva mu bwana ujya mu bukuru. Ibaho iyo nyababyeyi iba yakoze imyiteguro yo kwakira inda ariko ntihaboneke gusama, bityo icyo cyari cyateguwe kigasenuka kikava mu mubiri mu ishusho y'amaraso anyura mu gitsina. Ubusanzwe imihango imara hagati y'iminsi 3 na 5, nubwo hari abakobwa cyangwa abagore bayigira igihe gito cyangwa kirekire kurushaho. Iyo imihango irengeje iminsi 7, ni byiza kwihutira kugana umukozi w'ubuzima.">
+                        Imihango ni ikimenyetso gisanzwe kigaragaza ko umubiri w'umukobwa uri gukura neza kandi uva mu bwana ujya mu bukuru. Ibaho iyo nyababyeyi iba yakoze imyiteguro yo kwakira inda ariko ntihaboneke gusama, bityo icyo cyari cyateguwe kigasenuka kikava mu mubiri mu ishusho y'amaraso anyura mu gitsina. Ubusanzwe imihango imara hagati y'iminsi 3 na 5, nubwo hari abakobwa cyangwa abagore bayigira igihe gito cyangwa kirekire kurushaho. Iyo imihango irengeje iminsi 7, ni byiza kwihutira kugana umukozi w'ubuzima.
                     </div>
-                    <div class="mt-4 text-sm text-emerald-600 font-medium" data-en="Key facts: • Hormones cause these changes • Talk to a trusted adult • Every body develops at its own pace" data-rw="Ibintu by'ingenzi: • Hormoni ni zo zitera ibi • Vugana n'umuntu mukuru wizewe • Buri mubiri ukuza ku igihe cyayo">Ibintu by'ingenzi: • Hormoni ni zo zitera ibi • Vugana n'umuntu mukuru wizewe • Buri mubiri ukuza ku igihe cyayo</div>
+                    <div class="mt-4 text-sm text-emerald-600 font-medium" data-en="Key facts: • Menstruation is not a disease • Some girls start as early as age 9 or 10, others later around age 16 • Tracking your cycle helps you prepare and understand your body • A girl who has started menstruating can become pregnant if she has unprotected sex" data-rw="Ibintu by'ingenzi: • Imihango si uburwayi • Hari abakobwa bayitangira ku myaka 9 cyangwa 10, abandi bakayibona nyuma nko ku myaka 16 • Gukurikira ukwezi kwawe bigufasha kwitegura no gusobanukirwa umubiri wawe • Umukobwa watangiye kujya mu mihango ashobora gusama akoze imibonano mpuzabitsina idakingiye">Ibintu by'ingenzi: • Imihango si uburwayi • Hari abakobwa bayitangira ku myaka 9 cyangwa 10, abandi bakayibona nyuma nko ku myaka 16 • Gukurikira ukwezi kwawe bigufasha kwitegura no gusobanukirwa umubiri wawe • Umukobwa watangiye kujya mu mihango ashobora gusama akoze imibonano mpuzabitsina idakingiye</div>
                 </div>
             </div>
 
-            <!-- Lesson 2 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
                 <button onclick="toggleSection('lesson2')" 
                         class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-tint text-pink-500 lesson-icon"></i>
-                        <span data-en="Lesson 2: Menstrual Health &amp; Hygiene" data-rw="Isomo 2: Ubuzima bw'imyanya y'ukwezi n'isuku">Isomo 2: Ubuzima bw'imyanya y'ukwezi n'isuku</span>
+                        <span data-en="Lesson 2: Signs Before Menstruation" data-rw="Isomo 2: Ibimenyetso Bibanziriza Imihango">Isomo 2: Ibimenyetso Bibanziriza Imihango</span>
                     </span>
                     <i class="fas fa-chevron-down icon"></i>
                 </button>
                 <div id="lesson2" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
-                    <div data-en="Menstruation is a natural monthly process. Track your cycle, use clean pads or cups, and never feel ashamed. Pain or heavy bleeding should be discussed with a health worker." data-rw="Imyanya y'ukwezi ni ibisanzwe buri kwezi. Andika igihe cyawe, koresha ibintu by'umweru cyangwa igikombe, kandi ntukwiye kugira isoni. Ububabare cyangwa amaraso menshi bigomba kuganwa n'umukozi w'ubuzima.">
-                        Imyanya y'ukwezi ni ibisanzwe buri kwezi. Andika igihe cyawe, koresha ibintu by'umweru cyangwa igikombe, kandi ntukwiye kugira isoni. Ububabare cyangwa amaraso menshi bigomba kuganwa n'umukozi w'ubuzima.
+                    <div data-en="Many girls and women notice body changes and emotional changes before their period starts. These signs can begin one or two weeks before menstruation and may continue for a few days after bleeding begins. A person may experience headaches, lower abdominal pain, tender or swollen breasts, tiredness, bloating, acne, appetite changes, sadness, irritability, trouble sleeping, or changes in sexual feelings. These signs are common and do not usually mean illness unless they become unusually severe and disturb daily life." data-rw="Abakobwa n'abagore benshi bagira impinduka z'umubiri n'iz'amarangamutima mbere y'uko imihango itangira. Ibi bimenyetso bishobora gutangira icyumweru kimwe cyangwa bibiri mbere y'imihango, bikanakomeza mu minsi mike nyuma y'uko itangiye. Umuntu ashobora kugira umutwe, kubabara mu kiziba cy'inda, kubyimba cyangwa kuribwa amabere, umunaniro, gutura umubi, ibiheri, impinduka mu mirire, agahinda, kurakara, kubura ibitotsi cyangwa impinduka mu byiyumviro bijyanye n'imibonano mpuzabitsina. Ibi bimenyetso ni ibisanzwe kandi akenshi ntibisobanura uburwayi keretse bibaye bikabije bikabangamira ubuzima bwa buri munsi.">
+                        Abakobwa n'abagore benshi bagira impinduka z'umubiri n'iz'amarangamutima mbere y'uko imihango itangira. Ibi bimenyetso bishobora gutangira icyumweru kimwe cyangwa bibiri mbere y'imihango, bikanakomeza mu minsi mike nyuma y'uko itangiye. Umuntu ashobora kugira umutwe, kubabara mu kiziba cy'inda, kubyimba cyangwa kuribwa amabere, umunaniro, gutura umubi, ibiheri, impinduka mu mirire, agahinda, kurakara, kubura ibitotsi cyangwa impinduka mu byiyumviro bijyanye n'imibonano mpuzabitsina. Ibi bimenyetso ni ibisanzwe kandi akenshi ntibisobanura uburwayi keretse bibaye bikabije bikabangamira ubuzima bwa buri munsi.
                     </div>
-                    <div class="mt-4 text-sm text-pink-600 font-medium" data-en="Key facts: • Cycle is usually 28 days • Use pads, tampons or cups • Pain relief: hot water bottle or ibuprofen" data-rw="Ibintu by'ingenzi: • Igihe ni 28 iminsi • Koresha ibintu by'umweru, tampons cyangwa igikombe • Kugabanya ububabare: ibirahuri by'ishyushye cyangwa ibuprofen">Ibintu by'ingenzi: • Igihe ni 28 iminsi • Koresha ibintu by'umweru, tampons cyangwa igikombe • Kugabanya ububabare: ibirahuri by'ishyushye cyangwa ibuprofen</div>
+                    <div class="mt-4 text-sm text-pink-600 font-medium" data-en="Key facts: • Symptoms differ from one person to another • Light exercise, nutritious food, rest, and stress reduction can help • If symptoms become extreme or disrupt normal life, visit a health provider" data-rw="Ibintu by'ingenzi: • Ibimenyetso biratandukana bitewe n'umuntu • Imyitozo yoroheje, indyo yuzuye, kuruhuka no kugabanya stress birafasha • Niba ibi bimenyetso bikabije cyangwa bikabangamira ubuzima bwawe, jya kwa muganga">Ibintu by'ingenzi: • Ibimenyetso biratandukana bitewe n'umuntu • Imyitozo yoroheje, indyo yuzuye, kuruhuka no kugabanya stress birafasha • Niba ibi bimenyetso bikabije cyangwa bikabangamira ubuzima bwawe, jya kwa muganga</div>
                 </div>
             </div>
 
-            <!-- Lesson 3 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
                 <button onclick="toggleSection('lesson3')" 
                         class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shield-alt text-amber-500 lesson-icon"></i>
-                        <span data-en="Lesson 3: Contraception Methods" data-rw="Isomo 3: Uburyo bwo kwirinda ingo">Isomo 3: Uburyo bwo kwirinda ingo</span>
+                        <span data-en="Lesson 3: Managing Menstrual Pain" data-rw="Isomo 3: Kugabanya Ububabare bwo mu Mihango">Isomo 3: Kugabanya Ububabare bwo mu Mihango</span>
                     </span>
                     <i class="fas fa-chevron-down icon"></i>
                 </button>
                 <div id="lesson3" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
-                    <div data-en="There are many safe ways to prevent pregnancy: condoms, pills, implants, IUDs, and more. Choose what fits your life and always use protection against STIs too." data-rw="Hari uburyo bwinshi bwo kwirinda ingo: kondomu, ibinini, implants, IUD n'ibindi. Hitamo ibikwiriye ubuzima bwawe kandi ukoreshe uburyo bwo kwirinda ibyorezo by'ubuzima bw'imyororokere.">
-                        Hari uburyo bwinshi bwo kwirinda ingo: kondomu, ibinini, implants, IUD n'ibindi. Hitamo ibikwiriye ubuzima bwawe kandi ukoreshe uburyo bwo kwirinda ibyorezo by'ubuzima bw'imyororokere.
+                    <div data-en="Pain during menstruation can be normal, but if it becomes so severe that it stops you from doing your daily responsibilities, you should seek medical help. Simple ways to reduce pain include placing safe warmth on the lower abdomen, bathing with warm water, doing gentle exercise such as walking or stretching, drinking enough water, eating balanced meals, resting well, and practicing calming activities like deep breathing or meditation. A gentle massage around the lower back or lower abdomen may also help some people." data-rw="Kubabara mu gihe cy'imihango bishobora kuba ibisanzwe, ariko iyo ububabare bukabije kugeza aho butuma udakora inshingano zawe za buri munsi, ni ngombwa gushaka ubufasha kwa muganga. Uburyo bworoshye bwo kugabanya ububabare harimo gushyira ubushyuhe butekanye ku kiziba cy'inda, koga amazi ashyushye, gukora imyitozo yoroheje nko kugenda cyangwa kwiyorora, kunywa amazi ahagije, kurya indyo yuzuye, kuruhuka bihagije no gukora ibikorwa bituma utuza nko guhumeka cyane cyangwa meditation. Hari n'abafashwa no gukanda buhoro ahagana mu mugongo wo hasi cyangwa ku kiziba cy'inda.">
+                        Kubabara mu gihe cy'imihango bishobora kuba ibisanzwe, ariko iyo ububabare bukabije kugeza aho butuma udakora inshingano zawe za buri munsi, ni ngombwa gushaka ubufasha kwa muganga. Uburyo bworoshye bwo kugabanya ububabare harimo gushyira ubushyuhe butekanye ku kiziba cy'inda, koga amazi ashyushye, gukora imyitozo yoroheje nko kugenda cyangwa kwiyorora, kunywa amazi ahagije, kurya indyo yuzuye, kuruhuka bihagije no gukora ibikorwa bituma utuza nko guhumeka cyane cyangwa meditation. Hari n'abafashwa no gukanda buhoro ahagana mu mugongo wo hasi cyangwa ku kiziba cy'inda.
                     </div>
-                    <div class="mt-4 text-sm text-amber-600 font-medium" data-en="Key facts: • Condoms protect against STIs &amp; pregnancy • Emergency contraception available within 72 hours • Talk to a nurse for the best option" data-rw="Ibintu by'ingenzi: • Kondomu zirinda ibyorezo n'ingo • Uburyo bwo kwirinda ingo bw'ibisanzwe buriho mu masaha 72 • Vugana n'umuganga kugira icyo ukoresha">Ibintu by'ingenzi: • Kondomu zirinda ibyorezo n'ingo • Uburyo bwo kwirinda ingo bw'ibisanzwe buriho mu masaha 72 • Vugana n'umuganga kugira icyo ukoresha</div>
+                    <div class="mt-4 text-sm text-amber-600 font-medium" data-en="Key facts: • Heavy caffeine, too much sugar, or salty drinks may worsen discomfort for some people • There is no single solution that works for everyone • If pain becomes too strong, do not stay silent; ask for help early" data-rw="Ibintu by'ingenzi: • Ikawa nyinshi, isukari nyinshi cyangwa ibinyobwa birimo umunyu bishobora kongera uburibwe ku bantu bamwe • Nta buryo bumwe bukorera buri wese • Niba ububabare bukabije, ntuceceke; saba ubufasha hakiri kare">Ibintu by'ingenzi: • Ikawa nyinshi, isukari nyinshi cyangwa ibinyobwa birimo umunyu bishobora kongera uburibwe ku bantu bamwe • Nta buryo bumwe bukorera buri wese • Niba ububabare bukabije, ntuceceke; saba ubufasha hakiri kare</div>
                 </div>
             </div>
 
-            <!-- Lesson 4 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
                 <button onclick="toggleSection('lesson4')" 
                         class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-virus text-red-500 lesson-icon"></i>
-                        <span data-en="Lesson 4: STIs, HIV &amp; Prevention" data-rw="Isomo 4: Ibyorezo by'ubuzima bw'imyororokere, HIV n'uburyo bwo kwirinda">Isomo 4: Ibyorezo by'ubuzima bw'imyororokere, HIV n'uburyo bwo kwirinda</span>
+                        <span data-en="Lesson 4: Fertility and the Menstrual Cycle" data-rw="Isomo 4: Uburumbuke n'Ukwezi k'Umugore">Isomo 4: Uburumbuke n'Ukwezi k'Umugore</span>
                     </span>
                     <i class="fas fa-chevron-down icon"></i>
                 </button>
                 <div id="lesson4" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
-                    <div data-en="STIs and HIV are preventable. Use condoms, get tested regularly, and know your status. Early treatment saves lives." data-rw="Ibyorezo by'ubuzima bw'imyororokere n'HIV birashobora kwirindwa. Koresha kondomu, kora ibipimo buri gihe, kandi uzi uko umeze. Kuvura vuba birakiza ubuzima.">
-                        Ibyorezo by'ubuzima bw'imyororokere n'HIV birashobora kwirindwa. Koresha kondomu, kora ibipimo buri gihe, kandi uzi uko umeze. Kuvura vuba birakiza ubuzima.
+                    <div data-en="A girl or woman has the highest chance of becoming pregnant during the fertile window. This is the time when an egg is released from the ovary and can meet sperm. In many menstrual cycles, ovulation happens around 14 days before the next period, although cycles are not the same for everyone. For people with regular cycles, the fertile window is often estimated at about 7 days. There is no completely safe day from pregnancy if unprotected sex happens, because bodies and cycles differ from person to person." data-rw="Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama mu gihe cy'uburumbuke. Icyo ni igihe intangangore iba irekuwe iva mu ibere ry'intanga kandi ishobora guhura n'intangangabo. Mu kwezi kwa benshi, kurekurwa kw'igi kuba hafi y'iminsi 14 mbere y'imihango ikurikira, nubwo ukwezi kudasa ku bantu bose. Ku bafite ukwezi kudahindagurika, igihe cy'uburumbuke gikunze kubarwa nk'iminsi igera kuri 7. Nta munsi ushobora gufatwa nk'umutekano wuzuye ku kutazisama igihe habaye imibonano mpuzabitsina idakingiye, kuko imibiri n'ukwezi bitandukana.">
+                        Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama mu gihe cy'uburumbuke. Icyo ni igihe intangangore iba irekuwe iva mu ibere ry'intanga kandi ishobora guhura n'intangangabo. Mu kwezi kwa benshi, kurekurwa kw'igi kuba hafi y'iminsi 14 mbere y'imihango ikurikira, nubwo ukwezi kudasa ku bantu bose. Ku bafite ukwezi kudahindagurika, igihe cy'uburumbuke gikunze kubarwa nk'iminsi igera kuri 7. Nta munsi ushobora gufatwa nk'umutekano wuzuye ku kutazisama igihe habaye imibonano mpuzabitsina idakingiye, kuko imibiri n'ukwezi bitandukana.
                     </div>
-                    <div class="mt-4 text-sm text-red-600 font-medium" data-en="Key facts: • Most STIs have no symptoms • Free testing at Isange One Stop Centers • PrEP and PEP available for HIV" data-rw="Ibintu by'ingenzi: • Ibyorezo byinshi ntibigaragara • Ibipimo ni ubuntu mu Isange One Stop • PrEP na PEP birahari ku HIV">Ibintu by'ingenzi: • Ibyorezo byinshi ntibigaragara • Ibipimo ni ubuntu mu Isange One Stop • PrEP na PEP birahari ku HIV</div>
+                    <div class="mt-4 text-sm text-red-600 font-medium" data-en="Key facts: • Fertility depends on both the egg and sperm • Ovulation timing can shift, especially in irregular cycles • Tracking your periods helps you better understand your fertile days" data-rw="Ibintu by'ingenzi: • Gusama bisaba uruhare rw'intangangore n'intangangabo • Igihe cyo kurekura igi gishobora guhinduka cyane cyane ku bafite ukwezi guhindagurika • Gukurikira imihango yawe bigufasha gusobanukirwa neza iminsi y'uburumbuke">Ibintu by'ingenzi: • Gusama bisaba uruhare rw'intangangore n'intangangabo • Igihe cyo kurekura igi gishobora guhinduka cyane cyane ku bafite ukwezi guhindagurika • Gukurikira imihango yawe bigufasha gusobanukirwa neza iminsi y'uburumbuke</div>
                 </div>
             </div>
 
-            <!-- Lesson 5 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
                 <button onclick="toggleSection('lesson5')" 
                         class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-heart text-rose-500 lesson-icon"></i>
-                        <span data-en="Lesson 5: Consent &amp; Healthy Relationships" data-rw="Isomo 5: Kubona uruhushya n'imibanire nziza">Isomo 5: Kubona uruhushya n'imibanire nziza</span>
+                        <span data-en="Lesson 5: HIV Basics and Transmission" data-rw="Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura">Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura</span>
                     </span>
                     <i class="fas fa-chevron-down icon"></i>
                 </button>
                 <div id="lesson5" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
-                    <div data-en="Consent must be enthusiastic, ongoing, and can be withdrawn at any time. Healthy relationships are built on respect, communication, and equality." data-rw="Uruhushya rugomba kuba rwuzuye, rugakomeza, kandi rurashobora gukurwaho igihe icyo ari cyo cyose. Imibanire nziza ishingiye ku kubahiriza, kuvugana, no guhuza.">
-                        Uruhushya rugomba kuba rwuzuye, rugakomeza, kandi rurashobora gukurwaho igihe icyo ari cyo cyose. Imibanire nziza ishingiye ku kubahiriza, kuvugana, no guhuza.
+                    <div data-en="HIV is the virus that attacks the body's defense cells, especially CD4 cells, and weakens the immune system. If it is not treated, it can lead to AIDS. HIV can be transmitted through unprotected sex, sharing sharp objects that have infected blood, receiving infected blood, or from a mother to her baby during pregnancy, birth, or breastfeeding. HIV is not spread by greeting, sharing food, or casual contact." data-rw="VIH ni virusi yibasira uturemangingo turinda umubiri cyane cyane utwa CD4, igatuma ubudahangarwa bw'umubiri bugabanuka. Iyo itavuwe ishobora gutera SIDA. VIH ishobora kwandurira mu mibonano mpuzabitsina idakingiye, gusangira ibikoresho bikomeretsa byanduye amaraso, kwakira amaraso yanduye, cyangwa ikava ku mubyeyi ikajya ku mwana igihe atwite, abyara cyangwa yonsa. VIH ntandurira mu gusuhuzanya, gusangira amafunguro cyangwa mu busabane busanzwe.">
+                        VIH ni virusi yibasira uturemangingo turinda umubiri cyane cyane utwa CD4, igatuma ubudahangarwa bw'umubiri bugabanuka. Iyo itavuwe ishobora gutera SIDA. VIH ishobora kwandurira mu mibonano mpuzabitsina idakingiye, gusangira ibikoresho bikomeretsa byanduye amaraso, kwakira amaraso yanduye, cyangwa ikava ku mubyeyi ikajya ku mwana igihe atwite, abyara cyangwa yonsa. VIH ntandurira mu gusuhuzanya, gusangira amafunguro cyangwa mu busabane busanzwe.
                     </div>
-                    <div class="mt-4 text-sm text-rose-600 font-medium" data-en="Key facts: • No means NO • Respect boundaries • Talk openly about feelings and expectations" data-rw="Ibintu by'ingenzi: • Oya ni OYA • Kubahiriza ibikorwa • Vugana n'umwanya ku byo ukunda n'ibyo utifuza">Ibintu by'ingenzi: • Oya ni OYA • Kubahiriza ibikorwa • Vugana n'umwanya ku byo ukunda n'ibyo utifuza</div>
+                    <div class="mt-4 text-sm text-rose-600 font-medium" data-en="Key facts: • HIV can seriously weaken the body if untreated • Common effects include frequent illness, tiredness, weight loss, persistent fever, and skin problems • Correct information helps young people protect themselves" data-rw="Ibintu by'ingenzi: • Iyo itavuwe, VIH ishobora guca intege umubiri cyane • Ingaruka zayo zishobora kuba indwara zihoraho, umunaniro, kugabanuka ibiro, umuriro no kugira ibibazo by'uruhu • Amakuru y'ukuri afasha urubyiruko kwirinda">Ibintu by'ingenzi: • Iyo itavuwe, VIH ishobora guca intege umubiri cyane • Ingaruka zayo zishobora kuba indwara zihoraho, umunaniro, kugabanuka ibiro, umuriro no kugira ibibazo by'uruhu • Amakuru y'ukuri afasha urubyiruko kwirinda</div>
                 </div>
             </div>
 
-            <!-- Lesson 6 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
                 <button onclick="toggleSection('lesson6')" 
                         class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-baby text-purple-500 lesson-icon"></i>
-                        <span data-en="Lesson 6: Pregnancy &amp; Safe Choices" data-rw="Isomo 6: Ingwate n'uburyo bwo kwirinda">Isomo 6: Ingwate n'uburyo bwo kwirinda</span>
+                        <span data-en="Lesson 6: HIV Prevention and Youth Guidance" data-rw="Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko">Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko</span>
                     </span>
                     <i class="fas fa-chevron-down icon"></i>
                 </button>
                 <div id="lesson6" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
-                    <div data-en="If you are pregnant, you have options. Antenatal care is free and important. Speak to a trusted health provider for support." data-rw="Niba uri ingwate, ufite uburyo. Ubuzima bw'imbere y'igihe ni ubuntu kandi ni ngombwa. Vugana n'umukozi w'ubuzima wizewe kugira inkunga.">
-                        Niba uri ingwate, ufite uburyo. Ubuzima bw'imbere y'igihe ni ubuntu kandi ni ngombwa. Vugana n'umukozi w'ubuzima wizewe kugira inkunga.
+                    <div data-en="Young people can protect themselves from HIV by choosing safer behaviors such as abstinence, faithfulness, avoiding unprotected sex, using condoms correctly, not sharing sharp objects, and getting tested regularly to know their status. It is also important to avoid harmful peer pressure, focus on education and positive goals, seek trusted information, and refuse stigma or discrimination against people living with HIV. HIV prevention starts with informed and respectful choices." data-rw="Urubyiruko rwakwihagararaho mu kwirinda VIH ruhitamo imyitwarire irinda ubuzima nko kwifata, ubudahemuka, kwirinda imibonano mpuzabitsina idakingiye, gukoresha agakingirizo neza, kutagabana ibikoresho bikomeretsa no kwipimisha kenshi kugira ngo rumenye uko ruhagaze. Ni ingenzi kandi kwirinda igitutu cy'urungano, kwibanda ku masomo n'intego nziza, gushaka amakuru yizewe no kwanga ivangura rikorerwa ababana na VIH. Kwirinda VIH bitangirira ku byemezo bifite amakuru no kubaha ubuzima bwawe n'ubw'abandi.">
+                        Urubyiruko rwakwihagararaho mu kwirinda VIH ruhitamo imyitwarire irinda ubuzima nko kwifata, ubudahemuka, kwirinda imibonano mpuzabitsina idakingiye, gukoresha agakingirizo neza, kutagabana ibikoresho bikomeretsa no kwipimisha kenshi kugira ngo rumenye uko ruhagaze. Ni ingenzi kandi kwirinda igitutu cy'urungano, kwibanda ku masomo n'intego nziza, gushaka amakuru yizewe no kwanga ivangura rikorerwa ababana na VIH. Kwirinda VIH bitangirira ku byemezo bifite amakuru no kubaha ubuzima bwawe n'ubw'abandi.
                     </div>
-                    <div class="mt-4 text-sm text-purple-600 font-medium" data-en="Key facts: • Free ANC at all health centers • You are not alone • Confidential support available 24/7" data-rw="Ibintu by'ingenzi: • ANC ni ubuntu mu bitaro byose • Nturi wenyine • Inkunga y'ibanga irahari 24/7">Ibintu by'ingenzi: • ANC ni ubuntu mu bitaro byose • Nturi wenyine • Inkunga y'ibanga irahari 24/7</div>
+                    <div class="mt-4 text-sm text-purple-600 font-medium" data-en="Key facts: • Regular HIV testing helps you know your health status early • Do not let peer pressure push you into risky choices • Young people should seek trusted experts when they need accurate sexual and reproductive health information" data-rw="Ibintu by'ingenzi: • Kwipimisha VIH kenshi bigufasha kumenya uko ubuzima bwawe buhagaze hakiri kare • Ntukemere ko igitutu cy'urungano kigushyira mu byemezo bishobora kukugirira nabi • Urubyiruko rukwiye kugana abizewe n'inzobere igihe rukeneye amakuru nyayo ku buzima bw'imyororokere">Ibintu by'ingenzi: • Kwipimisha VIH kenshi bigufasha kumenya uko ubuzima bwawe buhagaze hakiri kare • Ntukemere ko igitutu cy'urungano kigushyira mu byemezo bishobora kukugirira nabi • Urubyiruko rukwiye kugana abizewe n'inzobere igihe rukeneye amakuru nyayo ku buzima bw'imyororokere</div>
                 </div>
             </div>
         </div>
 
-        <!-- Calculator Section (full language switching + original logic preserved) -->
         <div class="ct-wrap mt-16">
             <div class="ct-card max-w-2xl mx-auto">
                 <div class="ct-header">
@@ -398,7 +372,6 @@
                     <div id="calc-error" class="ct-error"></div>
                 </div>
 
-                <!-- Results (hidden by default) -->
                 <div id="results" class="ct-results hidden">
                     <div class="ct-results-grid">
                         <div class="ct-result-card">
@@ -441,7 +414,6 @@
         </div>
     </div>
 
-    <!-- Footer - congruent with mental-health.html style (emergency helplines + links) -->
     <footer class="bg-slate-900 text-white py-12">
         <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
             <div>
@@ -463,28 +435,18 @@
             </div>
             <div class="text-sm opacity-75">
                 <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
-                <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
+                <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with love for Rwanda</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Tailwind script already loaded in head
-
-        // Language switching - works for ALL text on the page
         function switchLanguage(lang) {
             document.body.setAttribute('data-lang', lang);
-            
-            // Update every translatable element
             document.querySelectorAll('[data-en]').forEach(el => {
-                if (lang === 'en') {
-                    el.textContent = el.getAttribute('data-en');
-                } else {
-                    el.textContent = el.getAttribute('data-rw');
-                }
+                el.textContent = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-rw');
             });
 
-            // Update active language button
             const btnRw = document.getElementById('btn-rw');
             const btnEn = document.getElementById('btn-en');
             if (btnRw && btnEn) {
@@ -492,36 +454,29 @@
                 btnEn.classList.toggle('active', lang === 'en');
             }
 
-            // Re-render calculator results if visible (language update)
             const results = document.getElementById('results');
             if (results && !results.classList.contains('hidden')) {
-                calculateCycle(); // refresh results in new language
+                calculateCycle();
             }
         }
 
-        // Mobile menu - congruent with mental-health.html
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('open');
         }
 
-        // Accordion for lessons
         function toggleSection(id) {
             const content = document.getElementById(id);
             if (!content) return;
-            
+
             const isOpen = content.classList.contains('open');
-            
-            // Close all others
             document.querySelectorAll('.accordion-content').forEach(el => {
                 el.classList.remove('open');
             });
-            
-            // Toggle current
+
             if (!isOpen) content.classList.add('open');
         }
 
-        // Calculator logic (original kept + language support)
         let isPregnantMode = false;
 
         function togglePregnantMode() {
@@ -537,9 +492,9 @@
             errorEl.textContent = '';
 
             if (!lmpInput) {
-                errorEl.textContent = document.body.getAttribute('data-lang') === 'en' 
-                    ? 'Please enter the first day of your last period' 
-                    : 'Andika itariki ya mbere y’imyanya yawe ya nyuma';
+                errorEl.textContent = document.body.getAttribute('data-lang') === 'en'
+                    ? 'Please enter the first day of your last period'
+                    : "Andika itariki ya mbere y'imihango yawe ya nyuma";
                 return;
             }
 
@@ -547,24 +502,21 @@
             const nextPeriod = new Date(lmp);
             nextPeriod.setDate(nextPeriod.getDate() + cycleLength);
 
-            // Fertile window (approx days 10-16 of cycle)
             const fertileStart = new Date(lmp);
             fertileStart.setDate(fertileStart.getDate() + 10);
             const fertileEnd = new Date(lmp);
             fertileEnd.setDate(fertileEnd.getDate() + 16);
 
-            // Due date if pregnant mode (280 days from LMP)
             let dueDate = null;
             if (isPregnantMode) {
                 dueDate = new Date(lmp);
                 dueDate.setDate(dueDate.getDate() + 280);
             }
 
-            // Fill results
             document.getElementById('next-period').textContent = nextPeriod.toLocaleDateString('en-GB');
-            document.getElementById('fertile-window').innerHTML = 
+            document.getElementById('fertile-window').innerHTML =
                 `${fertileStart.toLocaleDateString('en-GB')} - ${fertileEnd.toLocaleDateString('en-GB')}`;
-            
+
             const dueEl = document.getElementById('due-date');
             if (dueDate) {
                 dueEl.textContent = dueDate.toLocaleDateString('en-GB');
@@ -581,14 +533,11 @@
             document.getElementById('calc-error').textContent = '';
         }
 
-        // Initialize everything
         function initializePage() {
-            // Ensure language is set
             if (!document.body.getAttribute('data-lang')) {
                 document.body.setAttribute('data-lang', 'rw');
             }
-            
-            // Make sure active button is correct on load
+
             const currentLang = document.body.getAttribute('data-lang');
             const btnRw = document.getElementById('btn-rw');
             const btnEn = document.getElementById('btn-en');
@@ -596,11 +545,8 @@
                 btnRw.classList.toggle('active', currentLang === 'rw');
                 btnEn.classList.toggle('active', currentLang === 'en');
             }
-
-            console.log('%c✅ srh.html fully loaded with language switching + all lessons + bilingual calculator', 'color:#db2777; font-weight:600');
         }
 
-        // Run on load
         window.onload = initializePage;
     </script>
 </body>
