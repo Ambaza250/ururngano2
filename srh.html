@@ -338,7 +338,7 @@
             <div class="ct-card max-w-2xl mx-auto">
                 <div class="ct-header">
                     <i class="fas fa-calendar-alt ct-icon"></i>
-                    <h3 data-en="Menstrual Cycle &amp; Pregnancy Calculator" data-rw="Ikinyabwenge cy'Imyanya y'ukwezi n'Ingwate">Ikinyabwenge cy'Imyanya y'ukwezi n'Ingwate</h3>
+                    <h3 data-en="Menstrual Cycle &amp; Pregnancy Calculator" data-rw="Bara Ukwezi kw'Umugore">Bara Ukwezi kw'Umugore</h3>
                     <p data-en="Track your cycle, predict ovulation &amp; due date" data-rw="Andika igihe cyawe, ibara igihe cy'imbuto n'itariki y'igihe">Andika igihe cyawe, ibara igihe cy'imbuto n'itariki y'igihe</p>
                 </div>
 
@@ -366,7 +366,7 @@
                     <button onclick="calculateCycle()" 
                             class="ct-btn flex items-center justify-center gap-2">
                         <i class="fas fa-calculator"></i>
-                        <span data-en="Calculate Now" data-rw="Ibara Ubu">Ibara Ubu</span>
+                        <span data-en="Calculate Now" data-rw="Bara Ubu">Bara Ubu</span>
                     </button>
 
                     <div id="calc-error" class="ct-error"></div>
@@ -414,31 +414,54 @@
         </div>
     </div>
 
-    <footer class="bg-slate-900 text-white py-12">
-        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
-            <div>
-                <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
-                <div class="space-y-3 text-sm">
-                    <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
-                    <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
-                    <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
-                </div>
+    <footer style="background-color: #1d4ed8; color: white; margin-top: 3rem;">
+    <div style="max-width: 1152px; margin: 0 auto; padding: 2.5rem 1.5rem;">
+        
+        <!-- Top row -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
+            
+            <!-- Brand -->
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                     style="width: 44px; height: 44px; object-fit: cover; border-radius: 12px;">
+                <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px;">Urungano Platform</span>
             </div>
-            <div>
-                <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
-                <div class="grid grid-cols-2 gap-y-2 text-sm">
-                    <a href="chat.html" class="hover:text-pink-400" data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</a>
-                    <a href="srh.html" class="hover:text-pink-400" data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</a>
-                    <a href="mental-health.html" class="hover:text-pink-400" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                    <a href="about-us.html" class="hover:text-pink-400" data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</a>
-                </div>
+
+            <!-- Contact links -->
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
+                <a href="tel:+250786561823"
+                   style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem; transition: color 0.2s;"
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
+                    <span>📞</span> +250 786 561 823
+                </a>
+                <a href="mailto:Urunganoplatform@gmail.com"
+                   style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
+                    <span>✉️</span> Urunganoplatform@gmail.com
+                </a>
+                <a href="https://instagram.com/c-frederic1" target="_blank" rel="noopener noreferrer"
+                   style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
+                    <span>📸</span> @c-frederic1
+                </a>
             </div>
-            <div class="text-sm opacity-75">
-                <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
-                <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with love for Rwanda</p>
-            </div>
+
+            <!-- Copyright -->
+            <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;">
+                &copy; 2026 Urungano Platform. All rights reserved.
+            </p>
         </div>
-    </footer>
+
+        <!-- Divider + tagline -->
+        <div style="border-top: 1px solid #2563eb; margin-top: 1.5rem; padding-top: 1.25rem; text-align: center;">
+            <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;"
+               data-en="Anonymous • Secure • Stigma-Free Support"
+               data-rw="Ubwihisho • Umutekano • Ubufasha butagira akato">
+                Ubwihisho • Umutekano • Ubufasha butagira akato
+            </p>
+        </div>
+    </div>
+</footer>
 
     <script>
         function switchLanguage(lang) {
