@@ -53,6 +53,266 @@
         /* Mobile menu */
         #mobile-menu { display: none; }
         #mobile-menu.open { display: flex; }
+
+        /* Mental health screening tool */
+.screening-card {
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    border: 1px solid #dbeafe;
+    border-radius: 28px;
+    box-shadow: 0 18px 45px rgba(37, 99, 235, 0.08);
+    overflow: hidden;
+}
+
+.screening-header {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.screening-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.screening-header p {
+    margin-top: 0.5rem;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.95rem;
+}
+
+.screening-body {
+    padding: 1.5rem;
+}
+
+.screening-note {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e3a8a;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+}
+
+.screening-selector {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.screening-type-btn {
+    border: 2px solid;
+    border-radius: 22px;
+    padding: 1.2rem;
+    text-align: left;
+    font-weight: 700;
+    background: white;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.screening-type-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.screening-type-btn small {
+    display: block;
+    font-weight: 500;
+    margin-top: 0.4rem;
+    line-height: 1.5;
+}
+
+.screening-type-btn.phq {
+    border-color: #2563eb;
+    color: #1d4ed8;
+}
+
+.screening-type-btn.phq small {
+    color: #475569;
+}
+
+.screening-type-btn.gad {
+    border-color: #10b981;
+    color: #047857;
+}
+
+.screening-type-btn.gad small {
+    color: #475569;
+}
+
+.screening-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.55rem 0.95rem;
+    margin-bottom: 1rem;
+    font-size: 0.92rem;
+}
+
+.screening-question {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.screening-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.screening-option {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    border-radius: 20px;
+    padding: 1rem;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.screening-option:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.screening-result {
+    text-align: center;
+    padding: 0.5rem 0 0.25rem;
+}
+
+.screening-result-badge {
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.screening-result-badge.safe {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.screening-result-badge.mild {
+    background: #fef9c3;
+    color: #a16207;
+}
+
+.screening-result-badge.moderate {
+    background: #fde68a;
+    color: #b45309;
+}
+
+.screening-result-badge.urgent {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.screening-result h4 {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.screening-result p {
+    color: #475569;
+    line-height: 1.7;
+    max-width: 42rem;
+    margin: 0 auto 1rem;
+}
+
+.screening-score {
+    display: inline-block;
+    background: #f8fafc;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.screening-emergency {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    border-radius: 22px;
+    padding: 1.2rem;
+    margin: 1.25rem auto;
+    max-width: 34rem;
+    box-shadow: 0 18px 35px rgba(220, 38, 38, 0.25);
+}
+
+.screening-emergency a {
+    display: inline-block;
+    margin-top: 0.8rem;
+    background: white;
+    color: #b91c1c;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 0.85rem 1.35rem;
+}
+
+.screening-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.screening-reset-btn {
+    background: transparent;
+    color: #2563eb;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.screening-secondary-btn {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 0.9rem 1.3rem;
+    font-weight: 700;
+}
+
+.hidden-screening {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .screening-selector,
+    .screening-options {
+        grid-template-columns: 1fr;
+    }
+
+    .screening-question {
+        font-size: 1.1rem;
+    }
+}
+
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
@@ -253,6 +513,96 @@
             </div>
         </div>
 
+<!-- Mental Health Screening Tool -->
+<section class="mb-8 md:mb-12">
+    <div class="screening-card">
+        <div class="screening-header">
+            <h3 data-en="Mental Health Self-Screening" data-rw="Isuzuma ry'Ubuzima bwo mu Mutwe">
+                Isuzuma ry'Ubuzima bwo mu Mutwe
+            </h3>
+            <p data-en="Choose a guided tool to check your recent symptoms." data-rw="Hitamo uburyo bwo kwisuzuma ibimenyetso umaze iminsi wumva.">
+                Hitamo uburyo bwo kwisuzuma ibimenyetso umaze iminsi wumva.
+            </p>
+        </div>
+
+        <div class="screening-body">
+            <div class="screening-note" data-en="This tool is for screening only. It does not replace a doctor, psychologist, or counselor. If you feel unsafe or have thoughts of harming yourself, seek urgent support immediately." data-rw="Iri suzuma rigamije kugufasha kwisuzuma gusa. Ntirisimbura muganga, umuhanga mu by'imitekerereze cyangwa umujyanama. Niba wumva uri mu kaga cyangwa ufite ibitekerezo byo kwiyangiza, ihutire gushaka ubufasha.">
+                Iri suzuma rigamije kugufasha kwisuzuma gusa. Ntirisimbura muganga, umuhanga mu by'imitekerereze cyangwa umujyanama. Niba wumva uri mu kaga cyangwa ufite ibitekerezo byo kwiyangiza, ihutire gushaka ubufasha.
+            </div>
+
+            <div id="screening-selection-view">
+                <div class="screening-selector">
+                    <button class="screening-type-btn phq" onclick="startScreening('PHQA')">
+                        <span data-en="PHQ-A Depression Check" data-rw="PHQ-A Isuzuma ry'Agahinda Gakabije">
+                            PHQ-A Isuzuma ry'Agahinda Gakabije
+                        </span>
+                        <small data-en="9 questions for adolescent depression symptoms over the last 2 weeks." data-rw="Ibibazo 9 bifasha gusuzuma ibimenyetso by'agahinda gakabije mu byumweru 2 bishize.">
+                            Ibibazo 9 bifasha gusuzuma ibimenyetso by'agahinda gakabije mu byumweru 2 bishize.
+                        </small>
+                    </button>
+
+                    <button class="screening-type-btn gad" onclick="startScreening('GAD7')">
+                        <span data-en="GAD-7 Anxiety Check" data-rw="GAD-7 Isuzuma ry'Uhangayiko">
+                            GAD-7 Isuzuma ry'Uhangayiko
+                        </span>
+                        <small data-en="7 questions to check anxiety and excessive worry." data-rw="Ibibazo 7 bifasha gusuzuma umuhangayiko n'ibitekerezo byinshi.">
+                            Ibibazo 7 bifasha gusuzuma umuhangayiko n'ibitekerezo byinshi.
+                        </small>
+                    </button>
+                </div>
+            </div>
+
+            <div id="screening-question-view" class="hidden-screening">
+                <div id="screening-progress" class="screening-progress">Ikibazo 1 kuri 9</div>
+                <div id="screening-question-text" class="screening-question">...</div>
+
+                <div class="screening-options">
+                    <button class="screening-option" onclick="recordScreeningAnswer(0)">
+                        <span data-en="Not at all" data-rw="Ntabwo na rimwe">Ntabwo na rimwe</span>
+                    </button>
+                    <button class="screening-option" onclick="recordScreeningAnswer(1)">
+                        <span data-en="Several days" data-rw="Iminsi mike">Iminsi mike</span>
+                    </button>
+                    <button class="screening-option" onclick="recordScreeningAnswer(2)">
+                        <span data-en="More than half the days" data-rw="Kurenga kimwe cya kabiri cy'iminsi">Kurenga kimwe cya kabiri cy'iminsi</span>
+                    </button>
+                    <button class="screening-option" onclick="recordScreeningAnswer(3)">
+                        <span data-en="Nearly every day" data-rw="Buri munsi">Buri munsi</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="screening-result-view" class="hidden-screening">
+                <div class="screening-result">
+                    <div id="screening-result-badge" class="screening-result-badge safe">✓</div>
+                    <h4 id="screening-result-title">Ibisubizo Byanyu</h4>
+                    <div id="screening-score" class="screening-score">Amanota: 0</div>
+                    <p id="screening-result-desc">...</p>
+
+                    <div id="screening-emergency-box" class="screening-emergency hidden-screening">
+                        <div data-en="Your answers suggest you may need urgent support. Please contact a trusted adult, a health facility, or call the emergency support line now." data-rw="Ibisubizo byawe byerekana ko ushobora gukenera ubufasha bwihuse. Hamagara umuntu mukuru wiringira, ikigo nderabuzima, cyangwa umurongo w'ubutabazi aka kanya.">
+                            Ibisubizo byawe byerekana ko ushobora gukenera ubufasha bwihuse. Hamagara umuntu mukuru wiringira, ikigo nderabuzima, cyangwa umurongo w'ubutabazi aka kanya.
+                        </div>
+                        <a href="tel:114">Hamagara 114</a>
+                    </div>
+
+                    <div class="screening-actions">
+                        <button class="screening-reset-btn" onclick="resetScreening()"
+                                data-en="Start again" data-rw="Ongera utangire">
+                            Ongera utangire
+                        </button>
+                        <a href="chat.html" class="screening-secondary-btn"
+                           data-en="Talk to Urungano" data-rw="Ganira n'Urungano">
+                            Ganira n'Urungano
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+        
         <!-- Back Button -->
         <div class="text-center">
             <a href="urungano.html"
@@ -328,8 +678,253 @@
 
             document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+            if (currentScreening && !document.getElementById('screening-question-view').classList.contains('hidden-screening')) {
+    renderScreeningQuestion();
+}
+
+if (currentScreening && !document.getElementById('screening-result-view').classList.contains('hidden-screening')) {
+    showScreeningResult();
+}
+
         }
 
+    const screeningQuestions = {
+        PHQA: {
+            key: 'PHQA',
+            maxScore: 27,
+            titleRw: "PHQ-A Isuzuma ry'Agahinda Gakabije",
+            titleEn: "PHQ-A Depression Check",
+            questions: [
+                {
+                    rw: "Mu byumweru 2 bishize, ni kangahe wagize agahinda, kwiheba cyangwa kumva nta cyizere ufite?",
+                    en: "Over the last 2 weeks, how often have you felt down, depressed, or hopeless?"
+                },
+                {
+                    rw: "Ni kangahe watakaje ubushake cyangwa ibyishimo byo gukora ibintu wakundaga?",
+                    en: "How often have you had little interest or pleasure in doing things?"
+                },
+                {
+                    rw: "Ni kangahe wagize ikibazo cyo gusinzira, kubura ibitotsi cyangwa gusinzira cyane?",
+                    en: "How often have you had trouble falling asleep, staying asleep, or sleeping too much?"
+                },
+                {
+                    rw: "Ni kangahe wumvise unaniwe cyangwa udafite imbaraga?",
+                    en: "How often have you felt tired or had little energy?"
+                },
+                {
+                    rw: "Ni kangahe waruze nabi cyangwa warenze urugero mu kurya?",
+                    en: "How often have you had poor appetite or been overeating?"
+                },
+                {
+                    rw: "Ni kangahe wumvise wiyanga, wumva uri ikigwari cyangwa wananiwe umuryango wawe?",
+                    en: "How often have you felt bad about yourself, like you are a failure, or that you have let yourself or your family down?"
+                },
+                {
+                    rw: "Ni kangahe wagize ikibazo cyo kwibanda ku ishuri, gusoma cyangwa ku mirimo ya buri munsi?",
+                    en: "How often have you had trouble concentrating on schoolwork, reading, or daily tasks?"
+                },
+                {
+                    rw: "Ni kangahe wagaragaye nk'ukora ibintu buhoro cyane cyangwa uhora uhagaze udatuje kurusha ibisanzwe?",
+                    en: "How often have you been moving or speaking so slowly that other people noticed, or the opposite, being so restless that you moved around more than usual?"
+                },
+                {
+                    rw: "Ni kangahe wagize ibitekerezo byo kwiyangiza cyangwa wumva byaba byiza udakiriho?",
+                    en: "How often have you had thoughts of hurting yourself or that you would be better off dead?"
+                }
+            ]
+        },
+        GAD7: {
+            key: 'GAD7',
+            maxScore: 21,
+            titleRw: "GAD-7 Isuzuma ry'Uhangayiko",
+            titleEn: "GAD-7 Anxiety Check",
+            questions: [
+                {
+                    rw: "Mu byumweru 2 bishize, ni kangahe wumvise ugize ubwoba, uhangayitse cyangwa ufite umutima utuje nabi?",
+                    en: "Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?"
+                },
+                {
+                    rw: "Ni kangahe byakugoye guhagarika cyangwa kugabanya guhangayika?",
+                    en: "How often have you not been able to stop or control worrying?"
+                },
+                {
+                    rw: "Ni kangahe wahangayikiye ibintu byinshi bitandukanye?",
+                    en: "How often have you worried too much about different things?"
+                },
+                {
+                    rw: "Ni kangahe byakugoye kuruhuka?",
+                    en: "How often have you had trouble relaxing?"
+                },
+                {
+                    rw: "Ni kangahe warakaye cyangwa utuje nabi ku buryo kuguma hamwe byakugoye?",
+                    en: "How often have you been so restless that it was hard to sit still?"
+                },
+                {
+                    rw: "Ni kangahe wabaye umujinya vuba cyangwa warakajwe n'ubusa?",
+                    en: "How often have you become easily annoyed or irritable?"
+                },
+                {
+                    rw: "Ni kangahe wumvise ufite ubwoba ko hari ikintu kibi gishobora kuba?",
+                    en: "How often have you felt afraid as if something awful might happen?"
+                }
+            ]
+        }
+    };
+
+    let currentScreening = null;
+    let screeningStep = 0;
+    let screeningScore = 0;
+    let screeningUrgent = false;
+
+    function getScreeningLang() {
+        return document.body.getAttribute('data-lang') || 'rw';
+    }
+
+    function startScreening(type) {
+        currentScreening = screeningQuestions[type];
+        screeningStep = 0;
+        screeningScore = 0;
+        screeningUrgent = false;
+
+        document.getElementById('screening-selection-view').classList.add('hidden-screening');
+        document.getElementById('screening-result-view').classList.add('hidden-screening');
+        document.getElementById('screening-question-view').classList.remove('hidden-screening');
+        document.getElementById('screening-emergency-box').classList.add('hidden-screening');
+
+        renderScreeningQuestion();
+    }
+
+    function renderScreeningQuestion() {
+        if (!currentScreening) return;
+
+        const lang = getScreeningLang();
+        const question = currentScreening.questions[screeningStep];
+        const total = currentScreening.questions.length;
+
+        document.getElementById('screening-progress').textContent =
+            lang === 'en'
+                ? `Question ${screeningStep + 1} of ${total}`
+                : `Ikibazo ${screeningStep + 1} kuri ${total}`;
+
+        document.getElementById('screening-question-text').textContent =
+            lang === 'en' ? question.en : question.rw;
+    }
+
+    function recordScreeningAnswer(points) {
+        if (!currentScreening) return;
+
+        screeningScore += points;
+
+        if (currentScreening.key === 'PHQA' && screeningStep === 8 && points > 0) {
+            screeningUrgent = true;
+        }
+
+        screeningStep++;
+
+        if (screeningStep < currentScreening.questions.length) {
+            renderScreeningQuestion();
+        } else {
+            showScreeningResult();
+        }
+    }
+
+    function showScreeningResult() {
+        const lang = getScreeningLang();
+        const badge = document.getElementById('screening-result-badge');
+        const title = document.getElementById('screening-result-title');
+        const desc = document.getElementById('screening-result-desc');
+        const score = document.getElementById('screening-score');
+        const emergencyBox = document.getElementById('screening-emergency-box');
+
+        let level = 'safe';
+        let symbol = '✓';
+        let titleRw = "Nta bimenyetso bikomeye byagaragaye";
+        let titleEn = "No major warning signs detected";
+        let descRw = "Ibisubizo byawe ntibyerekana ikibazo gikomeye muri aka kanya. Komeza kwitaho, uruhuke neza kandi uvugane n'umuntu wiringira niba hari ikiguhangayikishije.";
+        let descEn = "Your answers do not suggest a severe problem right now. Keep caring for yourself, rest well, and talk to someone you trust if anything is worrying you.";
+
+        if (currentScreening.key === 'PHQA') {
+            if (screeningUrgent || screeningScore >= 15) {
+                level = 'urgent';
+                symbol = '!';
+                titleRw = "Ukeneye ubufasha bwihuse";
+                titleEn = "You may need urgent support";
+                descRw = "Ibisubizo byawe byerekana ibimenyetso bikomeye by'agahinda cyangwa ibitekerezo byo kwiyangiza. Ntugume wenyine. Hamagara ubufasha bwihuse cyangwa ugane ikigo nderabuzima.";
+                descEn = "Your answers suggest severe depression symptoms or possible self-harm thoughts. Please do not stay alone. Contact urgent support or go to a health facility.";
+            } else if (screeningScore >= 10) {
+                level = 'moderate';
+                symbol = '•';
+                titleRw = "Hari ibimenyetso bikeneye kwitabwaho";
+                titleEn = "There are symptoms that need attention";
+                descRw = "Ibisubizo byawe byerekana ko ushobora kuba ufite ibimenyetso biringaniye by'agahinda gakabije. Byaba byiza uganiriye n'umujyanama, umubyeyi cyangwa umuganga.";
+                descEn = "Your answers suggest moderate depressive symptoms. It would be helpful to speak with a counselor, parent, trusted adult, or clinician.";
+            } else if (screeningScore >= 5) {
+                level = 'mild';
+                symbol = '•';
+                titleRw = "Hari ibimenyetso byoroheje";
+                titleEn = "There are mild symptoms";
+                descRw = "Ibisubizo byawe byerekana ibimenyetso byoroheje. Komeza kwisuzuma, uruhuke, kandi uvugane n'umuntu wiringira niba bikomeje.";
+                descEn = "Your answers suggest mild symptoms. Keep checking in with yourself, rest, and talk to someone you trust if the feelings continue.";
+            }
+        }
+
+        if (currentScreening.key === 'GAD7') {
+            if (screeningScore >= 15) {
+                level = 'urgent';
+                symbol = '!';
+                titleRw = "Uhangayitse cyane";
+                titleEn = "Severe anxiety symptoms";
+                descRw = "Ibisubizo byawe byerekana ko ufite ibimenyetso bikomeye by'umuhangayiko. Birakenewe ko ushaka ubufasha bw'umwuga cyangwa uganira n'ikigo nderabuzima.";
+                descEn = "Your answers suggest severe anxiety symptoms. It is important to seek professional support or speak with a health facility.";
+            } else if (screeningScore >= 10) {
+                level = 'moderate';
+                symbol = '•';
+                titleRw = "Hari umuhangayiko uringaniye";
+                titleEn = "There is moderate anxiety";
+                descRw = "Ibisubizo byawe byerekana ibimenyetso biringaniye by'umuhangayiko. Kugisha inama umujyanama cyangwa umuganga bishobora kugufasha.";
+                descEn = "Your answers suggest moderate anxiety symptoms. Talking to a counselor or clinician could help.";
+            } else if (screeningScore >= 5) {
+                level = 'mild';
+                symbol = '•';
+                titleRw = "Hari ibimenyetso byoroheje by'umuhangayiko";
+                titleEn = "There are mild anxiety symptoms";
+                descRw = "Ibisubizo byawe byerekana ibimenyetso byoroheje by'umuhangayiko. Fata umwanya wo kuruhuka no kuganira n'umuntu wiringira niba bikomeza.";
+                descEn = "Your answers suggest mild anxiety symptoms. Make time to rest and talk to someone you trust if they continue.";
+            }
+        }
+
+        badge.className = `screening-result-badge ${level}`;
+        badge.textContent = symbol;
+        title.textContent = lang === 'en' ? titleEn : titleRw;
+        desc.textContent = lang === 'en' ? descEn : descRw;
+        score.textContent = lang === 'en'
+            ? `Score: ${screeningScore} / ${currentScreening.maxScore}`
+            : `Amanota: ${screeningScore} / ${currentScreening.maxScore}`;
+
+        if (level === 'urgent') {
+            emergencyBox.classList.remove('hidden-screening');
+        } else {
+            emergencyBox.classList.add('hidden-screening');
+        }
+
+        document.getElementById('screening-question-view').classList.add('hidden-screening');
+        document.getElementById('screening-result-view').classList.remove('hidden-screening');
+    }
+
+    function resetScreening() {
+        currentScreening = null;
+        screeningStep = 0;
+        screeningScore = 0;
+        screeningUrgent = false;
+
+        document.getElementById('screening-question-view').classList.add('hidden-screening');
+        document.getElementById('screening-result-view').classList.add('hidden-screening');
+        document.getElementById('screening-emergency-box').classList.add('hidden-screening');
+        document.getElementById('screening-selection-view').classList.remove('hidden-screening');
+    }
+
+        
         window.onload = () => switchLanguage('rw');
     </script>
 </body>
