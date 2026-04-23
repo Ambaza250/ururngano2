@@ -405,26 +405,175 @@
   <style>
     :root { --primary: #10b981; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); min-height: 100vh; padding: 10px; }
-    .container { max-width: 1100px; margin: auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; height: 96vh; display: flex; flex-direction: column; }
-    .header-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 25px; background: white; border-bottom: 1px solid #e2e8f0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      min-height: 100vh;
+      padding: 10px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+      height: 96vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 25px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
     .logo { height: 52px; border-radius: 8px; }
-    .toggle { background: #f1f5f9; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
-    .back-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; }
-    #auth-section { display: none; align-items: center; justify-content: center; flex: 1; }
-    .auth-card { background: white; padding: 40px 35px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 420px; text-align: center; }
-    .sidebar { width: 340px; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; }
-    .chat-area { flex: 1; display: flex; flex-direction: column; }
-    .chat-header { padding: 18px 25px; background: #10b981; color: white; font-weight: 600; }
-    #messages { flex: 1; padding: 25px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; }
-    .message { max-width: 78%; padding: 14px 18px; border-radius: 20px; font-size: 15.5px; line-height: 1.45; }
-    .sent { background: #10b981; color: white; align-self: flex-end; }
-    .received { background: white; color: #1f2937; align-self: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .sender-name { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #0f766e; }
-    .message small { display: block; margin-top: 8px; opacity: 0.75; font-size: 11px; }
-    .input-area { padding: 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; }
-    #message-input { flex: 1; padding: 16px 22px; border: 2px solid #e2e8f0; border-radius: 50px; outline: none; }
-    button { padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; }
+
+    .toggle {
+      background: #f1f5f9;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .back-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #auth-section {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .auth-card {
+      background: white;
+      padding: 40px 35px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    #chat-section {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    .sidebar {
+      width: 340px;
+      background: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 18px 25px;
+      background: #10b981;
+      color: white;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    #messages {
+      flex: 1;
+      min-height: 0;
+      padding: 25px;
+      overflow-y: auto;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 14px 18px;
+      border-radius: 20px;
+      font-size: 15.5px;
+      line-height: 1.45;
+    }
+
+    .sent {
+      background: #10b981;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .received {
+      background: white;
+      color: #1f2937;
+      align-self: flex-start;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .sender-name {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #0f766e;
+    }
+
+    .message small {
+      display: block;
+      margin-top: 8px;
+      opacity: 0.75;
+      font-size: 11px;
+    }
+
+    .input-area {
+      padding: 20px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    #message-input {
+      flex: 1;
+      padding: 16px 22px;
+      border: 2px solid #e2e8f0;
+      border-radius: 50px;
+      outline: none;
+    }
+
+    button {
+      padding: 14px 28px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
     .group-item, .user-item {
       padding: 14px 16px;
@@ -466,9 +615,20 @@
     }
 
     @media (max-width: 900px) {
-      .container { height: auto; min-height: 96vh; }
-      #chat-section { flex-direction: column; }
-      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+      .container {
+        height: auto;
+        min-height: 96vh;
+      }
+
+      #chat-section {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+      }
     }
   </style>
 </head>
@@ -499,7 +659,7 @@
       </div>
     </div>
 
-    <div id="chat-section" style="display:none; flex:1;">
+    <div id="chat-section" style="display:none;">
       <div class="sidebar">
         <div class="header-bar" style="border:none; padding:15px 0;">
           <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo">
