@@ -25,6 +25,7 @@
       doc,
       setDoc,
       getDocs,
+      getDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
@@ -42,12 +43,20 @@
     const db = getFirestore(app);
 
     let currentUser = null;
+    let currentUserProfile = null;
     let currentTarget = null;
     let unsubscribeMessages = null;
     let isEnglish = false;
+    const userCache = {};
 
     function t(rw, en) {
       return isEnglish ? en : rw;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text ?? "";
+      return div.innerHTML;
     }
 
     function showSection(section) {
@@ -56,12 +65,38 @@
     }
 
     async function saveUserProfile(user, username = "") {
+      const finalUsername =
+        username ||
+        user.displayName ||
+        user.email?.split("@")[0] ||
+        "User";
+
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email || "",
-        username: username || user.displayName || user.email?.split("@")[0] || "User",
+        username: finalUsername,
         createdAt: serverTimestamp()
       }, { merge: true });
+
+      currentUserProfile = {
+        uid: user.uid,
+        email: user.email || "",
+        username: finalUsername
+      };
+
+      userCache[user.uid] = currentUserProfile;
+    }
+
+    async function loadCurrentUserProfile(user) {
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        currentUserProfile = snap.data();
+        userCache[user.uid] = currentUserProfile;
+      } else {
+        await saveUserProfile(user);
+      }
     }
 
     window.signUp = async () => {
@@ -84,7 +119,7 @@
         await saveUserProfile(user, username);
         status.innerHTML = `<span style="color:green;">${t("Iyandikishwa ryagenze neza!", "Sign up successful!")}</span>`;
       } catch (e) {
-        status.innerHTML = `<span style="color:red;">${e.message}</span>`;
+        status.innerHTML = `<span style="color:red;">${escapeHtml(e.message)}</span>`;
       }
     };
 
@@ -103,7 +138,7 @@
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (e) {
-        status.innerHTML = `<span style="color:red;">${e.message}</span>`;
+        status.innerHTML = `<span style="color:red;">${escapeHtml(e.message)}</span>`;
       }
     };
 
@@ -135,8 +170,8 @@
         div.dataset.type = "group";
         div.dataset.id = group.id;
         div.innerHTML = `
-          <strong>${isEnglish ? (group.nameEn || group.nameRw) : (group.nameRw || group.nameEn)}</strong>
-          <small>${isEnglish ? (group.descEn || "") : (group.descRw || "")}</small>
+          <strong>${escapeHtml(isEnglish ? (group.nameEn || group.nameRw) : (group.nameRw || group.nameEn))}</strong>
+          <small>${escapeHtml(isEnglish ? (group.descEn || "") : (group.descRw || ""))}</small>
         `;
         div.onclick = () => openGroup(group);
         list.appendChild(div);
@@ -153,7 +188,11 @@
       const users = [];
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
-        if (!data || data.uid === currentUser.uid) return;
+        if (!data || !data.uid) return;
+
+        userCache[data.uid] = data;
+
+        if (data.uid === currentUser.uid) return;
         users.push(data);
       });
 
@@ -170,8 +209,8 @@
         div.dataset.type = "user";
         div.dataset.id = user.uid;
         div.innerHTML = `
-          <strong>${user.username || "User"}</strong>
-          <small>${user.email || ""}</small>
+          <strong>${escapeHtml(user.username || "User")}</strong>
+          <small>${escapeHtml(user.email || "")}</small>
         `;
         div.onclick = () => openPrivateChat(user);
         list.appendChild(div);
@@ -211,7 +250,7 @@
       );
 
       unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        renderMessages(snapshot, "group");
+        renderMessages(snapshot);
       });
     }
 
@@ -232,11 +271,11 @@
       );
 
       unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        renderMessages(snapshot, "private");
+        renderMessages(snapshot);
       });
     }
 
-    function renderMessages(snapshot, mode) {
+    function renderMessages(snapshot) {
       const div = document.getElementById("messages");
       div.innerHTML = "";
 
@@ -249,14 +288,17 @@
             })
           : "";
 
-        const senderName = msg.senderName || "User";
+        const senderName =
+          userCache[msg.senderId]?.username ||
+          msg.senderName ||
+          "User";
 
         const mdiv = document.createElement("div");
         mdiv.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
         mdiv.innerHTML = `
-          ${msg.senderId === currentUser.uid ? "" : `<span class="sender-name">${senderName}</span>`}
-          <div>${msg.text}</div>
-          <small>${time}</small>
+          ${msg.senderId === currentUser.uid ? "" : `<span class="sender-name">${escapeHtml(senderName)}</span>`}
+          <div>${escapeHtml(msg.text)}</div>
+          <small>${escapeHtml(time)}</small>
         `;
         div.appendChild(mdiv);
       });
@@ -269,11 +311,16 @@
       const text = input.value.trim();
       if (!text || !currentUser || !currentTarget) return;
 
+      const senderName =
+        currentUserProfile?.username ||
+        currentUser.displayName ||
+        "User";
+
       if (currentTarget.type === "group") {
         await addDoc(collection(db, "groups", currentTarget.data.id, "messages"), {
           text,
           senderId: currentUser.uid,
-          senderName: currentUser.displayName || currentUser.email || "User",
+          senderName,
           createdAt: serverTimestamp()
         });
       }
@@ -283,7 +330,7 @@
         await addDoc(collection(db, "chats", chatId, "messages"), {
           text,
           senderId: currentUser.uid,
-          senderName: currentUser.displayName || currentUser.email || "User",
+          senderName,
           createdAt: serverTimestamp()
         });
       }
@@ -315,6 +362,14 @@
           "Hitamo itsinda cyangwa umuntu ushaka kuganiramo",
           "Choose a group or person to start chatting"
         );
+      } else if (currentTarget.type === "group") {
+        document.getElementById("chat-header").textContent = isEnglish
+          ? `Group: ${currentTarget.data.nameEn || currentTarget.data.nameRw}`
+          : `Itsinda: ${currentTarget.data.nameRw || currentTarget.data.nameEn}`;
+      } else if (currentTarget.type === "private") {
+        document.getElementById("chat-header").textContent = isEnglish
+          ? `Chatting with ${currentTarget.data.username || currentTarget.data.email}`
+          : `Kuganira na ${currentTarget.data.username || currentTarget.data.email}`;
       }
 
       if (currentUser) {
@@ -332,12 +387,14 @@
       if (user) {
         currentUser = user;
         await saveUserProfile(user);
+        await loadCurrentUserProfile(user);
         showSection("chat");
         refreshLanguage();
         await loadGroups();
         await loadUsers();
       } else {
         currentUser = null;
+        currentUserProfile = null;
         currentTarget = null;
         clearMessages();
         showSection("auth");
