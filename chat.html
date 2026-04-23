@@ -5,218 +5,301 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Urungano Chat</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut,
+      updateProfile
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      query,
+      orderBy,
+      doc,
+      setDoc,
+      getDocs,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+      authDomain: "urungano-chat-50d62.firebaseapp.com",
+      projectId: "urungano-chat-50d62",
+      storageBucket: "urungano-chat-50d62.firebasestorage.app",
+      messagingSenderId: "730372170670",
+      appId: "1:730372170670:web:91300da03f18f488afde3f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentGroup = null;
+    let unsubscribeMessages = null;
+    let isEnglish = false;
+
+    function t(rw, en) {
+      return isEnglish ? en : rw;
+    }
+
+    function showSection(section) {
+      document.getElementById("auth-section").style.display = section === "auth" ? "flex" : "none";
+      document.getElementById("chat-section").style.display = section === "chat" ? "flex" : "none";
+    }
+
+    async function saveUserProfile(user, username = "") {
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email || "",
+        username: username || user.displayName || user.email?.split("@")[0] || "User",
+        createdAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    window.signUp = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const username = document.getElementById("username").value.trim();
+      const status = document.getElementById("status");
+
+      if (!username || !email || !password) {
+        status.innerHTML = `<span style="color:red;">${t("Nyuza amakuru yose", "Please fill in all fields")}</span>`;
+        return;
+      }
+
+      status.textContent = t("Tegereza...", "Please wait...");
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await updateProfile(user, { displayName: username });
+        await saveUserProfile(user, username);
+        status.innerHTML = `<span style="color:green;">${t("Iyandikishwa ryagenze neza!", "Sign up successful!")}</span>`;
+      } catch (e) {
+        status.innerHTML = `<span style="color:red;">${e.message}</span>`;
+      }
+    };
+
+    window.logIn = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const status = document.getElementById("status");
+
+      if (!email || !password) {
+        status.innerHTML = `<span style="color:red;">${t("Nyuza email n'ijambo ry'ibanga", "Enter email and password")}</span>`;
+        return;
+      }
+
+      status.textContent = t("Tegereza...", "Please wait...");
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (e) {
+        status.innerHTML = `<span style="color:red;">${e.message}</span>`;
+      }
+    };
+
+    async function loadGroups() {
+      const list = document.getElementById("groups-list");
+      list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+
+      const snapshot = await getDocs(collection(db, "groups"));
+      list.innerHTML = "";
+
+      const groups = [];
+      snapshot.forEach(docSnap => groups.push(docSnap.data()));
+      groups.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      if (!groups.length) {
+        list.innerHTML = `<p style="color:#64748b;">${t("Nta matsinda arashyirwaho muri Firebase.", "No groups have been created in Firebase yet.")}</p>`;
+        return;
+      }
+
+      groups.forEach(group => {
+        const div = document.createElement("div");
+        div.className = "group-item";
+        div.dataset.groupId = group.id;
+        div.innerHTML = `
+          <strong>${isEnglish ? group.nameEn : group.nameRw}</strong>
+          <small>${isEnglish ? group.descEn : group.descRw}</small>
+        `;
+        div.onclick = () => openGroup(group);
+        list.appendChild(div);
+      });
+
+      if (!currentGroup && groups.length) {
+        openGroup(groups[0]);
+      }
+    }
+
+    function markActiveGroup(groupId) {
+      document.querySelectorAll(".group-item").forEach(item => {
+        item.classList.toggle("active", item.dataset.groupId === groupId);
+      });
+    }
+
+    function openGroup(group) {
+      currentGroup = group;
+      markActiveGroup(group.id);
+
+      document.getElementById("chat-header").textContent = isEnglish
+        ? `Group: ${group.nameEn}`
+        : `Itsinda: ${group.nameRw}`;
+
+      document.getElementById("messages").innerHTML = "";
+
+      if (unsubscribeMessages) unsubscribeMessages();
+
+      const q = query(
+        collection(db, "groups", group.id, "messages"),
+        orderBy("createdAt")
+      );
+
+      unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        const div = document.getElementById("messages");
+        div.innerHTML = "";
+
+        snapshot.forEach(d => {
+          const msg = d.data();
+          const time = msg.createdAt
+            ? new Date(msg.createdAt.toDate()).toLocaleTimeString(isEnglish ? "en-US" : "rw-RW", {
+                hour: "2-digit",
+                minute: "2-digit"
+              })
+            : "";
+
+          const senderName = msg.senderName || "User";
+
+          const mdiv = document.createElement("div");
+          mdiv.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
+          mdiv.innerHTML = `
+            ${msg.senderId === currentUser.uid ? "" : `<span class="sender-name">${senderName}</span>`}
+            <div>${msg.text}</div>
+            <small>${time}</small>
+          `;
+          div.appendChild(mdiv);
+        });
+
+        div.scrollTop = div.scrollHeight;
+      });
+    }
+
+    window.sendMessage = async () => {
+      const input = document.getElementById("message-input");
+      const text = input.value.trim();
+      if (!text || !currentGroup || !currentUser) return;
+
+      await addDoc(collection(db, "groups", currentGroup.id, "messages"), {
+        text,
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || currentUser.email || "User",
+        createdAt: serverTimestamp()
+      });
+
+      input.value = "";
+    };
+
+    window.logout = () => signOut(auth);
+
+    function refreshLanguage() {
+      const text = isEnglish ? "English | Kinyarwanda" : "Kinyarwanda | English";
+      document.getElementById("lang-toggle").textContent = text;
+      document.getElementById("lang-toggle-auth").textContent = text;
+
+      document.getElementById("chat-subtitle").textContent = t("Kuganira mu bwiherezo", "Private & Safe Conversation");
+      document.getElementById("signup-btn").textContent = t("Iyandikishe", "Sign Up");
+      document.getElementById("login-btn").textContent = t("Kwinjira", "Login");
+      document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
+      document.getElementById("groups-note").textContent = t("Abakoresha bose baba muri aya matsinda.", "Everyone can use these groups.");
+      document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
+      document.getElementById("send-btn").textContent = t("Ohereza", "Send");
+      document.getElementById("back-home-auth").textContent = t("← Ahabanza", "← Home");
+      document.getElementById("back-home-chat").textContent = t("← Ahabanza", "← Home");
+      document.getElementById("message-input").placeholder = t("Andika message hano...", "Type your message here...");
+
+      if (currentGroup) {
+        document.getElementById("chat-header").textContent = isEnglish
+          ? `Group: ${currentGroup.nameEn}`
+          : `Itsinda: ${currentGroup.nameRw}`;
+      } else {
+        document.getElementById("chat-header").textContent = t("Hitamo itsinda ushaka kuganiramo", "Choose a group to start chatting");
+      }
+
+      if (currentUser) loadGroups();
+    }
+
+    window.toggleLanguage = () => {
+      isEnglish = !isEnglish;
+      refreshLanguage();
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await saveUserProfile(user);
+        showSection("chat");
+        refreshLanguage();
+        loadGroups();
+      } else {
+        currentUser = null;
+        currentGroup = null;
+        if (unsubscribeMessages) unsubscribeMessages();
+        showSection("auth");
+      }
+    });
+  </script>
 
   <style>
     :root { --primary: #10b981; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
-      min-height: 100vh;
-      padding: 10px;
-    }
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      overflow: hidden;
-      height: 96vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 25px;
-      background: white;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); min-height: 100vh; padding: 10px; }
+    .container { max-width: 1100px; margin: auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; height: 96vh; display: flex; flex-direction: column; }
+    .header-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 25px; background: white; border-bottom: 1px solid #e2e8f0; }
     .logo { height: 52px; border-radius: 8px; }
-    .toggle {
-      background: #f1f5f9;
-      padding: 8px 16px;
-      border-radius: 30px;
-      font-weight: 600;
-      cursor: pointer;
-      user-select: none;
-    }
-    .back-btn {
-      background: #10b981;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 30px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    #auth-section {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-    }
-
-    .auth-card {
-      background: white;
-      padding: 40px 35px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-
-    .sidebar {
-      width: 340px;
-      background: #f8fafc;
-      border-right: 1px solid #e2e8f0;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chat-header {
-      padding: 18px 25px;
-      background: #10b981;
-      color: white;
-      font-weight: 600;
-    }
-
-    #messages {
-      flex: 1;
-      padding: 25px;
-      overflow-y: auto;
-      background: #f8fafc;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .message {
-      max-width: 78%;
-      padding: 14px 18px;
-      border-radius: 20px;
-      font-size: 15.5px;
-      line-height: 1.5;
-    }
-
-    .sent {
-      background: #10b981;
-      color: white;
-      align-self: flex-end;
-    }
-
-    .received {
-      background: white;
-      color: #1f2937;
-      align-self: flex-start;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .sender-name {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      opacity: 0.85;
-    }
-
-    .message-time {
-      display: block;
-      margin-top: 8px;
-      font-size: 11px;
-      opacity: 0.75;
-    }
-
-    .input-area {
-      padding: 20px;
-      background: white;
-      border-top: 1px solid #e2e8f0;
-      display: flex;
-      gap: 12px;
-    }
-
-    #message-input {
-      flex: 1;
-      padding: 16px 22px;
-      border: 2px solid #e2e8f0;
-      border-radius: 50px;
-      outline: none;
-    }
-
-    button {
-      padding: 14px 28px;
-      background: #10b981;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .group-item {
-      padding: 14px 16px;
-      margin: 8px 0;
-      background: white;
-      border-radius: 12px;
-      cursor: pointer;
-      border: 1px solid #e2e8f0;
-      transition: all 0.2s ease;
-    }
-
-    .group-item:hover {
-      background: #f0fdf4;
-      border-color: #10b981;
-    }
-
-    .group-item.active {
-      background: #dcfce7;
-      border-color: #10b981;
-    }
-
-    .helper-text {
-      color: #64748b;
-      font-size: 13px;
-      margin-top: 4px;
-    }
+    .toggle { background: #f1f5f9; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
+    .back-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; }
+    #auth-section { display: none; align-items: center; justify-content: center; flex: 1; }
+    .auth-card { background: white; padding: 40px 35px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 420px; text-align: center; }
+    .sidebar { width: 340px; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; }
+    .chat-area { flex: 1; display: flex; flex-direction: column; }
+    .chat-header { padding: 18px 25px; background: #10b981; color: white; font-weight: 600; }
+    #messages { flex: 1; padding: 25px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; }
+    .message { max-width: 78%; padding: 14px 18px; border-radius: 20px; font-size: 15.5px; line-height: 1.45; }
+    .sent { background: #10b981; color: white; align-self: flex-end; }
+    .received { background: white; color: #1f2937; align-self: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .sender-name { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #0f766e; }
+    .message small { display: block; margin-top: 8px; opacity: 0.75; font-size: 11px; }
+    .input-area { padding: 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; }
+    #message-input { flex: 1; padding: 16px 22px; border: 2px solid #e2e8f0; border-radius: 50px; outline: none; }
+    button { padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; }
+    .group-item { padding: 14px 16px; margin: 8px 0; background: white; border-radius: 12px; cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.2s ease; }
+    .group-item:hover { background: #f0fdf4; border-color: #10b981; }
+    .group-item.active { background: #dcfce7; border-color: #10b981; }
+    .group-item strong { display: block; margin-bottom: 4px; }
+    .group-item small { display: block; color: #64748b; line-height: 1.4; }
 
     @media (max-width: 900px) {
-      .container {
-        height: auto;
-        min-height: 96vh;
-      }
-      #chat-section {
-        flex-direction: column;
-      }
-      .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #e2e8f0;
-      }
+      .container { height: auto; min-height: 96vh; }
+      #chat-section { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-
-    <!-- AUTH SECTION -->
     <div id="auth-section">
       <div class="auth-card">
         <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo" style="margin-bottom:20px;">
         <h1>Urungano Chat</h1>
-        <p id="chat-subtitle" style="margin-top:10px;">Kuganira mu bwiherezo</p>
+        <p id="chat-subtitle">Kuganira mu bwiherezo</p>
 
         <input id="username" type="text" placeholder="Username (nk' @Mukama250)" style="width:100%; padding:14px; margin:8px 0; border:1px solid #cbd5e1; border-radius:12px;">
         <input id="email" type="email" placeholder="Email yawe" style="width:100%; padding:14px; margin:8px 0; border:1px solid #cbd5e1; border-radius:12px;">
@@ -237,7 +320,6 @@
       </div>
     </div>
 
-    <!-- CHAT SECTION -->
     <div id="chat-section" style="display:none; flex:1;">
       <div class="sidebar">
         <div class="header-bar" style="border:none; padding:15px 0;">
@@ -249,8 +331,8 @@
         </div>
 
         <h3 id="groups-title">Amatsinda</h3>
-        <div class="helper-text" id="groups-helper">Abakoresha bose baba muri aya matsinda.</div>
-        <div id="groups-list" style="margin-top:14px;"></div>
+        <p id="groups-note" style="color:#64748b; font-size:13px; margin:8px 0 12px;">Abakoresha bose baba muri aya matsinda.</p>
+        <div id="groups-list"></div>
 
         <button onclick="logout()" id="logout-btn" style="margin-top:30px; width:100%; background:#ef4444; padding:14px;">Sohoka</button>
       </div>
@@ -265,352 +347,5 @@
       </div>
     </div>
   </div>
-
-  <script>
-    const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';
-
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let isEnglish = false;
-    let currentUser = null;
-    let currentGroup = null;
-    let currentChannel = null;
-
-    const statusEl = document.getElementById('status');
-    const messagesEl = document.getElementById('messages');
-    const groupsListEl = document.getElementById('groups-list');
-    const chatHeaderEl = document.getElementById('chat-header');
-
-    function showSection(section) {
-      document.getElementById('auth-section').style.display = section === 'auth' ? 'flex' : 'none';
-      document.getElementById('chat-section').style.display = section === 'chat' ? 'flex' : 'none';
-    }
-
-    function formatTime(value) {
-      if (!value) return '';
-      const date = new Date(value);
-      return date.toLocaleTimeString(isEnglish ? 'en-US' : 'rw-RW', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    async function ensureProfile(user, usernameFromForm = '') {
-      const fallbackName =
-        usernameFromForm ||
-        user.user_metadata?.username ||
-        user.email?.split('@')[0] ||
-        'User';
-
-      await supabaseClient.from('profiles').upsert({
-        id: user.id,
-        email: user.email,
-        username: fallbackName
-      });
-    }
-
-    async function signUp() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const username = document.getElementById('username').value.trim();
-
-      if (!username || !email || !password) {
-        statusEl.innerHTML = `<span style="color:red;">Nyuza amakuru yose</span>`;
-        return;
-      }
-
-      statusEl.textContent = isEnglish ? 'Please wait...' : 'Tegereza...';
-
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { username }
-        }
-      });
-
-      if (error) {
-        statusEl.innerHTML = `<span style="color:red;">${escapeHtml(error.message)}</span>`;
-        return;
-      }
-
-      if (data.user) {
-        await ensureProfile(data.user, username);
-      }
-
-      statusEl.innerHTML = `<span style="color:green;">${isEnglish ? 'Account created successfully. Check your email if confirmation is enabled.' : 'Iyandikisha ryagenze neza. Reba email niba confirmation iriho.'}</span>`;
-    }
-
-    async function logIn() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      if (!email || !password) {
-        statusEl.innerHTML = `<span style="color:red;">${isEnglish ? 'Enter email and password' : "Nyuza email n'ijambo ry'ibanga"}</span>`;
-        return;
-      }
-
-      statusEl.textContent = isEnglish ? 'Please wait...' : 'Tegereza...';
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        statusEl.innerHTML = `<span style="color:red;">${escapeHtml(error.message)}</span>`;
-        return;
-      }
-
-      if (data.user) {
-        await ensureProfile(data.user, document.getElementById('username').value.trim());
-      }
-    }
-
-    async function loadGroups() {
-      groupsListEl.innerHTML = `<p>${isEnglish ? 'Loading...' : 'Tegereza...'}</p>`;
-
-      const { data, error } = await supabaseClient
-        .from('chat_groups')
-        .select('*')
-        .order('name', { ascending: true });
-
-      if (error) {
-        groupsListEl.innerHTML = `<p style="color:red;">${escapeHtml(error.message)}</p>`;
-        return;
-      }
-
-      groupsListEl.innerHTML = '';
-
-      data.forEach(group => {
-        const div = document.createElement('div');
-        div.className = 'group-item';
-        div.dataset.groupId = group.id;
-
-        div.innerHTML = `
-          <strong>${escapeHtml(group.name)}</strong>
-          <div class="helper-text">${escapeHtml(group.description || (isEnglish ? 'Open group chat' : 'Itsinda rifunguye kuri bose'))}</div>
-        `;
-
-        div.onclick = () => openGroup(group);
-        groupsListEl.appendChild(div);
-      });
-
-      const defaultGroup =
-        data.find(g => g.slug === 'mental-health-cycle') ||
-        data[0];
-
-      if (defaultGroup) {
-        openGroup(defaultGroup);
-      }
-    }
-
-    function markActiveGroup(groupId) {
-      document.querySelectorAll('.group-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.groupId === groupId);
-      });
-    }
-
-    async function openGroup(group) {
-      currentGroup = group;
-      markActiveGroup(group.id);
-
-      chatHeaderEl.textContent = isEnglish
-        ? `Group: ${group.name}`
-        : `Itsinda: ${group.name}`;
-
-      await loadMessages();
-
-      if (currentChannel) {
-        supabaseClient.removeChannel(currentChannel);
-      }
-
-      currentChannel = supabaseClient
-        .channel(`group-${group.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'group_messages',
-            filter: `group_id=eq.${group.id}`
-          },
-          async () => {
-            await loadMessages();
-          }
-        )
-        .subscribe();
-    }
-
-    async function loadMessages() {
-      if (!currentGroup) return;
-
-      messagesEl.innerHTML = `<p>${isEnglish ? 'Loading messages...' : 'Tegereza ubutumwa...'}</p>`;
-
-      const { data, error } = await supabaseClient
-        .from('group_messages')
-        .select(`
-          id,
-          message,
-          sender_id,
-          created_at,
-          profiles:sender_id (username, email)
-        `)
-        .eq('group_id', currentGroup.id)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        messagesEl.innerHTML = `<p style="color:red;">${escapeHtml(error.message)}</p>`;
-        return;
-      }
-
-      messagesEl.innerHTML = '';
-
-      if (!data.length) {
-        messagesEl.innerHTML = `<p style="color:#64748b;">${isEnglish ? 'No messages yet. Start the conversation.' : 'Nta butumwa burimo. Tangira ikiganiro.'}</p>`;
-        return;
-      }
-
-      data.forEach(msg => {
-        const mine = currentUser && msg.sender_id === currentUser.id;
-        const wrapper = document.createElement('div');
-        wrapper.className = `message ${mine ? 'sent' : 'received'}`;
-
-        const senderName =
-          msg.profiles?.username ||
-          msg.profiles?.email ||
-          (isEnglish ? 'User' : 'Umukoresha');
-
-        wrapper.innerHTML = `
-          ${mine ? '' : `<span class="sender-name">${escapeHtml(senderName)}</span>`}
-          <div>${escapeHtml(msg.message)}</div>
-          <span class="message-time">${formatTime(msg.created_at)}</span>
-        `;
-
-        messagesEl.appendChild(wrapper);
-      });
-
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    async function sendMessage() {
-      const input = document.getElementById('message-input');
-      const text = input.value.trim();
-
-      if (!text || !currentGroup || !currentUser) return;
-
-      const { error } = await supabaseClient
-        .from('group_messages')
-        .insert({
-          group_id: currentGroup.id,
-          sender_id: currentUser.id,
-          message: text
-        });
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      input.value = '';
-    }
-
-    async function logout() {
-      if (currentChannel) {
-        supabaseClient.removeChannel(currentChannel);
-        currentChannel = null;
-      }
-
-      await supabaseClient.auth.signOut();
-    }
-
-    function toggleLanguage() {
-      isEnglish = !isEnglish;
-      const text = isEnglish ? 'English | Kinyarwanda' : 'Kinyarwanda | English';
-
-      document.getElementById('lang-toggle').textContent = text;
-      document.getElementById('lang-toggle-auth').textContent = text;
-
-      const backText = isEnglish ? '← Home' : '← Ahabanza';
-      document.getElementById('back-home-auth').textContent = backText;
-      document.getElementById('back-home-chat').textContent = backText;
-
-      document.getElementById('chat-subtitle').textContent = isEnglish
-        ? 'Private & Safe Conversation'
-        : 'Kuganira mu bwiherezo';
-
-      document.getElementById('signup-btn').textContent = isEnglish ? 'Sign Up' : 'Iyandikishe';
-      document.getElementById('login-btn').textContent = isEnglish ? 'Login' : 'Kwinjira';
-      document.getElementById('groups-title').textContent = isEnglish ? 'Groups' : 'Amatsinda';
-      document.getElementById('groups-helper').textContent = isEnglish
-        ? 'Everyone is automatically included in these groups.'
-        : 'Abakoresha bose bahita baba muri aya matsinda.';
-      document.getElementById('logout-btn').textContent = isEnglish ? 'Logout' : 'Sohoka';
-      document.getElementById('send-btn').textContent = isEnglish ? 'Send' : 'Ohereza';
-      document.getElementById('message-input').placeholder = isEnglish
-        ? 'Type your message here...'
-        : 'Andika message hano...';
-
-      if (currentGroup) {
-        chatHeaderEl.textContent = isEnglish
-          ? `Group: ${currentGroup.name}`
-          : `Itsinda: ${currentGroup.name}`;
-        loadMessages();
-      } else {
-        chatHeaderEl.textContent = isEnglish
-          ? 'Choose a group to start chatting'
-          : 'Hitamo itsinda ushaka kuganiramo';
-      }
-
-      loadGroups();
-    }
-
-    document.getElementById('message-input').addEventListener('keypress', function (event) {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
-    });
-
-    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        currentUser = session.user;
-        await ensureProfile(session.user);
-        showSection('chat');
-        await loadGroups();
-      } else {
-        currentUser = null;
-        currentGroup = null;
-        showSection('auth');
-      }
-    });
-
-    async function init() {
-      const { data } = await supabaseClient.auth.getSession();
-
-      if (data.session?.user) {
-        currentUser = data.session.user;
-        await ensureProfile(currentUser);
-        showSection('chat');
-        await loadGroups();
-      } else {
-        showSection('auth');
-      }
-    }
-
-    init();
-
-    window.signUp = signUp;
-    window.logIn = logIn;
-    window.sendMessage = sendMessage;
-    window.logout = logout;
-    window.toggleLanguage = toggleLanguage;
-  </script>
 </body>
 </html>
