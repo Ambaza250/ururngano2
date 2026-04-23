@@ -42,7 +42,7 @@
     const db = getFirestore(app);
 
     let currentUser = null;
-    let currentGroup = null;
+    let currentTarget = null;
     let unsubscribeMessages = null;
     let isEnglish = false;
 
@@ -115,48 +115,95 @@
       list.innerHTML = "";
 
       const groups = [];
-      snapshot.forEach(docSnap => groups.push(docSnap.data()));
+      snapshot.forEach(docSnap => {
+        const group = docSnap.data();
+        if (group && group.id && (group.nameRw || group.nameEn)) {
+          groups.push(group);
+        }
+      });
+
       groups.sort((a, b) => (a.order || 0) - (b.order || 0));
 
       if (!groups.length) {
-        list.innerHTML = `<p style="color:#64748b;">${t("Nta matsinda arashyirwaho muri Firebase.", "No groups have been created in Firebase yet.")}</p>`;
+        list.innerHTML = `<p style="color:#64748b;">${t("Nta matsinda arimo.", "No groups found.")}</p>`;
         return;
       }
 
       groups.forEach(group => {
         const div = document.createElement("div");
-        div.className = "group-item";
-        div.dataset.groupId = group.id;
+        div.className = "group-item sidebar-item";
+        div.dataset.type = "group";
+        div.dataset.id = group.id;
         div.innerHTML = `
-          <strong>${isEnglish ? group.nameEn : group.nameRw}</strong>
-          <small>${isEnglish ? group.descEn : group.descRw}</small>
+          <strong>${isEnglish ? (group.nameEn || group.nameRw) : (group.nameRw || group.nameEn)}</strong>
+          <small>${isEnglish ? (group.descEn || "") : (group.descRw || "")}</small>
         `;
         div.onclick = () => openGroup(group);
         list.appendChild(div);
       });
-
-      if (!currentGroup && groups.length) {
-        openGroup(groups[0]);
-      }
     }
 
-    function markActiveGroup(groupId) {
-      document.querySelectorAll(".group-item").forEach(item => {
-        item.classList.toggle("active", item.dataset.groupId === groupId);
+    async function loadUsers() {
+      const list = document.getElementById("users-list");
+      list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+
+      const snapshot = await getDocs(collection(db, "users"));
+      list.innerHTML = "";
+
+      const users = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (!data || data.uid === currentUser.uid) return;
+        users.push(data);
+      });
+
+      users.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
+
+      if (!users.length) {
+        list.innerHTML = `<p style="color:#64748b;">${t("Nta bandi bakoresha babonetse.", "No other users found.")}</p>`;
+        return;
+      }
+
+      users.forEach(user => {
+        const div = document.createElement("div");
+        div.className = "user-item sidebar-item";
+        div.dataset.type = "user";
+        div.dataset.id = user.uid;
+        div.innerHTML = `
+          <strong>${user.username || "User"}</strong>
+          <small>${user.email || ""}</small>
+        `;
+        div.onclick = () => openPrivateChat(user);
+        list.appendChild(div);
       });
     }
 
+    function markActiveItem(type, id) {
+      document.querySelectorAll(".sidebar-item").forEach(item => {
+        item.classList.toggle(
+          "active",
+          item.dataset.type === type && item.dataset.id === id
+        );
+      });
+    }
+
+    function clearMessages() {
+      document.getElementById("messages").innerHTML = "";
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+        unsubscribeMessages = null;
+      }
+    }
+
     function openGroup(group) {
-      currentGroup = group;
-      markActiveGroup(group.id);
+      currentTarget = { type: "group", data: group };
+      markActiveItem("group", group.id);
 
       document.getElementById("chat-header").textContent = isEnglish
-        ? `Group: ${group.nameEn}`
-        : `Itsinda: ${group.nameRw}`;
+        ? `Group: ${group.nameEn || group.nameRw}`
+        : `Itsinda: ${group.nameRw || group.nameEn}`;
 
-      document.getElementById("messages").innerHTML = "";
-
-      if (unsubscribeMessages) unsubscribeMessages();
+      clearMessages();
 
       const q = query(
         collection(db, "groups", group.id, "messages"),
@@ -164,45 +211,82 @@
       );
 
       unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        const div = document.getElementById("messages");
-        div.innerHTML = "";
-
-        snapshot.forEach(d => {
-          const msg = d.data();
-          const time = msg.createdAt
-            ? new Date(msg.createdAt.toDate()).toLocaleTimeString(isEnglish ? "en-US" : "rw-RW", {
-                hour: "2-digit",
-                minute: "2-digit"
-              })
-            : "";
-
-          const senderName = msg.senderName || "User";
-
-          const mdiv = document.createElement("div");
-          mdiv.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
-          mdiv.innerHTML = `
-            ${msg.senderId === currentUser.uid ? "" : `<span class="sender-name">${senderName}</span>`}
-            <div>${msg.text}</div>
-            <small>${time}</small>
-          `;
-          div.appendChild(mdiv);
-        });
-
-        div.scrollTop = div.scrollHeight;
+        renderMessages(snapshot, "group");
       });
+    }
+
+    function openPrivateChat(user) {
+      currentTarget = { type: "private", data: user };
+      markActiveItem("user", user.uid);
+
+      document.getElementById("chat-header").textContent = isEnglish
+        ? `Chatting with ${user.username || user.email}`
+        : `Kuganira na ${user.username || user.email}`;
+
+      clearMessages();
+
+      const chatId = [currentUser.uid, user.uid].sort().join("_");
+      const q = query(
+        collection(db, "chats", chatId, "messages"),
+        orderBy("createdAt")
+      );
+
+      unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        renderMessages(snapshot, "private");
+      });
+    }
+
+    function renderMessages(snapshot, mode) {
+      const div = document.getElementById("messages");
+      div.innerHTML = "";
+
+      snapshot.forEach(d => {
+        const msg = d.data();
+        const time = msg.createdAt
+          ? new Date(msg.createdAt.toDate()).toLocaleTimeString(isEnglish ? "en-US" : "rw-RW", {
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+          : "";
+
+        const senderName = msg.senderName || "User";
+
+        const mdiv = document.createElement("div");
+        mdiv.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
+        mdiv.innerHTML = `
+          ${msg.senderId === currentUser.uid ? "" : `<span class="sender-name">${senderName}</span>`}
+          <div>${msg.text}</div>
+          <small>${time}</small>
+        `;
+        div.appendChild(mdiv);
+      });
+
+      div.scrollTop = div.scrollHeight;
     }
 
     window.sendMessage = async () => {
       const input = document.getElementById("message-input");
       const text = input.value.trim();
-      if (!text || !currentGroup || !currentUser) return;
+      if (!text || !currentUser || !currentTarget) return;
 
-      await addDoc(collection(db, "groups", currentGroup.id, "messages"), {
-        text,
-        senderId: currentUser.uid,
-        senderName: currentUser.displayName || currentUser.email || "User",
-        createdAt: serverTimestamp()
-      });
+      if (currentTarget.type === "group") {
+        await addDoc(collection(db, "groups", currentTarget.data.id, "messages"), {
+          text,
+          senderId: currentUser.uid,
+          senderName: currentUser.displayName || currentUser.email || "User",
+          createdAt: serverTimestamp()
+        });
+      }
+
+      if (currentTarget.type === "private") {
+        const chatId = [currentUser.uid, currentTarget.data.uid].sort().join("_");
+        await addDoc(collection(db, "chats", chatId, "messages"), {
+          text,
+          senderId: currentUser.uid,
+          senderName: currentUser.displayName || currentUser.email || "User",
+          createdAt: serverTimestamp()
+        });
+      }
 
       input.value = "";
     };
@@ -219,21 +303,24 @@
       document.getElementById("login-btn").textContent = t("Kwinjira", "Login");
       document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
       document.getElementById("groups-note").textContent = t("Abakoresha bose baba muri aya matsinda.", "Everyone can use these groups.");
+      document.getElementById("users-title").textContent = t("Abandi bakoresha", "Other Users");
       document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
       document.getElementById("send-btn").textContent = t("Ohereza", "Send");
       document.getElementById("back-home-auth").textContent = t("← Ahabanza", "← Home");
       document.getElementById("back-home-chat").textContent = t("← Ahabanza", "← Home");
       document.getElementById("message-input").placeholder = t("Andika message hano...", "Type your message here...");
 
-      if (currentGroup) {
-        document.getElementById("chat-header").textContent = isEnglish
-          ? `Group: ${currentGroup.nameEn}`
-          : `Itsinda: ${currentGroup.nameRw}`;
-      } else {
-        document.getElementById("chat-header").textContent = t("Hitamo itsinda ushaka kuganiramo", "Choose a group to start chatting");
+      if (!currentTarget) {
+        document.getElementById("chat-header").textContent = t(
+          "Hitamo itsinda cyangwa umuntu ushaka kuganiramo",
+          "Choose a group or person to start chatting"
+        );
       }
 
-      if (currentUser) loadGroups();
+      if (currentUser) {
+        loadGroups();
+        loadUsers();
+      }
     }
 
     window.toggleLanguage = () => {
@@ -247,11 +334,12 @@
         await saveUserProfile(user);
         showSection("chat");
         refreshLanguage();
-        loadGroups();
+        await loadGroups();
+        await loadUsers();
       } else {
         currentUser = null;
-        currentGroup = null;
-        if (unsubscribeMessages) unsubscribeMessages();
+        currentTarget = null;
+        clearMessages();
         showSection("auth");
       }
     });
@@ -280,11 +368,45 @@
     .input-area { padding: 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; }
     #message-input { flex: 1; padding: 16px 22px; border: 2px solid #e2e8f0; border-radius: 50px; outline: none; }
     button { padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; }
-    .group-item { padding: 14px 16px; margin: 8px 0; background: white; border-radius: 12px; cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.2s ease; }
-    .group-item:hover { background: #f0fdf4; border-color: #10b981; }
-    .group-item.active { background: #dcfce7; border-color: #10b981; }
-    .group-item strong { display: block; margin-bottom: 4px; }
-    .group-item small { display: block; color: #64748b; line-height: 1.4; }
+
+    .group-item, .user-item {
+      padding: 14px 16px;
+      margin: 8px 0;
+      background: white;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s ease;
+    }
+
+    .group-item:hover, .user-item:hover {
+      background: #f0fdf4;
+      border-color: #10b981;
+    }
+
+    .group-item.active, .user-item.active {
+      background: #dcfce7;
+      border-color: #10b981;
+    }
+
+    .group-item strong, .user-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .group-item small, .user-item small {
+      display: block;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .section-divider {
+      margin-top: 18px;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
 
     @media (max-width: 900px) {
       .container { height: auto; min-height: 96vh; }
@@ -334,11 +456,14 @@
         <p id="groups-note" style="color:#64748b; font-size:13px; margin:8px 0 12px;">Abakoresha bose baba muri aya matsinda.</p>
         <div id="groups-list"></div>
 
+        <div class="section-divider" id="users-title">Abandi bakoresha</div>
+        <div id="users-list"></div>
+
         <button onclick="logout()" id="logout-btn" style="margin-top:30px; width:100%; background:#ef4444; padding:14px;">Sohoka</button>
       </div>
 
       <div class="chat-area">
-        <div class="chat-header" id="chat-header">Hitamo itsinda ushaka kuganiramo</div>
+        <div class="chat-header" id="chat-header">Hitamo itsinda cyangwa umuntu ushaka kuganiramo</div>
         <div id="messages"></div>
         <div class="input-area">
           <input id="message-input" placeholder="Andika message hano..." onkeypress="if(event.key==='Enter') sendMessage()">
