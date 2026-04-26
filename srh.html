@@ -519,47 +519,53 @@
             </div>
         </div>
 
-<footer style="background-color: #1d4ed8; color: white; margin-top: 3rem;">
-        <div style="max-width: 1152px; margin: 0 auto; padding: 2.5rem 1.5rem;">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 12px;">
+<footer class="w-full bg-blue-700 text-white mt-16">
+    <div class="w-full px-6 py-10 md:px-10 lg:px-16">
+        <div class="flex flex-col gap-8">
+            
+            <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                
+                <div class="flex items-center gap-4">
                     <img src="urungano-logo.jpeg" alt="Urungano Logo"
-                         style="width: 44px; height: 44px; object-fit: cover; border-radius: 12px;">
-                    <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px;">Urungano Platform</span>
+                         class="w-14 h-14 object-cover rounded-2xl shadow-md">
+                    <div>
+                        <h3 class="text-2xl font-bold">Urungano Platform</h3>
+                        <p class="text-blue-100 text-sm"
+                           data-en="Trusted youth-friendly support"
+                           data-rw="Ubufasha bwizewe kandi bubereye urubyiruko">
+                            Ubufasha bwizewe kandi bubereye urubyiruko
+                        </p>
+                    </div>
                 </div>
 
-                <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
-                    <a href="tel:+250786561823"
-                       style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem; transition: color 0.2s;"
-                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-                        <span>📞</span> +250 786 561 823
+                <div class="grid gap-3 text-sm text-blue-100 md:text-right">
+                    <a href="tel:+250786561823" class="hover:text-white transition">
+                        <span class="font-semibold text-white">Call:</span> +250 786 561 823
                     </a>
-                    <a href="mailto:Urunganoplatform@gmail.com"
-                       style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
-                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-                        <span>✉️</span> Urunganoplatform@gmail.com
+                    <a href="mailto:Urunganoplatform@gmail.com" class="hover:text-white transition">
+                        <span class="font-semibold text-white">Email:</span> Urunganoplatform@gmail.com
                     </a>
-                    <a href="https://instagram.com/c-frederic1" target="_blank" rel="noopener noreferrer"
-                       style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
-                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-                        <span>📸</span> @c-frederic1
+                    <a href="https://instagram.com/c-frederic1" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">
+                        <span class="font-semibold text-white">Instagram:</span> @c-frederic1
                     </a>
                 </div>
-
-                <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;">
-                    &copy; 2026 Urungano Platform. All rights reserved.
-                </p>
             </div>
 
-            <div style="border-top: 1px solid #2563eb; margin-top: 1.5rem; padding-top: 1.25rem; text-align: center;">
-                <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;"
-                   data-en="Anonymous • Secure • Stigma-Free Support"
+            <div class="border-t border-blue-500 pt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <p class="text-sm text-blue-100">
+                    &copy; 2026 Urungano Platform. All rights reserved.
+                </p>
+
+                <p class="text-sm text-blue-100"
+                   data-en="Private • Safe • Stigma-free support"
                    data-rw="Ubwihisho • Umutekano • Ubufasha butagira akato">
                     Ubwihisho • Umutekano • Ubufasha butagira akato
                 </p>
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
+
 
     <script>
         function switchLanguage(lang) {
