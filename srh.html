@@ -624,7 +624,7 @@
             if (!lmpInput) {
                 errorEl.textContent = document.body.getAttribute('data-lang') === 'en'
                     ? 'Please enter the first day of your last period'
-                    : "Andika itariki ya mbere y'imihango yawe ya nyuma";
+                    : "Andika itariki ya mbere y'imihango yawe iheruka";
                 return;
             }
 
@@ -652,7 +652,7 @@
                 dueEl.textContent = dueDate.toLocaleDateString('en-GB');
                 dueEl.parentElement.style.display = 'block';
             } else {
-                dueEl.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Not applicable' : 'Ntibikwiye';
+                dueEl.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Not applicable' : 'Ntiwasama Ubu';
             }
 
             resultsEl.classList.remove('hidden');
