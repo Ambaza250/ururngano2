@@ -53,97 +53,206 @@
         #mobile-menu { display: none; }
         #mobile-menu.open { display: flex; }
 
-        .ct-wrap { padding: 20px 10px; }
+               /* Calculator styles */
+        .ct-wrap {
+            padding: 20px 10px;
+        }
         .ct-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.15);
+            background: #fff7fb;
+            border: 1px solid #fbcfe8;
+            border-radius: 28px;
+            box-shadow: 0 18px 36px rgba(219, 39, 119, 0.12);
             overflow: hidden;
-            border: 1px solid #fce7f3;
         }
         .ct-header {
-            background: linear-gradient(135deg, #752b6b, #db2777);
+            background: linear-gradient(135deg, #f472b6, #db2777);
             color: white;
             text-align: center;
-            padding: 25px 20px;
+            padding: 22px 20px;
         }
-        .ct-icon { font-size: 42px; margin-bottom: 8px; }
-        .ct-header h3 { font-size: 1.35rem; margin: 0; font-weight: 600; }
-        .ct-header p { opacity: 0.95; margin-top: 6px; font-size: 0.95rem; }
-        .ct-form { padding: 25px; }
-        .ct-input-group { margin-bottom: 18px; }
-        .ct-input-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #374151; font-size: 0.95rem; }
+        .ct-header h3 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .ct-header p {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+        .ct-form {
+            padding: 26px 20px 20px;
+            display: grid;
+            gap: 18px;
+        }
+        .ct-input-group {
+            display: grid;
+            gap: 10px;
+        }
+        .ct-input-group label {
+            display: block;
+            text-align: center;
+            color: #be185d;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.45;
+        }
         .ct-input {
             width: 100%;
-            padding: 12px 14px;
-            border: 2px solid #f3e8ff;
-            border-radius: 12px;
+            background: white;
+            border: 2px solid #f9a8d4;
+            border-radius: 0;
+            padding: 14px 16px;
             font-size: 1rem;
-            transition: all 0.3s;
+            color: #4a044e;
+            outline: none;
+            transition: all 0.25s ease;
         }
         .ct-input:focus {
             border-color: #db2777;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.1);
+            box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.12);
         }
-        .ct-toggle { margin: 20px 0; cursor: pointer; }
-        .ct-toggle-slider {
-            background: #f3e8ff;
-            border-radius: 50px;
-            padding: 12px 16px;
-            transition: all 0.3s;
+        .ct-toggle-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 16px;
+            background: #fce7f3;
+            border: 1px solid #f9a8d4;
+            padding: 14px 16px;
         }
-        .ct-toggle input:checked + .ct-toggle-slider { background: #fce7f3; }
+        .ct-toggle-text {
+            color: #be185d;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .ct-toggle-label {
+            display: inline-flex;
+            align-items: center;
+        }
+        .ct-switch {
+            position: relative;
+            width: 84px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+        .ct-switch-track {
+            width: 100%;
+            height: 100%;
+            background: #fbcfe8;
+            border-radius: 999px;
+            transition: background 0.25s ease;
+        }
+        .ct-switch-thumb {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 999px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: transform 0.25s ease;
+        }
+        #pregnant-mode:checked + .ct-toggle-label .ct-switch-track {
+            background: #22c55e;
+        }
+        #pregnant-mode:checked + .ct-toggle-label .ct-switch-thumb {
+            transform: translateX(50px);
+        }
         .ct-btn {
             width: 100%;
-            background: linear-gradient(135deg, #8427db, #be185d);
+            border: 0;
+            background: linear-gradient(135deg, #ec4899, #db2777);
             color: white;
-            border: none;
-            padding: 16px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 14px;
+            padding: 15px 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
         }
         .ct-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(219, 39, 119, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(219, 39, 119, 0.2);
+        }
+        .ct-error {
+            color: #dc2626;
+            text-align: center;
+            margin: 2px 0 0;
+            font-size: 0.92rem;
+            min-height: 22px;
         }
         .ct-results {
-            padding: 20px 25px;
-            background: #fdf4ff;
-            border-top: 1px solid #f3e8ff;
+            padding: 0 20px 20px;
         }
         .ct-results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 14px;
-            margin: 20px 0;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
         }
         .ct-result-card {
             background: white;
+            border: 1px solid #f9a8d4;
+            border-radius: 18px;
             padding: 16px;
-            border-radius: 16px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .ct-result-icon { font-size: 28px; margin-bottom: 8px; }
-        .ct-result-label { font-size: 0.85rem; color: #6b7280; font-weight: 500; }
-        .ct-result-value { font-size: 1.1rem; font-weight: 700; color: #831843; margin: 4px 0; }
-        .ct-result-sub { font-size: 0.8rem; color: #9f1239; }
+        .ct-result-icon { font-size: 26px; margin-bottom: 8px; }
+        .ct-result-label {
+            color: #be185d;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .ct-result-value {
+            color: #4a044e;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.5;
+        }
         .ct-tip {
-            background: #fef3c7;
-            padding: 14px;
-            border-radius: 12px;
+            margin-top: 14px;
+            background: #fff1f7;
+            border: 1px solid #fbcfe8;
+            border-radius: 18px;
+            padding: 14px 16px;
+            color: #9d174d;
+            font-size: 0.94rem;
+            line-height: 1.6;
             text-align: center;
-            font-size: 0.95rem;
-            margin: 18px 0;
-            color: #92400e;
         }
-        .ct-error { color: #ef4444; text-align: center; margin: 12px 0; font-size: 0.9rem; min-height: 20px; }
-        .ct-disclaimer { font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 20px; line-height: 1.4; }
+        .ct-disclaimer {
+            padding: 0 20px 22px;
+            color: #6b7280;
+            font-size: 0.76rem;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .ct-reset-btn {
+            width: 100%;
+            margin-top: 12px;
+            background: transparent;
+            color: #db2777;
+            border: 0;
+            font-weight: 700;
+            padding: 12px 0 4px;
+            cursor: pointer;
+        }
+        @media (min-width: 768px) {
+            .ct-form,
+            .ct-results,
+            .ct-disclaimer {
+                padding-left: 28px;
+                padding-right: 28px;
+            }
+            .ct-results-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
 
         .lesson-card { transition: all 0.3s ease; }
         .lesson-card:hover {
@@ -334,39 +443,38 @@
             </div>
         </div>
 
+               <!-- Calculator Section (full language switching + original logic preserved) -->
         <div class="ct-wrap mt-16">
             <div class="ct-card max-w-2xl mx-auto">
                 <div class="ct-header">
-                    <i class="fas fa-calendar-alt ct-icon"></i>
-                    <h3 data-en="Menstrual Cycle &amp; Pregnancy Calculator" data-rw="Bara Ukwezi kw'Umugore">Bara Ukwezi kw'Umugore</h3>
-                    <p data-en="Track your cycle, predict ovulation &amp; due date" data-rw="Andika igihe cyawe, ibara igihe cy'imbuto n'itariki y'igihe">Andika igihe cyawe, ibara igihe cy'imbuto n'itariki y'igihe</p>
+                    <h3 data-en="Menstrual Cycle Calculator" data-rw="Bara ukwezi kwawe">Bara ukwezi kwawe</h3>
+                    <p data-en="Use your dates to estimate your next period, fertile days, and due date" data-rw="Koresha amatariki yawe ubare igihe cy'imihango ikurikira, iminsi y'uburumbuke n'itariki y'igihe">Koresha amatariki yawe ubare igihe cy'imihango ikurikira, iminsi y'uburumbuke n'itariki y'igihe</p>
                 </div>
 
                 <div class="ct-form">
                     <div class="ct-input-group">
-                        <label for="lmp" data-en="First day of last menstrual period" data-rw="Itariki ya mbere y'imyanya ya nyuma y'ukwezi">Itariki ya mbere y'imyanya ya nyuma y'ukwezi</label>
+                        <label for="lmp" data-en="Date your last period started" data-rw="Itariki ya nyuma uherukira kubona imihango">Itariki ya nyuma uherukira kubona imihango</label>
                         <input type="date" id="lmp" class="ct-input" value="2026-04-01">
                     </div>
 
                     <div class="ct-input-group">
-                        <label for="cycle-length" data-en="Average cycle length (days)" data-rw="Igihe cy'imyanya yawe (iminsi)">Igihe cy'imyanya yawe (iminsi)</label>
+                        <label for="cycle-length" data-en="How many days your cycle lasts" data-rw="Iminsi imihango yawe imara">Iminsi imihango yawe imara</label>
                         <input type="number" id="cycle-length" class="ct-input" value="28" min="21" max="35">
                     </div>
 
-                    <div class="flex items-center gap-3 text-sm">
+                    <div class="ct-toggle-row">
+                        <span class="ct-toggle-text" data-en="My cycle is irregular" data-rw="Imihango yange irahindagurika">Imihango yange irahindagurika</span>
                         <input type="checkbox" id="pregnant-mode" class="hidden" onchange="togglePregnantMode()">
-                        <label for="pregnant-mode" class="flex-1 cursor-pointer">
-                            <div class="ct-toggle-slider flex items-center justify-between px-4 py-2 rounded-3xl text-xs font-medium">
-                                <span data-en="I think I might be pregnant" data-rw="Ntekereza ko nshobora kuba ndi ingwate">Ntekereza ko nshobora kuba ndi ingwate</span>
-                                <span class="bg-white text-pink-600 px-3 py-1 rounded-3xl text-[10px] font-bold">ON</span>
-                            </div>
+                        <label for="pregnant-mode" class="ct-toggle-label cursor-pointer">
+                            <span class="ct-switch">
+                                <span class="ct-switch-track"></span>
+                                <span class="ct-switch-thumb"></span>
+                            </span>
                         </label>
                     </div>
 
-                    <button onclick="calculateCycle()" 
-                            class="ct-btn flex items-center justify-center gap-2">
-                        <i class="fas fa-calculator"></i>
-                        <span data-en="Calculate Now" data-rw="Bara Ubu">Bara Ubu</span>
+                    <button onclick="calculateCycle()" class="ct-btn">
+                        <span data-en="Calculate Your Period Now" data-rw="Bara imihango yawe ubu">Bara imihango yawe ubu</span>
                     </button>
 
                     <div id="calc-error" class="ct-error"></div>
@@ -376,17 +484,17 @@
                     <div class="ct-results-grid">
                         <div class="ct-result-card">
                             <i class="fas fa-calendar-day ct-result-icon text-pink-500"></i>
-                            <div class="ct-result-label" data-en="Next Period" data-rw="Imyanya ikurikira">Imyanya ikurikira</div>
+                            <div class="ct-result-label" data-en="Next Period" data-rw="Imihango ikurikira">Imihango ikurikira</div>
                             <div id="next-period" class="ct-result-value">—</div>
                         </div>
                         <div class="ct-result-card">
                             <i class="fas fa-egg ct-result-icon text-amber-500"></i>
-                            <div class="ct-result-label" data-en="Fertile Window" data-rw="Igihe cy'imbuto">Igihe cy'imbuto</div>
+                            <div class="ct-result-label" data-en="Fertile Window" data-rw="Igihe cy'uburumbuke">Igihe cy'uburumbuke</div>
                             <div id="fertile-window" class="ct-result-value">—</div>
                         </div>
                         <div class="ct-result-card">
                             <i class="fas fa-baby ct-result-icon text-purple-500"></i>
-                            <div class="ct-result-label" data-en="Estimated Due Date" data-rw="Itariki y'igihe cy'imbere">Itariki y'igihe cy'imbere</div>
+                            <div class="ct-result-label" data-en="Estimated Due Date" data-rw="Itariki y'igihe">Itariki y'igihe</div>
                             <div id="due-date" class="ct-result-value">—</div>
                         </div>
                     </div>
@@ -398,10 +506,8 @@
                         </span>
                     </div>
 
-                    <button onclick="resetCalculator()" 
-                            class="w-full text-pink-600 font-medium py-3 flex items-center justify-center gap-2 hover:bg-pink-50 rounded-2xl">
-                        <i class="fas fa-redo"></i>
-                        <span data-en="Calculate Again" data-rw="Ibara Nanone">Ibara Nanone</span>
+                    <button onclick="resetCalculator()" class="ct-reset-btn">
+                        <span data-en="Calculate Again" data-rw="Bara nanone">Bara nanone</span>
                     </button>
                 </div>
 
@@ -412,7 +518,8 @@
                 </div>
             </div>
         </div>
-    </div>
+
+
 
     <footer style="background-color: #1d4ed8; color: white; margin-top: 3rem;">
     <div style="max-width: 1152px; margin: 0 auto; padding: 2.5rem 1.5rem;">
