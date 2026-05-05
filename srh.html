@@ -53,6 +53,28 @@
         #mobile-menu { display: none; }
         #mobile-menu.open { display: flex; }
 
+         /* Avatar responsive */
+        #ai-avatar {
+            bottom: 1rem;
+            right: 1rem;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar { bottom: 2rem; right: 2rem; }
+        }
+        #ai-avatar .avatar-img-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
+        }
+        #ai-avatar .tooltip {
+            width: 220px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .tooltip { width: 288px; }
+        }
+
                /* Calculator styles */
         .ct-wrap {
             padding: 20px 10px;
