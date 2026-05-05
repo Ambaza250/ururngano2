@@ -113,6 +113,27 @@
 .about-section li:last-child {
   margin-bottom: 0;
 }
+        /* Avatar responsive */
+        #ai-avatar {
+            bottom: 1rem;
+            right: 1rem;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar { bottom: 2rem; right: 2rem; }
+        }
+        #ai-avatar .avatar-img-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
+        }
+        #ai-avatar .tooltip {
+            width: 220px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .tooltip { width: 288px; }
+        }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -126,6 +147,8 @@
     font-size: 1.6rem;
   }
 }
+
+        
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
@@ -330,5 +353,29 @@
 
         window.onload = () => switchLanguage('rw');
     </script>
+
+    <!-- Urungano AI Sign Language Avatar -->
+    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
+        <div class="relative">
+            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
+                <img src="about us.gif" 
+                     alt="Urungano AI Signing" 
+                     class="w-full h-full object-cover">
+            </div>
+            
+            
+        </div>
+        
+        <!-- Hover Tooltip -->
+        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
+            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm" >
+                🖐️ About us
+            </p>
+            <p class="text-slate-600 text-xs leading-relaxed" 
+          data-en="Information about us, our mission and our objectives"
+               data-rw="Amakuru kuri twe, inshingano n'intego yacu.">
+Amakuru kuri twe, inshingano n'intego yacu.</p>
+        </div>
+    </div>
 </body>
 </html>
