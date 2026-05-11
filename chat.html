@@ -28,7 +28,6 @@
       getDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
@@ -42,7 +41,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     let currentUser = null;
     let currentUserProfile = null;
@@ -50,10 +48,6 @@
     let unsubscribeMessages = null;
     let isEnglish = false;
     const userCache = {};
-
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let isRecording = false;
 
     function t(rw, en) {
       return isEnglish ? en : rw;
@@ -188,9 +182,7 @@
     function openGroup(group) {
       currentTarget = { type: "group", data: group };
       markActiveItem("group", group.id);
-      document.getElementById("chat-header").textContent = isEnglish 
-        ? `Group: ${group.nameEn || group.nameRw}` 
-        : `Itsinda: ${group.nameRw || group.nameEn}`;
+      refreshHeader();
       clearMessages();
       const q = query(collection(db, "groups", group.id, "messages"), orderBy("createdAt"));
       unsubscribeMessages = onSnapshot(q, renderMessages);
@@ -199,13 +191,25 @@
     function openPrivateChat(user) {
       currentTarget = { type: "private", data: user };
       markActiveItem("user", user.uid);
-      document.getElementById("chat-header").textContent = isEnglish 
-        ? `Chatting with ${user.username}` 
-        : `Kuganira na ${user.username}`;
+      refreshHeader();
       clearMessages();
       const chatId = [currentUser.uid, user.uid].sort().join("_");
       const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
       unsubscribeMessages = onSnapshot(q, renderMessages);
+    }
+
+    function refreshHeader() {
+      if (!currentTarget) return;
+      const header = document.getElementById("chat-header");
+      if (currentTarget.type === "group") {
+        header.textContent = isEnglish 
+          ? `Group: ${currentTarget.data.nameEn || currentTarget.data.nameRw}`
+          : `Itsinda: ${currentTarget.data.nameRw || currentTarget.data.nameEn}`;
+      } else {
+        header.textContent = isEnglish 
+          ? `Chatting with ${currentTarget.data.username}`
+          : `Kuganira na ${currentTarget.data.username}`;
+      }
     }
 
     function renderMessages(snapshot) {
@@ -218,13 +222,9 @@
         const div = document.createElement("div");
         div.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
 
-        const content = msg.audioUrl 
-          ? `<audio controls src="${msg.audioUrl}" style="width:100%; max-width:280px;"></audio>`
-          : `<div>${escapeHtml(msg.text)}</div>`;
-
         div.innerHTML = `
           ${msg.senderId !== currentUser.uid ? `<span class="sender-name">${escapeHtml(userCache[msg.senderId]?.username || "User")}</span>` : ''}
-          ${content}
+          <div>${escapeHtml(msg.text)}</div>
           <small>${time}</small>
         `;
         container.appendChild(div);
@@ -253,84 +253,17 @@
       input.value = "";
     };
 
-    // ===================== VOICE NOTES =====================
-    async function startRecording() {
-      if (isRecording) return;
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-        audioChunks = [];
-
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.onstop = async () => {
-          if (audioChunks.length > 0) {
-            const blob = new Blob(audioChunks, { type: 'audio/webm' });
-            await uploadVoiceNote(blob);
-          }
-        };
-
-        mediaRecorder.start();
-        isRecording = true;
-        updateVoiceButton();
-      } catch (err) {
-        alert("Microphone ntishoboye gufungura.\nKoresha Chrome kandi uhe uruhushya.");
-      }
-    }
-
-    function stopRecording() {
-      if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        updateVoiceButton();
-      }
-    }
-
-    function updateVoiceButton() {
-      const btn = document.getElementById("voice-btn");
-      if (isRecording) {
-        btn.style.backgroundColor = "#ef4444";
-        btn.textContent = "⏹️";
-      } else {
-        btn.style.backgroundColor = "#10b981";
-        btn.textContent = "🎤";
-      }
-    }
-
-    async function uploadVoiceNote(audioBlob) {
-      if (!currentTarget) return;
-      const filename = `voice_${Date.now()}.webm`;
-      const storageRef = ref(storage, `voice_notes/${currentUser.uid}/${filename}`);
-
-      try {
-        await uploadBytes(storageRef, audioBlob);
-        const url = await getDownloadURL(storageRef);
-
-        const messageData = {
-          audioUrl: url,
-          senderId: currentUser.uid,
-          senderName: currentUserProfile?.username || "User",
-          createdAt: serverTimestamp()
-        };
-
-        if (currentTarget.type === "group") {
-          await addDoc(collection(db, "groups", currentTarget.data.id, "messages"), messageData);
-        } else if (currentTarget.type === "private") {
-          const chatId = [currentUser.uid, currentTarget.data.uid].sort().join("_");
-          await addDoc(collection(db, "chats", chatId, "messages"), messageData);
-        }
-      } catch (e) {
-        console.error(e);
-        alert("Ntibishoboye kohereza voice note.");
-      }
-    }
-
     window.logout = () => signOut(auth);
 
     function refreshLanguage() {
-      document.getElementById("lang-toggle").textContent = isEnglish ? "English | Kinyarwanda" : "Kinyarwanda | English";
-      document.getElementById("chat-header").textContent = currentTarget 
-        ? (isEnglish ? `Chatting with ${currentTarget.data.username}` : `Kuganira na ${currentTarget.data.username}`)
-        : (isEnglish ? "Choose a group or person" : "Hitamo itsinda cyangwa umuntu");
+      // Translate static elements
+      document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
+      document.getElementById("users-title").textContent = t("Abandi bakoresha", "Other Users");
+      document.getElementById("send-btn").textContent = t("Ohereza", "Send");
+      document.getElementById("message-input").placeholder = t("Andika message hano...", "Type your message here...");
+      document.getElementById("lang-toggle").textContent = isEnglish ? "Kinyarwanda | English" : "English | Kinyarwanda";
+
+      if (currentTarget) refreshHeader();
     }
 
     window.toggleLanguage = () => {
@@ -339,14 +272,6 @@
     };
 
     // ===================== INIT =====================
-    document.addEventListener("DOMContentLoaded", () => {
-      const voiceBtn = document.getElementById("voice-btn");
-      voiceBtn.addEventListener("click", () => {
-        if (isRecording) stopRecording();
-        else startRecording();
-      });
-    });
-
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
@@ -471,15 +396,6 @@
       font-weight: 600;
       cursor: pointer;
     }
-    #voice-btn {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      font-size: 24px;
-      padding: 0;
-      background: #10b981;
-      flex-shrink: 0;
-    }
 
     .group-item, .user-item {
       padding: 14px 16px;
@@ -527,10 +443,17 @@
           <button onclick="window.location.href='index.html'" style="background:#10b981;">← Ahabanza</button>
         </div>
 
-        <h3 style="margin:20px 0 10px;">Amatsinda</h3>
+        <div style="margin:15px 0; text-align:right;">
+          <span onclick="toggleLanguage()" id="lang-toggle" 
+                style="background:#f1f5f9; padding:8px 16px; border-radius:30px; cursor:pointer; font-weight:600;">
+            English | Kinyarwanda
+          </span>
+        </div>
+
+        <h3 id="groups-title">Amatsinda</h3>
         <div id="groups-list"></div>
 
-        <h3 style="margin:25px 0 10px;">Abandi bakoresha</h3>
+        <h3 id="users-title" style="margin-top:25px;">Abandi bakoresha</h3>
         <div id="users-list"></div>
 
         <button onclick="logout()" style="margin-top:30px; width:100%; background:#ef4444; padding:14px;">Sohoka</button>
@@ -542,8 +465,7 @@
         
         <div class="input-area">
           <input id="message-input" placeholder="Andika message hano..." onkeypress="if(event.key==='Enter') sendMessage()">
-          <button onclick="sendMessage()">Ohereza</button>
-          <button id="voice-btn">🎤</button>
+          <button onclick="sendMessage()" id="send-btn">Ohereza</button>
         </div>
       </div>
     </div>
