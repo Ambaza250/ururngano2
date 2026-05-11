@@ -95,11 +95,84 @@
       }
     }
 
-    // ================== AUTH FUNCTIONS (unchanged) ==================
-    window.signUp = async () => { /* ... same as before ... */ };
-    window.logIn = async () => { /* ... same as before ... */ };
+    window.signUp = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const username = document.getElementById("username").value.trim();
+      const status = document.getElementById("status");
 
-    async function loadGroups() { /* ... same as before ... */ }
+      if (!username || !email || !password) {
+        status.innerHTML = `<span style="color:red;">${t("Nyuza amakuru yose", "Please fill in all fields")}</span>`;
+        return;
+      }
+
+      status.textContent = t("Tegereza...", "Please wait...");
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await updateProfile(user, { displayName: username });
+        await saveUserProfile(user, username);
+        status.innerHTML = `<span style="color:green;">${t("Iyandikishwa ryagenze neza!", "Sign up successful!")}</span>`;
+      } catch (e) {
+        status.innerHTML = `<span style="color:red;">${escapeHtml(e.message)}</span>`;
+      }
+    };
+
+    window.logIn = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const status = document.getElementById("status");
+
+      if (!email || !password) {
+        status.innerHTML = `<span style="color:red;">${t("Nyuza email n'ijambo ry'ibanga", "Enter email and password")}</span>`;
+        return;
+      }
+
+      status.textContent = t("Tegereza...", "Please wait...");
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (e) {
+        status.innerHTML = `<span style="color:red;">${escapeHtml(e.message)}</span>`;
+      }
+    };
+
+    async function loadGroups() {
+      const list = document.getElementById("groups-list");
+      list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+
+      const snapshot = await getDocs(collection(db, "groups"));
+      list.innerHTML = "";
+
+      const groups = [];
+      snapshot.forEach(docSnap => {
+        const group = docSnap.data();
+        if (group && group.id && (group.nameRw || group.nameEn)) {
+          groups.push(group);
+        }
+      });
+
+      groups.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      if (!groups.length) {
+        list.innerHTML = `<p style="color:#64748b;">${t("Nta matsinda arimo.", "No groups found.")}</p>`;
+        return;
+      }
+
+      groups.forEach(group => {
+        const div = document.createElement("div");
+        div.className = "group-item sidebar-item";
+        div.dataset.type = "group";
+        div.dataset.id = group.id;
+        div.innerHTML = `
+          <strong>${escapeHtml(isEnglish ? (group.nameEn || group.nameRw) : (group.nameRw || group.nameEn))}</strong>
+          <small>${escapeHtml(isEnglish ? (group.descEn || "") : (group.descRw || ""))}</small>
+        `;
+        div.onclick = () => openGroup(group);
+        list.appendChild(div);
+      });
+    }
 
     async function loadUsers() {
       const list = document.getElementById("users-list");
@@ -111,8 +184,11 @@
       const users = [];
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
-        if (!data || !data.uid || data.uid === currentUser.uid) return;
+        if (!data || !data.uid) return;
+
         userCache[data.uid] = data;
+
+        if (data.uid === currentUser.uid) return;
         users.push(data);
       });
 
@@ -130,14 +206,70 @@
         div.dataset.id = user.uid;
         div.innerHTML = `
           <strong>${escapeHtml(user.username || "User")}</strong>
-          <!-- Email removed as requested -->
+          <!-- Email hidden as requested -->
         `;
         div.onclick = () => openPrivateChat(user);
         list.appendChild(div);
       });
     }
 
-    // ... (markActiveItem, clearMessages, openGroup, openPrivateChat remain the same)
+    function markActiveItem(type, id) {
+      document.querySelectorAll(".sidebar-item").forEach(item => {
+        item.classList.toggle(
+          "active",
+          item.dataset.type === type && item.dataset.id === id
+        );
+      });
+    }
+
+    function clearMessages() {
+      document.getElementById("messages").innerHTML = "";
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+        unsubscribeMessages = null;
+      }
+    }
+
+    function openGroup(group) {
+      currentTarget = { type: "group", data: group };
+      markActiveItem("group", group.id);
+
+      document.getElementById("chat-header").textContent = isEnglish
+        ? `Group: ${group.nameEn || group.nameRw}`
+        : `Itsinda: ${group.nameRw || group.nameEn}`;
+
+      clearMessages();
+
+      const q = query(
+        collection(db, "groups", group.id, "messages"),
+        orderBy("createdAt")
+      );
+
+      unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        renderMessages(snapshot);
+      });
+    }
+
+    function openPrivateChat(user) {
+      currentTarget = { type: "private", data: user };
+      markActiveItem("user", user.uid);
+
+      document.getElementById("chat-header").textContent = isEnglish
+        ? `Chatting with ${user.username || user.email}`
+        : `Kuganira na ${user.username || user.email}`;
+
+      clearMessages();
+
+      const chatId = [currentUser.uid, user.uid].sort().join("_");
+      const q = query(
+        collection(db, "chats", chatId, "messages"),
+        orderBy("createdAt")
+      );
+
+      unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        renderMessages(snapshot);
+      });
+    }
 
     function renderMessages(snapshot) {
       const div = document.getElementById("messages");
@@ -145,25 +277,28 @@
 
       snapshot.forEach(d => {
         const msg = d.data();
-        const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString(isEnglish ? "en-US" : "rw-RW", {
-          hour: "2-digit", minute: "2-digit"
-        }) : "";
+        const time = msg.createdAt
+          ? new Date(msg.createdAt.toDate()).toLocaleTimeString(isEnglish ? "en-US" : "rw-RW", {
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+          : "";
 
         const senderName = userCache[msg.senderId]?.username || msg.senderName || "User";
 
         const mdiv = document.createElement("div");
         mdiv.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
 
-        let content = '';
+        let contentHTML = '';
         if (msg.audioUrl) {
-          content = `<audio controls src="${msg.audioUrl}" style="width:100%; max-width:280px;"></audio>`;
+          contentHTML = `<audio controls src="${msg.audioUrl}" style="width:100%; max-width:260px; margin-top:6px;"></audio>`;
         } else {
-          content = `<div>${escapeHtml(msg.text)}</div>`;
+          contentHTML = `<div>${escapeHtml(msg.text)}</div>`;
         }
 
         mdiv.innerHTML = `
           ${msg.senderId === currentUser.uid ? "" : `<span class="sender-name">${escapeHtml(senderName)}</span>`}
-          ${content}
+          ${contentHTML}
           <small>${escapeHtml(time)}</small>
         `;
         div.appendChild(mdiv);
@@ -196,12 +331,12 @@
       input.value = "";
     };
 
-    // ================== VOICE NOTE FUNCTIONS ==================
+    // ================== VOICE NOTE ==================
     window.startRecording = async () => {
       if (isRecording) return;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
         audioChunks = [];
 
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
@@ -213,9 +348,9 @@
         mediaRecorder.start();
         isRecording = true;
         document.getElementById("voice-btn").style.background = "#ef4444";
-        document.getElementById("voice-btn").textContent = "⏹️";
+        document.getElementById("voice-btn").innerHTML = "⏹️";
       } catch (err) {
-        alert("Ntibishoboye gufungura microphone: " + err.message);
+        alert("Ntibishoboye gufungura microphone.");
       }
     };
 
@@ -224,7 +359,7 @@
         mediaRecorder.stop();
         isRecording = false;
         document.getElementById("voice-btn").style.background = "#10b981";
-        document.getElementById("voice-btn").textContent = "🎤";
+        document.getElementById("voice-btn").innerHTML = "🎤";
       }
     };
 
@@ -260,35 +395,349 @@
 
     window.logout = () => signOut(auth);
 
-    // ... rest of your functions (refreshLanguage, onAuthStateChanged, etc.) remain the same
-    // Just make sure you call loadUsers() and loadGroups() as before
+    function refreshLanguage() {
+      const text = isEnglish ? "English | Kinyarwanda" : "Kinyarwanda | English";
+      document.getElementById("lang-toggle").textContent = text;
+      document.getElementById("lang-toggle-auth").textContent = text;
+
+      document.getElementById("chat-subtitle").textContent = t("Kuganira mu bwiherezo", "Private & Safe Conversation");
+      document.getElementById("signup-btn").textContent = t("Iyandikishe", "Sign Up");
+      document.getElementById("login-btn").textContent = t("Kwinjira", "Login");
+      document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
+      document.getElementById("groups-note").textContent = t("Abakoresha bose baba muri aya matsinda.", "Everyone can use these groups.");
+      document.getElementById("users-title").textContent = t("Abandi bakoresha", "Other Users");
+      document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
+      document.getElementById("send-btn").textContent = t("Ohereza", "Send");
+      document.getElementById("back-home-auth").textContent = t("← Ahabanza", "← Home");
+      document.getElementById("back-home-chat").textContent = t("← Ahabanza", "← Home");
+      document.getElementById("message-input").placeholder = t("Andika message hano...", "Type your message here...");
+
+      if (!currentTarget) {
+        document.getElementById("chat-header").textContent = t(
+          "Hitamo itsinda cyangwa umuntu ushaka kuganiramo",
+          "Choose a group or person to start chatting"
+        );
+      } else if (currentTarget.type === "group") {
+        document.getElementById("chat-header").textContent = isEnglish
+          ? `Group: ${currentTarget.data.nameEn || currentTarget.data.nameRw}`
+          : `Itsinda: ${currentTarget.data.nameRw || currentTarget.data.nameEn}`;
+      } else if (currentTarget.type === "private") {
+        document.getElementById("chat-header").textContent = isEnglish
+          ? `Chatting with ${currentTarget.data.username || currentTarget.data.email}`
+          : `Kuganira na ${currentTarget.data.username || currentTarget.data.email}`;
+      }
+    }
+
+    window.toggleLanguage = () => {
+      isEnglish = !isEnglish;
+      refreshLanguage();
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await saveUserProfile(user);
+        await loadCurrentUserProfile(user);
+        showSection("chat");
+        refreshLanguage();
+        await loadGroups();
+        await loadUsers();
+      } else {
+        currentUser = null;
+        currentUserProfile = null;
+        currentTarget = null;
+        clearMessages();
+        showSection("auth");
+      }
+    });
   </script>
 
-  <!-- Your existing <style> remains unchanged -->
   <style>
-    /* ... (all your previous CSS) ... */
+    :root { --primary: #10b981; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      min-height: 100vh;
+      padding: 10px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+      height: 96vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 25px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .logo { height: 52px; border-radius: 8px; }
+
+    .toggle {
+      background: #f1f5f9;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .back-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #auth-section {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .auth-card {
+      background: white;
+      padding: 40px 35px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    #chat-section {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    .sidebar {
+      width: 340px;
+      background: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 18px 25px;
+      background: #10b981;
+      color: white;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    #messages {
+      flex: 1;
+      min-height: 0;
+      padding: 25px;
+      overflow-y: auto;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 14px 18px;
+      border-radius: 20px;
+      font-size: 15.5px;
+      line-height: 1.45;
+    }
+
+    .sent {
+      background: #10b981;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .received {
+      background: white;
+      color: #1f2937;
+      align-self: flex-start;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .sender-name {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #0f766e;
+    }
+
+    .message small {
+      display: block;
+      margin-top: 8px;
+      opacity: 0.75;
+      font-size: 11px;
+    }
+
+    .input-area {
+      padding: 20px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    #message-input {
+      flex: 1;
+      padding: 16px 22px;
+      border: 2px solid #e2e8f0;
+      border-radius: 50px;
+      outline: none;
+    }
+
+    button {
+      padding: 14px 28px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .group-item, .user-item {
+      padding: 14px 16px;
+      margin: 8px 0;
+      background: white;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s ease;
+    }
+
+    .group-item:hover, .user-item:hover {
+      background: #f0fdf4;
+      border-color: #10b981;
+    }
+
+    .group-item.active, .user-item.active {
+      background: #dcfce7;
+      border-color: #10b981;
+    }
+
+    .group-item strong, .user-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .group-item small, .user-item small {
+      display: block;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .section-divider {
+      margin-top: 18px;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        height: auto;
+        min-height: 96vh;
+      }
+      #chat-section {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Auth section same as before -->
+    <div id="auth-section">
+      <div class="auth-card">
+        <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo" style="margin-bottom:20px;">
+        <h1>Urungano Chat</h1>
+        <p id="chat-subtitle">Kuganira mu bwiherezo</p>
+
+        <input id="username" type="text" placeholder="Username (nk' @Mukama250)" style="width:100%; padding:14px; margin:8px 0; border:1px solid #cbd5e1; border-radius:12px;">
+        <input id="email" type="email" placeholder="Email yawe" style="width:100%; padding:14px; margin:8px 0; border:1px solid #cbd5e1; border-radius:12px;">
+        <input id="password" type="password" placeholder="Password" style="width:100%; padding:14px; margin:8px 0; border:1px solid #cbd5e1; border-radius:12px;">
+
+        <div style="margin:25px 0 10px;">
+          <button onclick="signUp()" id="signup-btn" style="width:100%; padding:16px;">Iyandikishe</button>
+          <button onclick="logIn()" id="login-btn" style="width:100%; padding:16px; background:#64748b; margin-top:12px;">Kwinjira</button>
+        </div>
+
+        <div id="status" style="margin-top:15px; font-weight:500; min-height:40px;"></div>
+
+        <button onclick="window.location.href='index.html'" id="back-home-auth" class="back-btn" style="margin-top:20px; width:100%;">← Ahabanza</button>
+
+        <div style="margin-top:25px;">
+          <span onclick="toggleLanguage()" class="toggle" id="lang-toggle-auth">Kinyarwanda | English</span>
+        </div>
+      </div>
+    </div>
 
     <div id="chat-section" style="display:none;">
-      <!-- Sidebar same -->
+      <div class="sidebar">
+        <div class="header-bar" style="border:none; padding:15px 0;">
+          <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span onclick="toggleLanguage()" class="toggle" id="lang-toggle">Kinyarwanda | English</span>
+            <button onclick="window.location.href='index.html'" id="back-home-chat" class="back-btn">← Ahabanza</button>
+          </div>
+        </div>
+
+        <h3 id="groups-title">Amatsinda</h3>
+        <p id="groups-note" style="color:#64748b; font-size:13px; margin:8px 0 12px;">Abakoresha bose baba muri aya matsinda.</p>
+        <div id="groups-list"></div>
+
+        <div class="section-divider" id="users-title">Abandi bakoresha</div>
+        <div id="users-list"></div>
+
+        <button onclick="logout()" id="logout-btn" style="margin-top:30px; width:100%; background:#ef4444; padding:14px;">Sohoka</button>
+      </div>
 
       <div class="chat-area">
-        <div class="chat-header" id="chat-header">...</div>
-        
+        <div class="chat-header" id="chat-header">Hitamo itsinda cyangwa umuntu ushaka kuganiramo</div>
         <div id="messages"></div>
-
         <div class="input-area">
-          <input id="message-input" type="text" placeholder="Andika message hano...">
+          <input id="message-input" placeholder="Andika message hano..." onkeypress="if(event.key==='Enter') sendMessage()">
           <button onclick="sendMessage()" id="send-btn">Ohereza</button>
           
           <!-- Voice Note Button -->
           <button id="voice-btn" 
                   onclick="if(isRecording) stopRecording(); else startRecording();"
-                  style="background:#10b981; width:52px; height:52px; border-radius:50%; font-size:24px;">
+                  style="background:#10b981; width:52px; height:52px; border-radius:50%; font-size:24px; padding:0;">
             🎤
           </button>
         </div>
