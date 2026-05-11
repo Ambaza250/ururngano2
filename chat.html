@@ -83,8 +83,7 @@
     }
 
     async function loadCurrentUserProfile(user) {
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
+      const snap = await getDoc(doc(db, "users", user.uid));
       if (snap.exists()) {
         currentUserProfile = snap.data();
         userCache[user.uid] = currentUserProfile;
@@ -104,12 +103,12 @@
         status.innerHTML = `<span style="color:red;">${t("Nyuza amakuru yose", "Please fill all fields")}</span>`;
         return;
       }
-      status.textContent = "Tegereza...";
+      status.textContent = t("Tegereza...", "Please wait...");
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(cred.user, { displayName: username });
         await saveUserProfile(cred.user, username);
-        status.innerHTML = `<span style="color:green;">Iyandikishwa ryagenze neza!</span>`;
+        status.innerHTML = `<span style="color:green;">${t("Iyandikishwa ryagenze neza!", "Sign up successful!")}</span>`;
       } catch (e) {
         status.innerHTML = `<span style="color:red;">${escapeHtml(e.message)}</span>`;
       }
@@ -119,8 +118,11 @@
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
       const status = document.getElementById("status");
-      if (!email || !password) return status.innerHTML = `<span style="color:red;">Email n'ijambo ry'ibanga bira needed</span>`;
-      status.textContent = "Tegereza...";
+      if (!email || !password) {
+        status.innerHTML = `<span style="color:red;">${t("Nyuza email n'ijambo ry'ibanga", "Enter email and password")}</span>`;
+        return;
+      }
+      status.textContent = t("Tegereza...", "Please wait...");
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (e) {
@@ -197,7 +199,9 @@
     function openPrivateChat(user) {
       currentTarget = { type: "private", data: user };
       markActiveItem("user", user.uid);
-      document.getElementById("chat-header").textContent = `Kuganira na ${user.username || "User"}`;
+      document.getElementById("chat-header").textContent = isEnglish 
+        ? `Chatting with ${user.username}` 
+        : `Kuganira na ${user.username}`;
       clearMessages();
       const chatId = [currentUser.uid, user.uid].sort().join("_");
       const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
@@ -249,7 +253,7 @@
       input.value = "";
     };
 
-    // ===================== VOICE NOTES (FIXED) =====================
+    // ===================== VOICE NOTES =====================
     async function startRecording() {
       if (isRecording) return;
       try {
@@ -259,15 +263,17 @@
 
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.onstop = async () => {
-          const blob = new Blob(audioChunks, { type: 'audio/webm' });
-          await uploadVoiceNote(blob);
+          if (audioChunks.length > 0) {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            await uploadVoiceNote(blob);
+          }
         };
 
         mediaRecorder.start();
         isRecording = true;
         updateVoiceButton();
       } catch (err) {
-        alert("Microphone ntishoboye gufungura.\nKoresha Chrome kandi uhe permission.");
+        alert("Microphone ntishoboye gufungura.\nKoresha Chrome kandi uhe uruhushya.");
       }
     }
 
@@ -308,7 +314,7 @@
 
         if (currentTarget.type === "group") {
           await addDoc(collection(db, "groups", currentTarget.data.id, "messages"), messageData);
-        } else {
+        } else if (currentTarget.type === "private") {
           const chatId = [currentUser.uid, currentTarget.data.uid].sort().join("_");
           await addDoc(collection(db, "chats", chatId, "messages"), messageData);
         }
@@ -320,7 +326,27 @@
 
     window.logout = () => signOut(auth);
 
+    function refreshLanguage() {
+      document.getElementById("lang-toggle").textContent = isEnglish ? "English | Kinyarwanda" : "Kinyarwanda | English";
+      document.getElementById("chat-header").textContent = currentTarget 
+        ? (isEnglish ? `Chatting with ${currentTarget.data.username}` : `Kuganira na ${currentTarget.data.username}`)
+        : (isEnglish ? "Choose a group or person" : "Hitamo itsinda cyangwa umuntu");
+    }
+
+    window.toggleLanguage = () => {
+      isEnglish = !isEnglish;
+      refreshLanguage();
+    };
+
     // ===================== INIT =====================
+    document.addEventListener("DOMContentLoaded", () => {
+      const voiceBtn = document.getElementById("voice-btn");
+      voiceBtn.addEventListener("click", () => {
+        if (isRecording) stopRecording();
+        else startRecording();
+      });
+    });
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
@@ -328,21 +354,10 @@
         showSection("chat");
         await loadGroups();
         await loadUsers();
+        refreshLanguage();
       } else {
         showSection("auth");
       }
-    });
-
-    // Attach voice button listener
-    document.addEventListener("DOMContentLoaded", () => {
-      const voiceBtn = document.getElementById("voice-btn");
-      voiceBtn.addEventListener("click", () => {
-        if (isRecording) {
-          stopRecording();
-        } else {
-          startRecording();
-        }
-      });
     });
   </script>
 
@@ -355,7 +370,7 @@
       padding: 10px;
     }
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: auto;
       background: white;
       border-radius: 20px;
@@ -365,8 +380,16 @@
       display: flex;
       flex-direction: column;
     }
-    .header-bar { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: white; border-bottom: 1px solid #e2e8f0; }
+    .header-bar { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 15px 20px; 
+      background: white; 
+      border-bottom: 1px solid #e2e8f0; 
+    }
     .logo { height: 50px; }
+
     #auth-section { display: none; flex: 1; align-items: center; justify-content: center; }
     .auth-card {
       background: white;
@@ -377,7 +400,13 @@
       max-width: 420px;
       text-align: center;
     }
-    #chat-section { flex: 1; display: none; }
+
+    #chat-section { 
+      flex: 1; 
+      display: none; 
+      flex-direction: row;
+      overflow: hidden;
+    }
     .sidebar {
       width: 340px;
       background: #f8fafc;
@@ -389,12 +418,14 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      min-height: 0;
     }
     .chat-header {
       padding: 18px 25px;
       background: #10b981;
       color: white;
       font-weight: 600;
+      flex-shrink: 0;
     }
     #messages {
       flex: 1;
@@ -414,12 +445,14 @@
     .sent { background: #10b981; color: white; align-self: flex-end; }
     .received { background: white; color: #1f2937; align-self: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .sender-name { font-size: 12px; font-weight: 700; color: #0f766e; margin-bottom: 6px; display: block; }
+
     .input-area {
-      padding: 20px;
+      padding: 15px 20px;
       background: white;
       border-top: 1px solid #e2e8f0;
       display: flex;
       gap: 10px;
+      flex-shrink: 0;
     }
     #message-input {
       flex: 1;
@@ -430,7 +463,7 @@
       font-size: 15px;
     }
     button {
-      padding: 14px 28px;
+      padding: 14px 24px;
       background: #10b981;
       color: white;
       border: none;
@@ -438,6 +471,16 @@
       font-weight: 600;
       cursor: pointer;
     }
+    #voice-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      font-size: 24px;
+      padding: 0;
+      background: #10b981;
+      flex-shrink: 0;
+    }
+
     .group-item, .user-item {
       padding: 14px 16px;
       margin: 8px 0;
@@ -448,9 +491,10 @@
     }
     .group-item:hover, .user-item:hover { background: #f0fdf4; border-color: #10b981; }
     .group-item.active, .user-item.active { background: #dcfce7; border-color: #10b981; }
+
     @media (max-width: 900px) {
-      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
       #chat-section { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
     }
   </style>
 </head>
@@ -461,14 +505,14 @@
       <div class="auth-card">
         <img src="urungano-logo.jpeg" alt="Logo" class="logo" style="margin-bottom:20px;">
         <h1>Urungano Chat</h1>
-        <p>Kuganira mu bwiherezo</p>
+        <p id="chat-subtitle">Kuganira mu bwiherezo</p>
 
         <input id="username" type="text" placeholder="Username" style="width:100%; padding:14px; margin:10px 0; border:1px solid #cbd5e1; border-radius:12px;">
         <input id="email" type="email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; border:1px solid #cbd5e1; border-radius:12px;">
         <input id="password" type="password" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; border:1px solid #cbd5e1; border-radius:12px;">
 
         <button onclick="signUp()" style="width:100%; padding:16px; margin:10px 0;">Iyandikishe</button>
-        <button onclick="logIn()" style="width:100%; padding:16px; background:#64748b;">Kwinjira</button>
+        <button onclick="logIn()" style="width:100%; padding:16px; background:#64748b; margin-top:8px;">Kwinjira</button>
 
         <div id="status" style="margin:15px 0; min-height:40px;"></div>
         <button onclick="window.location.href='index.html'" style="width:100%; padding:14px;">← Ahabanza</button>
@@ -495,10 +539,11 @@
       <div class="chat-area">
         <div class="chat-header" id="chat-header">Hitamo itsinda cyangwa umuntu ushaka kuganiramo</div>
         <div id="messages"></div>
+        
         <div class="input-area">
           <input id="message-input" placeholder="Andika message hano..." onkeypress="if(event.key==='Enter') sendMessage()">
           <button onclick="sendMessage()">Ohereza</button>
-          <button id="voice-btn" style="width:52px; height:52px; border-radius:50%; font-size:24px; padding:0; background:#10b981;">🎤</button>
+          <button id="voice-btn">🎤</button>
         </div>
       </div>
     </div>
