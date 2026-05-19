@@ -8,28 +8,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
 
-        /* Avatar responsive */
-        #ai-avatar {
-            bottom: 1rem;
-            right: 1rem;
-        }
-        @media (min-width: 640px) {
-            #ai-avatar { bottom: 2rem; right: 2rem; }
-        }
-        #ai-avatar .avatar-img-wrap {
-            width: 64px;
-            height: 64px;
-        }
-        @media (min-width: 640px) {
-            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
-        }
-        #ai-avatar .tooltip {
-            width: 220px;
-        }
-        @media (min-width: 640px) {
-            #ai-avatar .tooltip { width: 288px; }
-        }
-
         /* Banner */
         .hero-banner {
             min-height: 260px;
@@ -72,269 +50,51 @@
         .accordion-content.open { max-height: 4000px; }
         .icon { transition: transform 0.3s ease; }
 
+        .voice-note {
+            margin-top: 1.25rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+        .voice-note-label {
+            width: fit-content;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            color: #1d4ed8;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-align: left;
+        }
+        .voice-note audio {
+            width: 100%;
+        }
+
         /* Mobile menu */
         #mobile-menu { display: none; }
         #mobile-menu.open { display: flex; }
 
-        /* Mental health screening tool */
-.screening-card {
-    background: linear-gradient(180deg, #ffffff, #f8fbff);
-    border: 1px solid #dbeafe;
-    border-radius: 28px;
-    box-shadow: 0 18px 45px rgba(37, 99, 235, 0.08);
-    overflow: hidden;
-}
-
-.screening-header {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: white;
-    padding: 1.5rem;
-    text-align: center;
-}
-
-.screening-header h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-.screening-header p {
-    margin-top: 0.5rem;
-    color: rgba(255,255,255,0.9);
-    font-size: 0.95rem;
-}
-
-.screening-body {
-    padding: 1.5rem;
-}
-
-.screening-note {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1e3a8a;
-    border-radius: 18px;
-    padding: 1rem 1.1rem;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: 1.25rem;
-}
-
-.screening-selector {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-}
-
-.screening-type-btn {
-    border: 2px solid;
-    border-radius: 22px;
-    padding: 1.2rem;
-    text-align: left;
-    font-weight: 700;
-    background: white;
-    transition: all 0.25s ease;
-    cursor: pointer;
-}
-
-.screening-type-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
-}
-
-.screening-type-btn small {
-    display: block;
-    font-weight: 500;
-    margin-top: 0.4rem;
-    line-height: 1.5;
-}
-
-.screening-type-btn.phq {
-    border-color: #2563eb;
-    color: #1d4ed8;
-}
-
-.screening-type-btn.phq small {
-    color: #475569;
-}
-
-.screening-type-btn.gad {
-    border-color: #10b981;
-    color: #047857;
-}
-
-.screening-type-btn.gad small {
-    color: #475569;
-}
-
-.screening-progress {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #eff6ff;
-    color: #2563eb;
-    font-weight: 700;
-    border-radius: 999px;
-    padding: 0.55rem 0.95rem;
-    margin-bottom: 1rem;
-    font-size: 0.92rem;
-}
-
-.screening-question {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #0f172a;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-}
-
-.screening-options {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.9rem;
-}
-
-.screening-option {
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    color: #0f172a;
-    border-radius: 20px;
-    padding: 1rem;
-    font-weight: 600;
-    transition: all 0.25s ease;
-    cursor: pointer;
-}
-
-.screening-option:hover {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: white;
-    transform: translateY(-1px);
-}
-
-.screening-result {
-    text-align: center;
-    padding: 0.5rem 0 0.25rem;
-}
-
-.screening-result-badge {
-    width: 82px;
-    height: 82px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.screening-result-badge.safe {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.screening-result-badge.mild {
-    background: #fef9c3;
-    color: #a16207;
-}
-
-.screening-result-badge.moderate {
-    background: #fde68a;
-    color: #b45309;
-}
-
-.screening-result-badge.urgent {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.screening-result h4 {
-    font-size: 1.55rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
-}
-
-.screening-result p {
-    color: #475569;
-    line-height: 1.7;
-    max-width: 42rem;
-    margin: 0 auto 1rem;
-}
-
-.screening-score {
-    display: inline-block;
-    background: #f8fafc;
-    color: #0f172a;
-    border: 1px solid #cbd5e1;
-    border-radius: 999px;
-    padding: 0.65rem 1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.screening-emergency {
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
-    color: white;
-    border-radius: 22px;
-    padding: 1.2rem;
-    margin: 1.25rem auto;
-    max-width: 34rem;
-    box-shadow: 0 18px 35px rgba(220, 38, 38, 0.25);
-}
-
-.screening-emergency a {
-    display: inline-block;
-    margin-top: 0.8rem;
-    background: white;
-    color: #b91c1c;
-    font-weight: 800;
-    text-decoration: none;
-    border-radius: 999px;
-    padding: 0.85rem 1.35rem;
-}
-
-.screening-actions {
-    display: flex;
-    justify-content: center;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-    margin-top: 1rem;
-}
-
-.screening-reset-btn {
-    background: transparent;
-    color: #2563eb;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-.screening-secondary-btn {
-    display: inline-block;
-    background: #2563eb;
-    color: white;
-    text-decoration: none;
-    border-radius: 999px;
-    padding: 0.9rem 1.3rem;
-    font-weight: 700;
-}
-
-.hidden-screening {
-    display: none;
-}
-
-@media (max-width: 768px) {
-    .screening-selector,
-    .screening-options {
-        grid-template-columns: 1fr;
-    }
-
-    .screening-question {
-        font-size: 1.1rem;
-    }
-}
-
+        /* Urungano AI Sign Language Avatar - same design as home page */
+        #ai-avatar {
+            bottom: 1rem;
+            right: 1rem;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar { bottom: 2rem; right: 2rem; }
+        }
+        #ai-avatar .avatar-img-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
+        }
+        #ai-avatar .tooltip {
+            width: 220px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .tooltip { width: 288px; }
+        }
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
@@ -430,6 +190,10 @@
                 <span id="iconlesson1" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
             <div id="lesson1" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 1: Understanding Mental Illness" data-rw="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe">Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="1"></audio>
+                </div>
                 <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
                    data-en="A person may experience sadness, fear, isolation, or stress as part of normal life, but when these feelings stay for a long time and begin to disturb daily life and normal functioning, they may be signs of mental illness. Mental illness refers to unusual emotional, behavioral, or thinking patterns that make it hard for someone to cope with normal challenges or solve ordinary life problems."
                    data-rw="Umuntu ashobora kugira agahinda, ubwoba, kwigunga cyangwa guhangayika nk'igice cy'ubuzima busanzwe, ariko iyo ibyo bimara igihe kirekire bikatangira kubangamira imibereho n'imikorere ye ya buri munsi, bishobora kuba ibimenyetso by'uburwayi bwo mu mutwe. Uburwayi bwo mu mutwe ni imyitwarire, amarangamutima cyangwa imitekerereze idasanzwe bituma umuntu atabasha guhangana n'ibibazo bisanzwe by'ubuzima cyangwa kubikemura neza.">
@@ -453,6 +217,10 @@
                 <span id="iconlesson2" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
             <div id="lesson2" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 2: What Can Cause Mental Illness?" data-rw="Isomo rya 2: Ni Iki Gishobora Gutera Uburwayi bwo mu Mutwe?">Isomo rya 2: Ni Iki Gishobora Gutera Uburwayi bwo mu Mutwe?</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="2"></audio>
+                </div>
                 <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
                    data-en="Mental illness can be caused by many different factors. These may include inherited family patterns, difficult living conditions such as poverty, conflict, violence or displacement, painful life changes such as losing someone you love, chronic physical illness, family conflict, abuse, and substance use. Early painful experiences such as neglect, abandonment, sexual violence, parental separation, early pregnancy with rejection, and other emotional wounds can also increase the risk."
                    data-rw="Uburwayi bwo mu mutwe bushobora guterwa n'impamvu nyinshi zitandukanye. Harimo imiterere y'umuryango cyangwa uruhurirane rw'indwara, ubukene, intambara, ihohoterwa, kwimurwa, kubura ab'agaciro, uburwayi bw'umubiri budakira, amakimbirane yo mu muryango, guhohoterwa n'ikoreshwa ry'ibiyobyabwenge. Hari kandi ibikomere byo mu bwana nko gutabwa, kutitabwaho, gufatwa ku ngufu, gutandukana kw'ababyeyi, gutwara inda ukiri muto ugatereranwa n'ibindi bikomeretsa amarangamutima bishobora kongera ibyago.">
@@ -471,6 +239,10 @@
                 <span id="iconlesson3" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
             <div id="lesson3" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 3: Signs and Symptoms to Notice" data-rw="Isomo rya 3: Ibimenyetso Wakwitaho">Isomo rya 3: Ibimenyetso Wakwitaho</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="3"></audio>
+                </div>
                 <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
                    data-en="Mental illness can show up in the body, emotions, thoughts, or behavior. Physical signs may include pain, constant tiredness even after rest, frequent headaches, poor sleep, or sleeping too much. Emotional signs may include deep sadness, severe worry, fear, or hopelessness. Behavioral signs may include anger, withdrawing from others, isolating yourself, or trying to harm yourself. Some people may also hear voices, see things others do not see, feel watched, or struggle to think clearly and make decisions."
                    data-rw="Uburwayi bwo mu mutwe bushobora kugaragarira ku mubiri, mu marangamutima, mu bitekerezo cyangwa mu myitwarire. Ibimenyetso byo ku mubiri bishobora kuba uburibwe, umunaniro uhoraho nubwo umuntu yaba yararuhutse, kurwara umutwe kenshi, kubura ibitotsi cyangwa gusinzira cyane. Mu marangamutima hashobora kubamo agahinda gakabije, guhangayika, ubwoba cyangwa kwiheba. Mu myitwarire hashobora kugaragara uburakari, kwiheza, kwigunga cyangwa kugerageza kwiyangiza. Hari n'abashobora kumva amajwi, kubona ibyo abandi batabona, kumva bakurikiranywe cyangwa kunanirwa gutekereza neza no gufata imyanzuro.">
@@ -494,6 +266,10 @@
                 <span id="iconlesson4" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
             <div id="lesson4" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 4: Warning Signs of Suicide" data-rw="Isomo rya 4: Ibimenyetso by'Umuntu Ushaka Kwiyahura">Isomo rya 4: Ibimenyetso by'Umuntu Ushaka Kwiyahura</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="4"></audio>
+                </div>
                 <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
                    data-en="It is not always easy to know when someone is thinking about suicide, because many people hide what they are feeling. Still, some warning signs are common: feeling intense emotional pain, becoming very restless, isolating from others, saying life has no value, speaking or writing about death, having attempted suicide before, drinking or using substances excessively, taking dangerous risks, saying people will miss them, or feeling like a burden to others."
                    data-rw="Ntibyoroshye buri gihe kumenya ko umuntu atekereza kwiyahura kuko akenshi ahisha ibiri muri we. Ariko hari ibimenyetso bikunze kugaragara: kumva ababaye cyane, kudatuza, kwigunga, kubona ubuzima nta gaciro bufite, kuvuga cyangwa kwandika ku rupfu, kuba yarigeze kugerageza kwiyahura, kunywa ibisindisha cyane, gukora ibintu bishyira ubuzima mu kaga, kuvuga ko azagenda bakamubura cyangwa kumva ari umutwaro ku bandi.">
@@ -517,6 +293,10 @@
                 <span id="iconlesson5" class="icon text-2xl md:text-3xl text-blue-600 flex-shrink-0">+</span>
             </button>
             <div id="lesson5" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 5: How to Listen and Support Well" data-rw="Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza">Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="5"></audio>
+                </div>
                 <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
                    data-en="When you support someone with signs of mental illness, start by listening carefully. Choose a quiet, private place, welcome them kindly, give them enough time, and keep their story confidential. Good listening can help someone feel safe and understood."
                    data-rw="Iyo ufashe umuntu ugaragaza ibimenyetso by'uburwayi bwo mu mutwe, tangira umutege amatwi neza. Muganirire ahantu hatuje kandi hihereye, umukirane urugwiro, umuhe umwanya uhagije kandi ugire ibanga ku byo akubwiye. Gutega amatwi neza bifasha umuntu kumva atekanye kandi yumviswe.">
@@ -535,97 +315,6 @@
             </div>
         </div>
 
-<!-- Mental Health Screening Tool -->
-<section id="mental-health-quiz" class="mb-8 md:mb-12">
-
-    <div class="screening-card">
-        <div class="screening-header">
-            <h3 data-en="Mental Health Self-Screening" data-rw="Isuzuma ry'Ubuzima bwo mu Mutwe">
-                Isuzuma ry'Ubuzima bwo mu Mutwe
-            </h3>
-            <p data-en="Choose a guided tool to check your recent symptoms." data-rw="Hitamo uburyo bwo kwisuzuma ibimenyetso umaze iminsi wumva.">
-                Hitamo uburyo bwo kwisuzuma ibimenyetso umaze iminsi wumva.
-            </p>
-        </div>
-
-        <div class="screening-body">
-            <div class="screening-note" data-en="This tool is for screening only. It does not replace a doctor, psychologist, or counselor. If you feel unsafe or have thoughts of harming yourself, seek urgent support immediately." data-rw="Iri suzuma rigamije kugufasha kwisuzuma gusa. Ntirisimbura muganga, umuhanga mu by'imitekerereze cyangwa umujyanama. Niba wumva uri mu kaga cyangwa ufite ibitekerezo byo kwiyangiza, ihutire gushaka ubufasha.">
-                Iri suzuma rigamije kugufasha kwisuzuma gusa. Ntirisimbura muganga, umuhanga mu by'imitekerereze cyangwa umujyanama. Niba wumva uri mu kaga cyangwa ufite ibitekerezo byo kwiyangiza, ihutire gushaka ubufasha.
-            </div>
-
-            <div id="screening-selection-view">
-                <div class="screening-selector">
-                    <button class="screening-type-btn phq" onclick="startScreening('PHQA')">
-                        <span data-en="PHQ-A Depression Check" data-rw="PHQ-A Isuzuma ry'Agahinda Gakabije">
-                            PHQ-A Isuzuma ry'Agahinda Gakabije
-                        </span>
-                        <small data-en="9 questions for adolescent depression symptoms over the last 2 weeks." data-rw="Ibibazo 9 bifasha gusuzuma ibimenyetso by'agahinda gakabije mu byumweru 2 bishize.">
-                            Ibibazo 9 bifasha gusuzuma ibimenyetso by'agahinda gakabije mu byumweru 2 bishize.
-                        </small>
-                    </button>
-
-                    <button class="screening-type-btn gad" onclick="startScreening('GAD7')">
-                        <span data-en="GAD-7 Anxiety Check" data-rw="GAD-7 Isuzuma ry'Uhangayiko">
-                            GAD-7 Isuzuma ry'Uhangayiko
-                        </span>
-                        <small data-en="7 questions to check anxiety and excessive worry." data-rw="Ibibazo 7 bifasha gusuzuma umuhangayiko n'ibitekerezo byinshi.">
-                            Ibibazo 7 bifasha gusuzuma umuhangayiko n'ibitekerezo byinshi.
-                        </small>
-                    </button>
-                </div>
-            </div>
-
-            <div id="screening-question-view" class="hidden-screening">
-                <div id="screening-progress" class="screening-progress">Ikibazo 1 kuri 9</div>
-                <div id="screening-question-text" class="screening-question">...</div>
-
-                <div class="screening-options">
-                    <button class="screening-option" onclick="recordScreeningAnswer(0)">
-                        <span data-en="Not at all" data-rw="Ntabwo na rimwe">Ntabwo na rimwe</span>
-                    </button>
-                    <button class="screening-option" onclick="recordScreeningAnswer(1)">
-                        <span data-en="Several days" data-rw="Iminsi mike">Iminsi mike</span>
-                    </button>
-                    <button class="screening-option" onclick="recordScreeningAnswer(2)">
-                        <span data-en="More than half the days" data-rw="Kurenga kimwe cya kabiri cy'iminsi">Kurenga kimwe cya kabiri cy'iminsi</span>
-                    </button>
-                    <button class="screening-option" onclick="recordScreeningAnswer(3)">
-                        <span data-en="Nearly every day" data-rw="Buri munsi">Buri munsi</span>
-                    </button>
-                </div>
-            </div>
-
-            <div id="screening-result-view" class="hidden-screening">
-                <div class="screening-result">
-                    <div id="screening-result-badge" class="screening-result-badge safe">✓</div>
-                    <h4 id="screening-result-title">Ibisubizo Byanyu</h4>
-                    <div id="screening-score" class="screening-score">Amanota: 0</div>
-                    <p id="screening-result-desc">...</p>
-
-                    <div id="screening-emergency-box" class="screening-emergency hidden-screening">
-                        <div data-en="Your answers suggest you may need urgent support. Please contact a trusted adult, a health facility, or call the emergency support line now." data-rw="Ibisubizo byawe byerekana ko ushobora gukenera ubufasha bwihuse. Hamagara umuntu mukuru wiringira, ikigo nderabuzima, cyangwa umurongo w'ubutabazi aka kanya.">
-                            Ibisubizo byawe byerekana ko ushobora gukenera ubufasha bwihuse. Hamagara umuntu mukuru wiringira, ikigo nderabuzima, cyangwa umurongo w'ubutabazi aka kanya.
-                        </div>
-                        <a href="tel:114" data-en="Call 114" data-rw="Hamagara 114" >Hamagara 114</a>
-                    </div>
-
-                    <div class="screening-actions">
-                        <button class="screening-reset-btn" onclick="resetScreening()"
-                                data-en="Start again" data-rw="Ongera utangire">
-                            Ongera utangire
-                        </button>
-                        <a href="chat.html" class="screening-secondary-btn"
-                           data-en="Talk to Urungano" data-rw="Ganira n'Urungano">
-                            Ganira n'Urungano
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-        
         <!-- Back Button -->
         <div class="text-center">
             <a href="urungano.html"
@@ -637,47 +326,54 @@
     </div>
 
     <!-- Footer -->
-    <footer style="background-color: #1d4ed8; color: white; margin-top: 3rem;">
-        <div style="max-width: 1152px; margin: 0 auto; padding: 2.5rem 1.5rem;">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <img src="urungano-logo.jpeg" alt="Urungano Logo"
-                         style="width: 44px; height: 44px; object-fit: cover; border-radius: 12px;">
-                    <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px;">Urungano Platform</span>
-                </div>
-
-                <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
-                    <a href="tel:+250786561823"
-                       style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem; transition: color 0.2s;"
-                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-                        <span>📞</span> +250 786 561 823
-                    </a>
-                    <a href="mailto:Urunganoplatform@gmail.com"
-                       style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
-                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-                        <span>✉️</span> Urunganoplatform@gmail.com
-                    </a>
-                    <a href="https://instagram.com/c-frederic1" target="_blank" rel="noopener noreferrer"
-                       style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
-                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-                        <span>📸</span> @c-frederic1
-                    </a>
-                </div>
-
-                <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;">
-                    &copy; 2026 Urungano Platform. All rights reserved.
-                </p>
+<footer style="background-color: #1d4ed8; color: white; margin-top: 3rem;">
+    <div style="max-width: 1152px; margin: 0 auto; padding: 2.5rem 1.5rem;">
+        
+        <!-- Top row -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
+            
+            <!-- Brand -->
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                     style="width: 44px; height: 44px; object-fit: cover; border-radius: 12px;">
+                <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px;">Urungano Platform</span>
             </div>
 
-            <div style="border-top: 1px solid #2563eb; margin-top: 1.5rem; padding-top: 1.25rem; text-align: center;">
-                <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;"
-                   data-en="Anonymous • Secure • Stigma-Free Support"
-                   data-rw="Ubwihisho • Umutekano • Ubufasha butagira akato">
-                    Ubwihisho • Umutekano • Ubufasha butagira akato
-                </p>
+            <!-- Contact links -->
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
+                <a href="tel:+250786561823"
+                   style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem; transition: color 0.2s;"
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
+                    <span>📞</span> +250 786 561 823
+                </a>
+                <a href="mailto:Urunganoplatform@gmail.com"
+                   style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
+                    <span>✉️</span> Urunganoplatform@gmail.com
+                </a>
+                <a href="https://instagram.com/c-frederic1" target="_blank" rel="noopener noreferrer"
+                   style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
+                    <span>📸</span> @c-frederic1
+                </a>
             </div>
+
+            <!-- Copyright -->
+            <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;">
+                &copy; 2026 Urungano Platform. All rights reserved.
+            </p>
         </div>
-    </footer>
+
+        <!-- Divider + tagline -->
+        <div style="border-top: 1px solid #2563eb; margin-top: 1.5rem; padding-top: 1.25rem; text-align: center;">
+            <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;"
+               data-en="Anonymous • Secure • Stigma-Free Support"
+               data-rw="Ubwihisho • Umutekano • Ubufasha butagira akato">
+                Ubwihisho • Umutekano • Ubufasha butagira akato
+            </p>
+        </div>
+    </div>
+</footer>
 
     <script>
         function toggleMobileMenu() {
@@ -699,255 +395,47 @@
                 el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
             });
 
+            updateVoiceNotes(lang);
+
             document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-
-            if (currentScreening && !document.getElementById('screening-question-view').classList.contains('hidden-screening')) {
-    renderScreeningQuestion();
-}
-
-if (currentScreening && !document.getElementById('screening-result-view').classList.contains('hidden-screening')) {
-    showScreeningResult();
-}
-
         }
 
-    const screeningQuestions = {
-        PHQA: {
-            key: 'PHQA',
-            maxScore: 27,
-            titleRw: "PHQ-A Isuzuma ry'Agahinda Gakabije",
-            titleEn: "PHQ-A Depression Check",
-            questions: [
-                {
-                    rw: "Mu byumweru 2 bishize, ni kangahe wagize agahinda, kwiheba cyangwa kumva nta cyizere ufite?",
-                    en: "Over the last 2 weeks, how often have you felt down, depressed, or hopeless?"
-                },
-                {
-                    rw: "Ni kangahe watakaje ubushake cyangwa ibyishimo byo gukora ibintu wakundaga?",
-                    en: "How often have you had little interest or pleasure in doing things?"
-                },
-                {
-                    rw: "Ni kangahe wagize ikibazo cyo gusinzira, kubura ibitotsi cyangwa gusinzira cyane?",
-                    en: "How often have you had trouble falling asleep, staying asleep, or sleeping too much?"
-                },
-                {
-                    rw: "Ni kangahe wumvise unaniwe cyangwa udafite imbaraga?",
-                    en: "How often have you felt tired or had little energy?"
-                },
-                {
-                    rw: "Ni kangahe waruze nabi cyangwa warenze urugero mu kurya?",
-                    en: "How often have you had poor appetite or been overeating?"
-                },
-                {
-                    rw: "Ni kangahe wumvise wiyanga, wumva uri ikigwari cyangwa wananiwe umuryango wawe?",
-                    en: "How often have you felt bad about yourself, like you are a failure, or that you have let yourself or your family down?"
-                },
-                {
-                    rw: "Ni kangahe wagize ikibazo cyo kwibanda ku ishuri, gusoma cyangwa ku mirimo ya buri munsi?",
-                    en: "How often have you had trouble concentrating on schoolwork, reading, or daily tasks?"
-                },
-                {
-                    rw: "Ni kangahe wagaragaye nk'ukora ibintu buhoro cyane cyangwa uhora uhagaze udatuje kurusha ibisanzwe?",
-                    en: "How often have you been moving or speaking so slowly that other people noticed, or the opposite, being so restless that you moved around more than usual?"
-                },
-                {
-                    rw: "Ni kangahe wagize ibitekerezo byo kwiyangiza cyangwa wumva byaba byiza udakiriho?",
-                    en: "How often have you had thoughts of hurting yourself or that you would be better off dead?"
+        function updateVoiceNotes(lang) {
+            const languageName = lang === 'en' ? 'english' : 'kinyarwanda';
+            const sourceTypes = {
+                mpeg: 'audio/mpeg',
+                aac: 'audio/aac',
+                mp3: 'audio/mpeg'
+            };
+
+            document.querySelectorAll('audio[data-topic][data-lesson]').forEach(audio => {
+                const wasPlaying = !audio.paused;
+                const basePath = `voice notes/${audio.dataset.topic} lesson ${audio.dataset.lesson} ${languageName}`;
+
+                audio.innerHTML = '';
+                Object.entries(sourceTypes).forEach(([extension, type]) => {
+                    const source = document.createElement('source');
+                    source.src = `${basePath}.${extension}`;
+                    source.type = type;
+                    audio.appendChild(source);
+                });
+
+                audio.load();
+                if (wasPlaying) {
+                    audio.play().catch(() => {});
                 }
-            ]
-        },
-        GAD7: {
-            key: 'GAD7',
-            maxScore: 21,
-            titleRw: "GAD-7 Isuzuma ry'Uhangayiko",
-            titleEn: "GAD-7 Anxiety Check",
-            questions: [
-                {
-                    rw: "Mu byumweru 2 bishize, ni kangahe wumvise ugize ubwoba, uhangayitse cyangwa ufite umutima utuje nabi?",
-                    en: "Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?"
-                },
-                {
-                    rw: "Ni kangahe byakugoye guhagarika cyangwa kugabanya guhangayika?",
-                    en: "How often have you not been able to stop or control worrying?"
-                },
-                {
-                    rw: "Ni kangahe wahangayikiye ibintu byinshi bitandukanye?",
-                    en: "How often have you worried too much about different things?"
-                },
-                {
-                    rw: "Ni kangahe byakugoye kuruhuka?",
-                    en: "How often have you had trouble relaxing?"
-                },
-                {
-                    rw: "Ni kangahe warakaye cyangwa utuje nabi ku buryo kuguma hamwe byakugoye?",
-                    en: "How often have you been so restless that it was hard to sit still?"
-                },
-                {
-                    rw: "Ni kangahe wabaye umujinya vuba cyangwa warakajwe n'ubusa?",
-                    en: "How often have you become easily annoyed or irritable?"
-                },
-                {
-                    rw: "Ni kangahe wumvise ufite ubwoba ko hari ikintu kibi gishobora kuba?",
-                    en: "How often have you felt afraid as if something awful might happen?"
-                }
-            ]
-        }
-    };
-
-    let currentScreening = null;
-    let screeningStep = 0;
-    let screeningScore = 0;
-    let screeningUrgent = false;
-
-    function getScreeningLang() {
-        return document.body.getAttribute('data-lang') || 'rw';
-    }
-
-    function startScreening(type) {
-        currentScreening = screeningQuestions[type];
-        screeningStep = 0;
-        screeningScore = 0;
-        screeningUrgent = false;
-
-        document.getElementById('screening-selection-view').classList.add('hidden-screening');
-        document.getElementById('screening-result-view').classList.add('hidden-screening');
-        document.getElementById('screening-question-view').classList.remove('hidden-screening');
-        document.getElementById('screening-emergency-box').classList.add('hidden-screening');
-
-        renderScreeningQuestion();
-    }
-
-    function renderScreeningQuestion() {
-        if (!currentScreening) return;
-
-        const lang = getScreeningLang();
-        const question = currentScreening.questions[screeningStep];
-        const total = currentScreening.questions.length;
-
-        document.getElementById('screening-progress').textContent =
-            lang === 'en'
-                ? `Question ${screeningStep + 1} of ${total}`
-                : `Ikibazo ${screeningStep + 1} kuri ${total}`;
-
-        document.getElementById('screening-question-text').textContent =
-            lang === 'en' ? question.en : question.rw;
-    }
-
-    function recordScreeningAnswer(points) {
-        if (!currentScreening) return;
-
-        screeningScore += points;
-
-        if (currentScreening.key === 'PHQA' && screeningStep === 8 && points > 0) {
-            screeningUrgent = true;
+            });
         }
 
-        screeningStep++;
-
-        if (screeningStep < currentScreening.questions.length) {
-            renderScreeningQuestion();
-        } else {
-            showScreeningResult();
-        }
-    }
-
-    function showScreeningResult() {
-        const lang = getScreeningLang();
-        const badge = document.getElementById('screening-result-badge');
-        const title = document.getElementById('screening-result-title');
-        const desc = document.getElementById('screening-result-desc');
-        const score = document.getElementById('screening-score');
-        const emergencyBox = document.getElementById('screening-emergency-box');
-
-        let level = 'safe';
-        let symbol = '✓';
-        let titleRw = "Nta bimenyetso bikomeye byagaragaye";
-        let titleEn = "No major warning signs detected";
-        let descRw = "Ibisubizo byawe ntibyerekana ikibazo gikomeye muri aka kanya. Komeza kwitaho, uruhuke neza kandi uvugane n'umuntu wiringira niba hari ikiguhangayikishije.";
-        let descEn = "Your answers do not suggest a severe problem right now. Keep caring for yourself, rest well, and talk to someone you trust if anything is worrying you.";
-
-        if (currentScreening.key === 'PHQA') {
-            if (screeningUrgent || screeningScore >= 15) {
-                level = 'urgent';
-                symbol = '!';
-                titleRw = "Ukeneye ubufasha bwihuse";
-                titleEn = "You may need urgent support";
-                descRw = "Ibisubizo byawe byerekana ibimenyetso bikomeye by'agahinda cyangwa ibitekerezo byo kwiyangiza. Ntugume wenyine. Hamagara ubufasha bwihuse cyangwa ugane ikigo nderabuzima.";
-                descEn = "Your answers suggest severe depression symptoms or possible self-harm thoughts. Please do not stay alone. Contact urgent support or go to a health facility.";
-            } else if (screeningScore >= 10) {
-                level = 'moderate';
-                symbol = '•';
-                titleRw = "Hari ibimenyetso bikeneye kwitabwaho";
-                titleEn = "There are symptoms that need attention";
-                descRw = "Ibisubizo byawe byerekana ko ushobora kuba ufite ibimenyetso biringaniye by'agahinda gakabije. Byaba byiza uganiriye n'umujyanama, umubyeyi cyangwa umuganga.";
-                descEn = "Your answers suggest moderate depressive symptoms. It would be helpful to speak with a counselor, parent, trusted adult, or clinician.";
-            } else if (screeningScore >= 5) {
-                level = 'mild';
-                symbol = '•';
-                titleRw = "Hari ibimenyetso byoroheje";
-                titleEn = "There are mild symptoms";
-                descRw = "Ibisubizo byawe byerekana ibimenyetso byoroheje. Komeza kwisuzuma, uruhuke, kandi uvugane n'umuntu wiringira niba bikomeje.";
-                descEn = "Your answers suggest mild symptoms. Keep checking in with yourself, rest, and talk to someone you trust if the feelings continue.";
-            }
+        function playVoiceNote(button) {
+            const audio = button.closest('.voice-note').querySelector('audio');
+            document.querySelectorAll('audio[data-topic][data-lesson]').forEach(otherAudio => {
+                if (otherAudio !== audio) otherAudio.pause();
+            });
+            audio.play().catch(() => {});
         }
 
-        if (currentScreening.key === 'GAD7') {
-            if (screeningScore >= 15) {
-                level = 'urgent';
-                symbol = '!';
-                titleRw = "Uhangayitse cyane";
-                titleEn = "Severe anxiety symptoms";
-                descRw = "Ibisubizo byawe byerekana ko ufite ibimenyetso bikomeye by'umuhangayiko. Birakenewe ko ushaka ubufasha bw'umwuga cyangwa uganira n'ikigo nderabuzima.";
-                descEn = "Your answers suggest severe anxiety symptoms. It is important to seek professional support or speak with a health facility.";
-            } else if (screeningScore >= 10) {
-                level = 'moderate';
-                symbol = '•';
-                titleRw = "Hari umuhangayiko uringaniye";
-                titleEn = "There is moderate anxiety";
-                descRw = "Ibisubizo byawe byerekana ibimenyetso biringaniye by'umuhangayiko. Kugisha inama umujyanama cyangwa umuganga bishobora kugufasha.";
-                descEn = "Your answers suggest moderate anxiety symptoms. Talking to a counselor or clinician could help.";
-            } else if (screeningScore >= 5) {
-                level = 'mild';
-                symbol = '•';
-                titleRw = "Hari ibimenyetso byoroheje by'umuhangayiko";
-                titleEn = "There are mild anxiety symptoms";
-                descRw = "Ibisubizo byawe byerekana ibimenyetso byoroheje by'umuhangayiko. Fata umwanya wo kuruhuka no kuganira n'umuntu wiringira niba bikomeza.";
-                descEn = "Your answers suggest mild anxiety symptoms. Make time to rest and talk to someone you trust if they continue.";
-            }
-        }
-
-        badge.className = `screening-result-badge ${level}`;
-        badge.textContent = symbol;
-        title.textContent = lang === 'en' ? titleEn : titleRw;
-        desc.textContent = lang === 'en' ? descEn : descRw;
-        score.textContent = lang === 'en'
-            ? `Score: ${screeningScore} / ${currentScreening.maxScore}`
-            : `Amanota: ${screeningScore} / ${currentScreening.maxScore}`;
-
-        if (level === 'urgent') {
-            emergencyBox.classList.remove('hidden-screening');
-        } else {
-            emergencyBox.classList.add('hidden-screening');
-        }
-
-        document.getElementById('screening-question-view').classList.add('hidden-screening');
-        document.getElementById('screening-result-view').classList.remove('hidden-screening');
-    }
-
-    function resetScreening() {
-        currentScreening = null;
-        screeningStep = 0;
-        screeningScore = 0;
-        screeningUrgent = false;
-
-        document.getElementById('screening-question-view').classList.add('hidden-screening');
-        document.getElementById('screening-result-view').classList.add('hidden-screening');
-        document.getElementById('screening-emergency-box').classList.add('hidden-screening');
-        document.getElementById('screening-selection-view').classList.remove('hidden-screening');
-    }
-
-        
         window.onload = () => switchLanguage('rw');
     </script>
 
@@ -955,22 +443,27 @@ if (currentScreening && !document.getElementById('screening-result-view').classL
     <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
         <div class="relative">
             <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
-                <img src="mental health.gif" 
-                     alt="Urungano AI Signing" 
-                     class="w-full h-full object-cover">
+                <img src="mental-health.gif"
+                     alt="Urungano AI Signing for Mental Health"
+                     class="w-full h-full object-cover"
+                     onerror="this.onerror=null; this.src='signs.gif';">
             </div>
-            
-            
+
+            <div class="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md ring-2 ring-white">
+                AI
+            </div>
         </div>
-        
+
         <!-- Hover Tooltip -->
         <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
-
-            <p class="text-slate-600 text-xs leading-relaxed" 
-          data-en="Lessons on mental health. It includes understanding and taking care of your mental health. There is also a mental health self-assessment.
-" 
-               data-rw="Amasomo k'ubuzima bwo mu mutwe.Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe.Hariho Kandi isuzuma ry'ubuzima bwo mutwe.">
-Amasomo k'ubuzima bwo mu mutwe.Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe.Hariho Kandi isuzuma ry'ubuzima bwo mutwe.   </p>
+            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
+                <span data-en="Mental Health Sign Language Lesson" data-rw="Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso">Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso</span>
+            </p>
+            <p class="text-slate-600 text-xs leading-relaxed"
+               data-en="Lessons on mental health. They include understanding and caring for your mental health. There is also a mental health assessment."
+               data-rw="Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.">
+                Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.
+            </p>
         </div>
     </div>
 </body>
