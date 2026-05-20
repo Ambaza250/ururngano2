@@ -1,0 +1,19 @@
+{
+  "name": "urungano",
+  "version": "1.0.0",
+  "description": "Urungano - Mental Health and SRH Platform",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static HTML site - no build needed'"
+  },
+  "keywords": [
+    "mental-health",
+    "srh",
+    "urungano"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
