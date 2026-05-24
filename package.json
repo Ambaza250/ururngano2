@@ -1,0 +1,21 @@
+{
+  "name": "urungano-platform",
+  "version": "1.0.0",
+  "description": "A safe, trusted, and youth-friendly digital platform providing information and support on Sexual & Reproductive Health (SRH) and Mental Health in Kinyarwanda",
+  "scripts": {
+    "dev": "echo 'Static site - open index.html in browser'",
+    "build": "echo 'No build step required for static site'"
+  },
+  "keywords": [
+    "health",
+    "mental-health",
+    "srh",
+    "rwanda",
+    "kinyarwanda"
+  ],
+  "author": "Ambaza Mukama",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  }
+}
