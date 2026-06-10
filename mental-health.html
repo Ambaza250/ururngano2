@@ -314,7 +314,70 @@
                 </p>
             </div>
         </div>
+        <!-- Mental Health Screening Tool -->
+        <div class="mb-12">
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
+                    <h3 class="text-2xl font-bold mb-1" 
+                        data-en="Mental Health Screening" 
+                        data-rw="Isuzuma ry'Ubuzima bwo mu Mutwe">Isuzuma ry'Ubuzima bwo mu Mutwe</h3>
+                    <p class="text-blue-100 text-sm" 
+                       data-en="PHQ-A &amp; GAD-7 • Quick &amp; Confidential" 
+                       data-rw="PHQ-A &amp; GAD-7 • Byihuse kandi ni Ibanga">PHQ-A &amp; GAD-7 • Byihuse kandi ni Ibanga</p>
+                </div>
 
+                <div id="quiz-container" class="p-6 md:p-8">
+                    <!-- Selection View -->
+                    <div id="selection-view" class="flex flex-col md:flex-row gap-4 justify-center py-8">
+                        <button onclick="startQuiz('PHQA')" 
+                                class="flex-1 max-w-xs bg-white border-2 border-blue-600 text-blue-700 hover:bg-blue-50 px-8 py-6 rounded-3xl font-semibold transition-all active:scale-95">
+                            <span class="block text-lg" data-en="PHQ-A" data-rw="PHQ-A">PHQ-A</span>
+                            <span class="text-sm opacity-75 block mt-1" data-en="Depression Screening (Ages 12-18)" data-rw="Kwisuzuma Agahinda Gakabije">Kwisuzuma Agahinda Gakabije</span>
+                        </button>
+                        
+                        <button onclick="startQuiz('GAD7')" 
+                                class="flex-1 max-w-xs bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 px-8 py-6 rounded-3xl font-semibold transition-all active:scale-95">
+                            <span class="block text-lg" data-en="GAD-7" data-rw="GAD-7">GAD-7</span>
+                            <span class="text-sm opacity-75 block mt-1" data-en="Anxiety Screening" data-rw="Kwisuzuma Umuhangayiko">Kwisuzuma Umuhangayiko</span>
+                        </button>
+                    </div>
+
+                    <!-- Question View -->
+                    <div id="question-view" class="hidden">
+                        <div class="text-center mb-8">
+                            <p id="progress" class="text-blue-600 font-bold text-sm tracking-widest"></p>
+                            <h4 id="question-text" class="text-xl md:text-2xl font-semibold text-slate-800 mt-3 leading-tight px-2"></h4>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3 max-w-md mx-auto">
+                            <button onclick="recordAnswer(0)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Hoya (Not at all)</button>
+                            <button onclick="recordAnswer(1)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Iminsi mike (Several days)</button>
+                            <button onclick="recordAnswer(2)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Igihe kirekire (More than half the days)</button>
+                            <button onclick="recordAnswer(3)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Buri munsi (Nearly every day)</button>
+                        </div>
+                    </div>
+
+                    <!-- Result View -->
+                    <div id="result-view" class="hidden text-center py-10">
+                        <div id="result-icon" class="text-6xl mb-6"></div>
+                        <h3 id="result-title" class="text-3xl font-bold mb-3"></h3>
+                        <p id="result-desc" class="text-slate-600 max-w-md mx-auto leading-relaxed"></p>
+                        
+                        <div id="emergency-action" class="hidden mt-8">
+                            <a href="tel:3530" 
+                               class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-lg transition">
+                                📞 Hamagara 3530 Ubu!
+                            </a>
+                        </div>
+
+                        <button onclick="resetQuiz()" 
+                                class="mt-10 text-blue-600 hover:text-blue-700 font-semibold underline">
+                            Ongera utangire
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Back Button -->
         <div class="text-center">
             <a href="urungano.html"
@@ -464,5 +527,91 @@
             </p>
         </div>
     </div>
+
+<script>
+    const questions = {
+        PHQA: [
+            "Kuba ufite agahinda, cyangwa kwiheba?",
+            "Kuba utakishimira ibintu wahoze ukunda?",
+            "Kugira ikibazo cyo gusinzira cyangwa gusinzira cyane?",
+            "Kuba wumva unaniwe cyangwa udafite imbaraga?",
+            "Kuba utumva ushaka kurya cyangwa urya birenze urugero?",
+            "Kuba wumva utiyizeye cyangwa wumva uri ikigwari?",
+            "Kugira ikibazo cyo kwerekeza imitekerereze ku kintu kimwe?",
+            "Kugenda buhoro cyangwa kuvuga buhoro cyane?",
+            "Kugira ibitekerezo byo kwigirira nabi cyangwa kwiyambura ubuzima?"
+        ],
+        GAD7: [
+            "Kuba wumva ufite ubwoba cyangwa uhangayitse cyane?",
+            "Kuba udashobora guhagarika kwibaza ibibazo?",
+            "Kuba uhangayikishwa n'ibintu bitandukanye?",
+            "Kugira ikibazo cyo kuruhuka?",
+            "Kuba wumva ufite imihangayiko ituma udicara hamwe?",
+            "Kuba urakazwa n'ubusa cyangwa urasirwa vuba?",
+            "Kuba wumva hari ikintu kibi kigiye kubaho?"
+        ]
+    };
+
+    let currentQuiz = '', currentStep = 0, score = 0, urgent = false;
+
+    function startQuiz(type) {
+        currentQuiz = type;
+        currentStep = 0;
+        score = 0;
+        urgent = false;
+        document.getElementById('selection-view').classList.add('hidden');
+        document.getElementById('question-view').classList.remove('hidden');
+        updateQuestion();
+    }
+
+    function updateQuestion() {
+        const qList = questions[currentQuiz];
+        document.getElementById('progress').innerText = 
+            `Ikibazo ${currentStep + 1} kuri ${qList.length}`;
+        document.getElementById('question-text').innerText = qList[currentStep];
+    }
+
+    function recordAnswer(points) {
+        score += points;
+        if (currentQuiz === 'PHQA' && currentStep === 8 && points > 0) urgent = true;
+
+        currentStep++;
+        if (currentStep < questions[currentQuiz].length) {
+            updateQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('question-view').classList.add('hidden');
+        document.getElementById('result-view').classList.remove('hidden');
+
+        let title = "Umeze neza 🎉";
+        let desc = "Ibisubizo byanyu bigaragaza ko nta kibazo gikomeye ufite. Komeza kwita ku buzima bwawe!";
+        let icon = "🌟";
+
+        if (score >= 15 || urgent) {
+            title = "Ukeneye Ubufasha bwihuse ⚠️";
+            desc = "Isuzumwa ryerekanye ibimenyetso bikomeye. Turakwinginga guhamagara 3530 cyangwa ugane Isange One Stop Centre ikwegereye.";
+            icon = "🚨";
+            document.getElementById('emergency-action').classList.remove('hidden');
+        } else if (score >= 10) {
+            title = "Ibimenyetso biringaniye ⚖️";
+            desc = "Wumva ufite ibimenyetso biringaniye. Byaba byiza uganiriye n'umujyanama cyangwa inshuti wizeye.";
+            icon = "⚖️";
+        }
+
+        document.getElementById('result-icon').innerText = icon;
+        document.getElementById('result-title').innerText = title;
+        document.getElementById('result-desc').innerText = desc;
+    }
+
+    function resetQuiz() {
+        document.getElementById('result-view').classList.add('hidden');
+        document.getElementById('emergency-action').classList.add('hidden');
+        document.getElementById('selection-view').classList.remove('hidden');
+    }
+</script>
 </body>
 </html>
