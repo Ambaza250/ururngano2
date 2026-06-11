@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urungano - Login / Register</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .lang-btn { transition: all 0.3s ease; }
+    .lang-btn.active {
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-weight: 600;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      padding: 28px;
+      width: 100%;
+      max-width: 460px;
+    }
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      outline: none;
+      font-size: 15px;
+    }
+    input:focus { border-color: #db2777; box-shadow: 0 0 0 3px rgba(219,39,119,0.15); }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50" data-lang="rw">
+
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+      <div class="flex justify-between items-center gap-2">
+        <div class="flex items-center gap-2 md:gap-3 min-w-0">
+          <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+          <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
+        </div>
+
+        <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+          <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+          <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <a href="srh.html" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-blue-600">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span data-en="Back" data-rw="Subira inyuma">Subira inyuma</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-3 py-10 md:px-6 md:py-14 flex items-start justify-center">
+    <div class="card">
+      <div class="text-center">
+        <img src="urungano-logo.jpeg" alt="Logo" class="w-16 h-16 object-cover mx-auto rounded-2xl mb-3">
+        <h2 class="text-2xl font-bold text-slate-800">
+          <span data-en="Login / Register" data-rw="Kwinjira / kwiyandikisha">Kwinjira / kwiyandikisha</span>
+        </h2>
+        <p class="text-slate-600 mt-2 text-sm">
+          <span data-en="Use your credentials to chat and get period reminders." data-rw="Koresha ayo makuru yo kwinjira kugirango uganire kandi ubone kwibutswa ku mihango.">
+            Koresha ayo makuru yo kwinjira kugirango uganire kandi ubone kwibutswa ku mihango.
+          </span>
+        </p>
+      </div>
+
+      <div class="mt-6 grid gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1" for="username" data-en="Username" data-rw="Izina ry' ukoresha">Izina ry' ukoresha</label>
+          <input id="username" type="text" placeholder="Username" autocomplete="username" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1" for="email" data-en="Email" data-rw="Imeri">Imeri</label>
+          <input id="email" type="email" placeholder="Email" autocomplete="email" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1" for="password" data-en="Password" data-rw="Ijambo ry'ibanga">Ijambo ry'ibanga</label>
+          <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 pt-2">
+          <button onclick="signUp()" class="w-full px-4 py-3 rounded-2xl bg-pink-600 hover:bg-pink-700 text-white font-bold">
+            <span data-en="Register" data-rw="Iyandikishe">Iyandikishe</span>
+          </button>
+          <button onclick="logIn()" class="w-full px-4 py-3 rounded-2xl bg-slate-500 hover:bg-slate-600 text-white font-bold">
+            <span data-en="Login" data-rw="Kwinjira">Kwinjira</span>
+          </button>
+        </div>
+
+        <div id="status" class="text-sm min-h-[22px] text-center"></div>
+
+        <div class="text-xs text-slate-500 pt-1 text-center">
+          <span data-en="Already have an account? Use Login." data-rw="Urasanzwe ufite konti? Jya kuri Kwinjira.">
+            Urasanzwe ufite konti? Jya kuri Kwinjira.
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-slate-900 text-white py-10">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+        <div class="space-y-3 text-sm">
+          <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+          <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
+          <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+        <div class="grid grid-cols-2 gap-y-2 text-sm">
+          <a href="chat.html" class="hover:text-pink-400" data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</a>
+          <a href="srh.html" class="hover:text-pink-400" data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</a>
+          <a href="mental-health.html" class="hover:text-pink-400" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+          <a href="about-us.html" class="hover:text-pink-400" data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</a>
+        </div>
+      </div>
+      <div class="text-sm opacity-75">
+        <p data-en="Urungano is a safe space for young people in Rwanda." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda.</p>
+        <p class="mt-6 text-xs">© 2026 Urungano Platform</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut,
+      updateProfile
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      serverTimestamp,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+      authDomain: "urungano-chat-50d62.firebaseapp.com",
+      projectId: "urungano-chat-50d62",
+      storageBucket: "urungano-chat-50d62.firebasestorage.app",
+      messagingSenderId: "730372170670",
+      appId: "1:730372170670:web:91300da03f18f488afde3f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
+
+    window.switchLanguage = function switchLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      document.body.setAttribute('data-lang', lang);
+      document.querySelectorAll('[data-en]').forEach(el => {
+        el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+      });
+
+      const btnRw = document.getElementById('btn-rw');
+      const btnEn = document.getElementById('btn-en');
+      if (btnRw && btnEn) {
+        btnRw.classList.toggle('active', lang === 'rw');
+        btnEn.classList.toggle('active', lang === 'en');
+      }
+
+      // Update placeholders for inputs
+      const username = document.getElementById('username');
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      if (lang === 'en') {
+        if (username) username.placeholder = 'Username';
+        if (email) email.placeholder = 'Email';
+        if (password) password.placeholder = 'Password';
+      } else {
+        if (username) username.placeholder = "Izina ry' ukoresha";
+        if (email) email.placeholder = 'Imeri';
+        if (password) password.placeholder = 'Ijambo ry\'ibanga';
+      }
+    };
+
+    window.signUp = async () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const status = document.getElementById('status');
+
+      if (!username || !email || !password) {
+        status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-circle-exclamation"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Please fill all fields' : 'Uzuza amakuru yose'}</span>`;
+        return;
+      }
+
+      status.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Please wait...' : 'Tegereza...';
+
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(cred.user, { displayName: username });
+
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          uid: cred.user.uid,
+          email: cred.user.email || '',
+          username: username,
+          createdAt: serverTimestamp()
+        }, { merge: true });
+
+        status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Registration successful!' : 'Iyandikishwa ryagenze neza!'}</span>`;
+
+        // Redirect after a moment
+        setTimeout(() => {
+          window.location.href = 'srh.html';
+        }, 600);
+      } catch (e) {
+        status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(e.message)}</span>`;
+      }
+    };
+
+    window.logIn = async () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const status = document.getElementById('status');
+
+      if (!email || !password) {
+        status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-circle-exclamation"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Enter email and password' : "Andika imeri n'ijambo ry'ibanga"}</span>`;
+        return;
+      }
+
+      status.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Please wait...' : 'Tegereza...';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+
+        status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Login successful!' : 'Kwinjira byagenze neza!'}</span>`;
+
+        setTimeout(() => {
+          window.location.href = 'srh.html';
+        }, 600);
+      } catch (e) {
+        status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(e.message)}</span>`;
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      // If already logged in, skip straight to SRH
+      if (user) {
+        // ensure profile exists (matches chat.html expectation)
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (!snap.exists()) {
+          await setDoc(doc(db, 'users', user.uid), {
+            uid: user.uid,
+            email: user.email || '',
+            username: user.displayName || user.email?.split('@')[0] || 'User',
+            createdAt: serverTimestamp()
+          }, { merge: true });
+        }
+        // Keep language button correct
+        const currentLang = document.body.getAttribute('data-lang') || 'rw';
+        switchLanguage(currentLang);
+        window.location.href = 'srh.html';
+      }
+    });
+
+    window.onload = () => {
+      const currentLang = document.body.getAttribute('data-lang') || 'rw';
+      switchLanguage(currentLang);
+      console.log('✅ auth.html ready');
+    };
+  </script>
+</body>
+</html>
+

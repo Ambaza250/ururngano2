@@ -332,17 +332,11 @@
                 </div>
 
                 <!-- Desktop nav links -->
-                <div class="hidden md:flex gap-6 text-sm font-medium items-center">
+                <div class="hidden md:flex gap-6 text-sm font-medium">
                     <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
                     <a href="srh.html" class="text-blue-600 font-semibold" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
                     <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
                     <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
-                    <button id="login-btn" onclick="goToAuth()" class="bg-blue-600 text-white px-4 py-2 rounded-2xl hover:bg-blue-700 transition text-sm font-semibold" style="white-space:nowrap;">
-                        <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
-                    </button>
-                    <button id="logout-btn" onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-2xl hover:bg-red-600 transition text-sm font-semibold" style="white-space:nowrap; display:none;">
-                        <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
-                    </button>
                 </div>
 
                 <!-- Mobile hamburger -->
@@ -536,10 +530,6 @@
 
         <!-- Calculator Section (full language switching + original logic preserved) -->
         <div class="ct-wrap mt-16">
-
-            <!-- Period reminder (visible only when logged in) -->
-            <div id="period-reminder" class="hidden mb-6 mx-auto max-w-2xl rounded-2xl bg-blue-50 border border-blue-100 px-5 py-4 text-slate-700">
-            </div>
             <div class="ct-card max-w-2xl mx-auto">
                 <div class="ct-header">
                     <h3 data-en="Menstrual Cycle Calculator" data-rw="Bara ukwezi kwawe">Bara ukwezi kwawe</h3>
@@ -645,192 +635,6 @@
     <script>
         // Tailwind script already loaded in head
 
-        // ===================== AUTH + FIRESTORE (dynamic imports to keep calculator non-broken) =====================
-        // (Auth+Firestore initialization is defined later in the file; keep calculator JS functional)
-
-
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
-            authDomain: "urungano-chat-50d62.firebaseapp.com",
-            projectId: "urungano-chat-50d62",
-            storageBucket: "urungano-chat-50d62.firebasestorage.app",
-            messagingSenderId: "730372170670",
-            appId: "1:730372170670:web:91300da03f18f488afde3f"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let currentUserProfile = null;
-
-        // logout is defined after Firebase modules load (to avoid breaking calculator)
-        window.goToAuth = () => window.location.href = 'auth.html';
-
-
-        async function ensureUserProfile(user) {
-            const snap = await getDoc(doc(db, 'users', user.uid));
-            if (!snap.exists()) {
-                await setDoc(doc(db, 'users', user.uid), {
-                    uid: user.uid,
-                    email: user.email || '',
-                    username: user.displayName || user.email?.split('@')[0] || 'User',
-                    createdAt: serverTimestamp()
-                }, { merge: true });
-            }
-        }
-
-        function setAuthUI({ loggedIn, username = '' }) {
-            const loginBtn = document.getElementById('login-btn');
-            const loginText = document.getElementById('login-btn-text');
-            const logoutBtn = document.getElementById('logout-btn');
-
-            if (!loginBtn || !loginText || !logoutBtn) return;
-
-            if (loggedIn) {
-                loginText.textContent = username || (document.body.getAttribute('data-lang') === 'en' ? 'Account' : 'Konti');
-                loginBtn.style.display = 'none';
-                logoutBtn.style.display = 'inline-flex';
-            } else {
-                loginText.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Login' : 'Kwinjira';
-                loginBtn.style.display = 'inline-flex';
-                logoutBtn.style.display = 'none';
-            }
-        }
-
-        // ===================== PERIOD TRACKING =====================
-        const PERIOD_DOC = 'periods'; // top-level collection under users/{uid}/periods/{doc}
-        let savedPeriod = null;
-        let authReady = false;
-
-        function getLang() {
-            return document.body.getAttribute('data-lang') === 'en' ? 'en' : 'rw';
-        }
-
-        function formatDate(date) {
-            try { return date.toLocaleDateString('en-GB'); } catch { return ''; }
-        }
-
-        function getCycleStage({ lmpISO, cycleLength }) {
-            const lmp = new Date(lmpISO);
-            if (Number.isNaN(lmp.getTime())) return null;
-
-            const today = new Date();
-            const msPerDay = 24 * 60 * 60 * 1000;
-            const dayIndex = Math.floor((today.setHours(0,0,0,0) - lmp.setHours(0,0,0,0)) / msPerDay);
-
-            // Approx: fertile window days 10-16 (inclusive) from LMP, period phase day 0-4
-            // This matches existing calculator logic (fertile ~10-16)
-            const fertileStart = 10;
-            const fertileEnd = 16;
-
-            if (dayIndex < 0) return { labelKey: 'upcoming', dayIndex };
-
-            // Normalize cycle length to day within cycle
-            const within = ((dayIndex % cycleLength) + cycleLength) % cycleLength;
-
-            if (within >= 0 && within <= 4) return { labelKey: 'menstruation', dayIndex: within };
-            if (within >= fertileStart && within <= fertileEnd) return { labelKey: 'fertile', dayIndex: within };
-            if (within > fertileEnd && within <=  cycleLength - 1) return { labelKey: 'luteal', dayIndex: within };
-
-            return { labelKey: 'unknown', dayIndex: within };
-        }
-
-        function stageText(stage, lang) {
-            const copy = {
-                en: {
-                    menstruation: 'You are in your period phase.',
-                    fertile: 'You are in your fertile window.',
-                    luteal: 'You are in the post-fertile (luteal) phase.',
-                    upcoming: 'Your next cycle is coming soon.',
-                    unknown: 'Cycle stage: unavailable.'
-                },
-                rw: {
-                    menstruation: 'Uri mu gihe cy’imihango.',
-                    fertile: 'Uri mu gihe cy’uburumbuke.',
-                    luteal: 'Uri mu gihe gikurikira (luteal).',
-                    upcoming: 'Ukwezi kwawe kwegereje.',
-                    unknown: 'Icyiciro cy’ukwezi kirabura.'
-                }
-            };
-            return (copy[lang][stage] || copy[lang].unknown);
-        }
-
-        async function loadSavedPeriod() {
-            if (!currentUser) return;
-            const docRef = doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
-            const snap = await getDoc(docRef);
-            if (snap.exists()) {
-                savedPeriod = snap.data();
-            } else {
-                savedPeriod = null;
-            }
-        }
-
-        async function savePeriodFromCalculator({ lmpISO, cycleLength }) {
-            if (!currentUser) return;
-            const docRef = doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
-            const payload = {
-                lmpISO,
-                cycleLength,
-                updatedAt: serverTimestamp()
-            };
-            await setDoc(docRef, payload, { merge: true });
-            savedPeriod = { ...payload };
-        }
-
-        function renderPeriodReminder() {
-            const reminderEl = document.getElementById('period-reminder');
-            if (!reminderEl) return;
-
-            if (!currentUser || !savedPeriod?.lmpISO || !savedPeriod?.cycleLength) {
-                reminderEl.classList.add('hidden');
-                return;
-            }
-
-            const stage = getCycleStage({ lmpISO: savedPeriod.lmpISO, cycleLength: savedPeriod.cycleLength });
-            if (!stage) {
-                reminderEl.classList.add('hidden');
-                return;
-            }
-
-            const lang = getLang();
-            const lmp = new Date(savedPeriod.lmpISO);
-
-            const prefix = lang === 'en' ? 'Period reminder:' : 'Kwibutsa ku mihango:';
-            reminderEl.innerHTML = `
-                <i class="fas fa-clock text-blue-600 mr-2"></i>
-                <strong>${prefix}</strong> ${stageText(stage.labelKey, lang)}
-                <div class="text-xs opacity-80 mt-1">${lang === 'en' ? 'Last period start:' : 'Itariki y’imihango iheruka:'} ${formatDate(lmp)}</div>
-            `;
-            reminderEl.classList.remove('hidden');
-        }
-
-        function hydrateLoginAndPeriodUI() {
-            setAuthUI({ loggedIn: !!currentUser, username: currentUserProfile?.username || '' });
-            renderPeriodReminder();
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            authReady = true;
-            if (user) {
-                await ensureUserProfile(user);
-                // For username, read from users doc quickly
-                const snap = await getDoc(doc(db, 'users', user.uid));
-                currentUserProfile = snap.exists() ? snap.data() : { username: user.displayName || user.email?.split('@')[0] || 'User' };
-                await loadSavedPeriod();
-                hydrateLoginAndPeriodUI();
-            } else {
-                currentUserProfile = null;
-                savedPeriod = null;
-                setAuthUI({ loggedIn: false });
-                renderPeriodReminder();
-            }
-        });
-
         // Language switching - works for ALL text on the page
         function switchLanguage(lang) {
             document.documentElement.setAttribute('lang', lang);
@@ -926,18 +730,6 @@
             isPregnantMode = !isPregnantMode;
         }
 
-        // Save to Firestore when logged in
-        async function maybeSavePeriodToAccount({ lmpISO, cycleLength }) {
-            try {
-                if (typeof savePeriodFromCalculator === 'function') {
-                    await savePeriodFromCalculator({ lmpISO, cycleLength });
-                    renderPeriodReminder();
-                }
-            } catch (e) {
-                console.log('Period save failed', e);
-            }
-        }
-
         function calculateCycle() {
             const lmpInput = document.getElementById('lmp').value;
             const cycleLength = parseInt(document.getElementById('cycle-length').value) || 28;
@@ -984,11 +776,6 @@
             }
 
             resultsEl.classList.remove('hidden');
-
-            // If logged in, save period tracking (for reminder on reload)
-            if (lmpInput) {
-                maybeSavePeriodToAccount({ lmpISO: lmpInput, cycleLength });
-            }
         }
 
         function resetCalculator() {
