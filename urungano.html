@@ -228,6 +228,12 @@
                        data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
                     <a href="chat.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
                        data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
+                    <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
+                        <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
+                    </button>
+                    <button id="logout-btn" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
+                        <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
+                    </button>
                 </div>
 
                 <!-- Mobile hamburger -->
@@ -553,6 +559,60 @@
 </footer>
     
     <script>
+        // ===================== AUTH + LOGIN BUTTON (SRH/Chat shared) =====================
+        // Note: only shows/hides Login/Logout here; period reminder is on srh.html.
+        // Uses the same Firebase config as chat.html.
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+            authDomain: "urungano-chat-50d62.firebaseapp.com",
+            projectId: "urungano-chat-50d62",
+            storageBucket: "urungano-chat-50d62.firebasestorage.app",
+            messagingSenderId: "730372170670",
+            appId: "1:730372170670:web:91300da03f18f488afde3f"
+        };
+
+        // Load Firebase in-module via dynamic import (works in non-module script)
+        let _auth = null;
+        let _currentUser = null;
+        let _unsubscribe = null;
+
+        window.goToAuth = () => window.location.href = 'auth.html';
+
+        window.logout = () => {
+            if (!_auth) return;
+            import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js").then(m => m.signOut(_auth));
+        };
+
+        function setAuthUI(loggedIn) {
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            if (!loginBtn || !logoutBtn) return;
+            if (loggedIn) {
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-flex';
+            } else {
+                loginBtn.style.display = 'inline-flex';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        (async function initAuthHeader() {
+            try {
+                const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+                const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+                const app = appMod.initializeApp(firebaseConfig);
+                _auth = authMod.getAuth(app);
+
+                _unsubscribe = authMod.onAuthStateChanged(_auth, (user) => {
+                    _currentUser = user;
+                    setAuthUI(!!user);
+                });
+            } catch (e) {
+                console.log('Auth header init failed', e);
+            }
+        })();
+
         let recognition = null;
         let isListening = false;
         let chatFrame = null;
