@@ -770,19 +770,35 @@
         }
 
         async function savePeriodFromCalculator({ lmpISO, cycleLength }) {
-            if (!currentUser) return;
+            // Guard against script execution order issues (currentUser may not be initialized yet)
+            try {
+                if (typeof currentUser === 'undefined' || !currentUser) return;
+            } catch {
+                return;
+            }
             const docRef = doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
+
             const payload = {
                 lmpISO,
                 cycleLength,
                 updatedAt: serverTimestamp()
             };
             await setDoc(docRef, payload, { merge: true });
+            console.log('[SRH] setDoc completed for', docRef.path);
             savedPeriod = { ...payload };
+
         }
 
         function renderPeriodReminder() {
+            // Guard against execution order issues (currentUser may not be initialized yet)
+            try {
+                if (typeof currentUser === 'undefined') return;
+            } catch {
+                return;
+            }
+
             const reminderEl = document.getElementById('period-reminder');
+
             if (!reminderEl) return;
 
             if (!currentUser || !savedPeriod?.lmpISO || !savedPeriod?.cycleLength) {
@@ -817,6 +833,18 @@
             currentUser = user;
             authReady = true;
             if (user) {
+                // Flush any pending save that happened before auth finished initializing
+                if (pendingPeriodSave) {
+                    console.log('[SRH] Flushing pending save on auth ready', pendingPeriodSave);
+                    const { lmpISO, cycleLength } = pendingPeriodSave;
+                    pendingPeriodSave = null;
+                    if (typeof savePeriodFromCalculator === 'function') {
+                        await savePeriodFromCalculator({ lmpISO, cycleLength });
+                        console.log('[SRH] Pending setDoc completed');
+                        renderPeriodReminder();
+                    }
+                }
+
                 await ensureUserProfile(user);
                 // For username, read from users doc quickly
                 const snap = await getDoc(doc(db, 'users', user.uid));
@@ -920,23 +948,56 @@
         }
 
         // Calculator logic (original kept + language support)
-        let isPregnantMode = false;
+        // NOTE: keep isPregnantMode declared with var (not let/const) to avoid TDZ when calculateCycle is called
+        // before this line runs due to script execution order.
+        var isPregnantMode = false;
+
 
         function togglePregnantMode() {
             isPregnantMode = !isPregnantMode;
         }
 
         // Save to Firestore when logged in
+        // (Use var to avoid TDZ issues if calculateCycle fires before this line is executed.)
+        var pendingPeriodSave = null;
+
+
         async function maybeSavePeriodToAccount({ lmpISO, cycleLength }) {
+            // Debug visibility for save issues
             try {
+                console.log('[SRH] maybeSavePeriodToAccount called', { lmpISO, cycleLength });
+
+                // If auth isn't ready yet, defer the write until onAuthStateChanged sets currentUser.
+                // Avoid touching `currentUser` directly if it is still in TDZ.
+                let userSnapshot = null;
+                try {
+                    userSnapshot = currentUser;
+                } catch (e) {
+                    userSnapshot = null;
+                }
+
+                if (!userSnapshot) {
+                    pendingPeriodSave = { lmpISO, cycleLength };
+                    console.log('[SRH] Deferring save until auth ready', pendingPeriodSave);
+                    return;
+                }
+
+                pendingPeriodSave = null;
+
+
                 if (typeof savePeriodFromCalculator === 'function') {
                     await savePeriodFromCalculator({ lmpISO, cycleLength });
+                    console.log('[SRH] savePeriodFromCalculator finished');
                     renderPeriodReminder();
+                } else {
+                    console.log('[SRH] savePeriodFromCalculator is not a function');
                 }
             } catch (e) {
                 console.log('Period save failed', e);
             }
         }
+
+
 
         function calculateCycle() {
             const lmpInput = document.getElementById('lmp').value;
@@ -947,13 +1008,21 @@
             errorEl.textContent = '';
 
             if (!lmpInput) {
-                errorEl.textContent = document.body.getAttribute('data-lang') === 'en' 
-                    ? 'Please enter the first day of your last period' 
+                errorEl.textContent = document.body.getAttribute('data-lang') === 'en'
+                    ? 'Please enter the first day of your last period'
                     : 'Andika itariki ya mbere y’imyanya yawe ya nyuma';
                 return;
             }
 
+            // Validate date
             const lmp = new Date(lmpInput);
+            if (Number.isNaN(lmp.getTime())) {
+                errorEl.textContent = document.body.getAttribute('data-lang') === 'en'
+                    ? 'Please enter a valid date'
+                    : 'Andika itariki ikwiye';
+                return;
+            }
+
             const nextPeriod = new Date(lmp);
             nextPeriod.setDate(nextPeriod.getDate() + cycleLength);
 
@@ -970,23 +1039,26 @@
                 dueDate.setDate(dueDate.getDate() + 280);
             }
 
-            // Fill results
+            // Fill results (original-srh.html behavior)
             document.getElementById('next-period').textContent = nextPeriod.toLocaleDateString('en-GB');
-            document.getElementById('fertile-window').innerHTML = 
+            document.getElementById('fertile-window').innerHTML =
                 `${fertileStart.toLocaleDateString('en-GB')} - ${fertileEnd.toLocaleDateString('en-GB')}`;
-            
+
             const dueEl = document.getElementById('due-date');
             if (dueDate) {
                 dueEl.textContent = dueDate.toLocaleDateString('en-GB');
-                dueEl.parentElement.style.display = 'block';
+                // show due-date card value area
+                if (dueEl.parentElement) dueEl.parentElement.style.display = 'block';
             } else {
                 dueEl.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Not applicable' : 'Ntibikwiye';
+                // hide due-date card value area (keeps UI clean)
+                if (dueEl.parentElement) dueEl.parentElement.style.display = 'block';
             }
 
             resultsEl.classList.remove('hidden');
 
             // If logged in, save period tracking (for reminder on reload)
-            if (lmpInput) {
+            if (typeof maybeSavePeriodToAccount === 'function') {
                 maybeSavePeriodToAccount({ lmpISO: lmpInput, cycleLength });
             }
         }
