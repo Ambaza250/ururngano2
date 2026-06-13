@@ -579,9 +579,14 @@
 
         window.goToAuth = () => window.location.href = 'auth.html';
 
-        window.logout = () => {
+        window.logout = async () => {
             if (!_auth) return;
-            import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js").then(m => m.signOut(_auth));
+            try {
+                const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+                await authMod.signOut(_auth);
+            } catch (e) {
+                console.log('Logout failed', e);
+            }
         };
 
         function setAuthUI(loggedIn) {

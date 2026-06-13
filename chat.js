@@ -1,11 +1,10 @@
-// ================== YOUR KEYS - REPLACE THESE ==================
-const SUPABASE_URL = 'https://ydutxsguqrvgtqtjzbjv.supabase.co';   // ← Change this
-const SUPABASE_ANON_KEY = 'sb_publishable_LbnCj2nM89a_JQ2eavJJ9A_G6dof_ks';            // ← Paste your Publishable key here
+// chat.js is currently not used by chat.html (chat.html embeds Firebase auth + chat logic inline).
+// Keeping Supabase code here can cause confusion if it is accidentally loaded on the wrong page.
+// This file is intentionally disabled.
 
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+console.warn('chat.js disabled: chat.html uses Firebase inline; remove/rewire if you want Supabase chat.');
 
-const status = document.getElementById('status');
-
+/*
 // ====================== SIGN UP ======================
 async function signUp() {
   const email = document.getElementById('email').value;
@@ -59,3 +58,4 @@ supabase.auth.getSession().then(({ data }) => {
     status.textContent = "✅ Wari usanzwe winjiye";
   }
 });
+*/
