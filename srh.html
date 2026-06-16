@@ -548,7 +548,7 @@
                     </div>
 
                     <div class="ct-input-group">
-                        <label for="cycle-length" data-en="How many days your cycle lasts" data-rw="Iminsi imihango yawe imara">Iminsi imihango yawe imara</label>
+                        <label for="cycle-length" data-en="How many days your cycle lasts" data-rw="Iminsi ukwezi kwawe kumara.">Iminsi ukwezi kwawe kumara</label>
                         <input type="number" id="cycle-length" class="ct-input" value="28" min="21" max="35">
                     </div>
 
@@ -828,7 +828,57 @@ window.logout = async () => {
             savedPeriod = { ...payload };
         }
 
+        function calculateNextPeriodFromSavedPeriod({ lmpISO, cycleLength }) {
+            const lmp = new Date(lmpISO);
+            if (Number.isNaN(lmp.getTime())) return null;
+            const now = new Date();
+            const today0 = new Date(now);
+            today0.setHours(0,0,0,0);
+
+            let next = new Date(lmp);
+            next.setHours(0,0,0,0);
+
+            // Move forward by whole cycles until next >= today
+            // (Avoiding off-by-one due to timezones by using date-only midnight.)
+            while (next < today0) {
+                next.setDate(next.getDate() + cycleLength);
+                if (cycleLength <= 0) break;
+            }
+
+            // Fertile window is approx days 10-16 from LMP of the upcoming cycle
+            const fertileStart = new Date(next);
+            fertileStart.setDate(fertileStart.getDate() - cycleLength + 10);
+
+            const fertileEnd = new Date(next);
+            fertileEnd.setDate(fertileEnd.getDate() - cycleLength + 16);
+
+            return {
+                nextPeriod: next,
+                fertileStart,
+                fertileEnd
+            };
+        }
+
+        function showPeriodPopup({ nextPeriod, fertileStart, fertileEnd, stageLabelKey }) {
+            const lang = getLang();
+            const title = lang === 'en' ? 'Your menstrual cycle info' : 'Amakuru y’imihango yawe';
+            const nextText = lang === 'en' ? 'Next period (estimated):' : 'Imihango ikurikira (biteganijwe):';
+            const fertileText = lang === 'en' ? 'Fertile window (estimated):' : 'Igihe cy’uburumbuke (biteganijwe):';
+            const stageTextLabel = lang === 'en' ? 'Current phase:' : 'Icyiciro uriho:';
+
+            const fertileRange = `${fertileStart.toLocaleDateString('en-GB')} - ${fertileEnd.toLocaleDateString('en-GB')}`;
+            const phaseText = stageLabelKey ? stageText(stageLabelKey, lang) : (lang === 'en' ? 'Unavailable' : 'Bitaraboneka');
+
+            const message = `${nextText} ${nextPeriod.toLocaleDateString('en-GB')}\n` +
+                `${fertileText} ${fertileRange}\n` +
+                `${stageTextLabel} ${phaseText}`;
+
+            // Immediate popup
+            alert(`${title}\n\n${message}`);
+        }
+
         function renderPeriodReminder() {
+
             // Guard against execution order issues (currentUser may not be initialized yet)
             try {
                 if (typeof currentUser === 'undefined') return;
@@ -914,6 +964,24 @@ window.logout = async () => {
                     currentUserProfile = snap.exists() ? snap.data() : { username: user.displayName || user.email?.split('@')[0] || 'User' };
                     await loadSavedPeriod();
                     hydrateLoginAndPeriodUI();
+
+                    // Immediately show popup based on saved period data (next period + fertile window)
+                    if (savedPeriod?.lmpISO && savedPeriod?.cycleLength) {
+                        const computed = calculateNextPeriodFromSavedPeriod({
+                            lmpISO: savedPeriod.lmpISO,
+                            cycleLength: savedPeriod.cycleLength
+                        });
+                        if (computed) {
+                            const stage = getCycleStage({ lmpISO: savedPeriod.lmpISO, cycleLength: savedPeriod.cycleLength });
+                            showPeriodPopup({
+                                nextPeriod: computed.nextPeriod,
+                                fertileStart: computed.fertileStart,
+                                fertileEnd: computed.fertileEnd,
+                                stageLabelKey: stage?.labelKey
+                            });
+                        }
+                    }
+
                 } else {
                     currentUserProfile = null;
                     savedPeriod = null;
