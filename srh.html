@@ -337,14 +337,9 @@
                     <a href="srh.html" class="text-blue-600 font-semibold" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
                     <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
                     <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
-                    <button id="login-btn" onclick="goToAuth()" class="bg-blue-600 text-white px-4 py-2 rounded-2xl hover:bg-blue-700 transition text-sm font-semibold" style="white-space:nowrap;">
-                        <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
-                    </button>
-                    <button id="logout-btn" onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-2xl hover:bg-red-600 transition text-sm font-semibold" style="white-space:nowrap; display:none;">
-                        <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
-                    </button>
+                                    
                 </div>
-
+                
                 <!-- Mobile hamburger -->
                 <button id="hamburger" onclick="toggleMobileMenu()"
                         class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
@@ -659,25 +654,62 @@
             appId: "1:730372170670:web:91300da03f18f488afde3f"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Import Firebase modules (needed for initializeApp/getAuth/getFirestore)
+        // No top-level await: initialize inside IIFE.
+        let auth;
+        let db;
+
+        // Promise that resolves once Firebase Auth + Firestore are fully initialized,
+        // and Firestore modular functions are available.
+        const firestoreExportsReady = (async () => {
+            const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+            const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+            const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+
+            const appInstance = appMod.initializeApp(firebaseConfig);
+            auth = authMod.getAuth(appInstance);
+            db = fsMod.getFirestore(appInstance);
+
+            return {
+                getDoc: fsMod.getDoc,
+                doc: fsMod.doc,
+                setDoc: fsMod.setDoc,
+                serverTimestamp: fsMod.serverTimestamp
+            };
+        })();
+
 
         let currentUser = null;
         let currentUserProfile = null;
 
-        // logout is defined after Firebase modules load (to avoid breaking calculator)
-        window.goToAuth = () => window.location.href = 'auth.html';
+
+        // Ensure the header button always works even if Firebase init fails
+        function goToAuth() {
+            try { window.location.href = 'auth.html'; } catch (e) { console.log('goToAuth failed', e); }
+        }
+
+
+        // Used by the header: onclick="logout()"
+        // Ensures SRH matches urungano.html behavior (button toggles onAuthStateChanged)
+window.logout = async () => {
+            try {
+                const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+                await authMod.signOut(auth);
+            } catch (e) {
+                console.log('Logout failed', e);
+            }
+        };
 
 
         async function ensureUserProfile(user) {
-            const snap = await getDoc(doc(db, 'users', user.uid));
+            const fs = await firestoreExportsReady;
+            const snap = await fs.getDoc(fs.doc(db, 'users', user.uid));
             if (!snap.exists()) {
-                await setDoc(doc(db, 'users', user.uid), {
+                await fs.setDoc(fs.doc(db, 'users', user.uid), {
                     uid: user.uid,
                     email: user.email || '',
                     username: user.displayName || user.email?.split('@')[0] || 'User',
-                    createdAt: serverTimestamp()
+                    createdAt: fs.serverTimestamp()
                 }, { merge: true });
             }
         }
@@ -690,6 +722,7 @@
             if (!loginBtn || !loginText || !logoutBtn) return;
 
             if (loggedIn) {
+                console.log('[SRH] setAuthUI loggedIn=true username=', username);
                 loginText.textContent = username || (document.body.getAttribute('data-lang') === 'en' ? 'Account' : 'Konti');
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-flex';
@@ -760,8 +793,9 @@
 
         async function loadSavedPeriod() {
             if (!currentUser) return;
-            const docRef = doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
-            const snap = await getDoc(docRef);
+            const fs = await firestoreExportsReady;
+            const docRef = fs.doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
+            const snap = await fs.getDoc(docRef);
             if (snap.exists()) {
                 savedPeriod = snap.data();
             } else {
@@ -776,17 +810,22 @@
             } catch {
                 return;
             }
-            const docRef = doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
+
+            // Always use the already-loaded Firestore module exports.
+            // This avoids "Firestore modular imports not ready" races.
+            const fs = await firestoreExportsReady;
+
+            const docRef = fs.doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
 
             const payload = {
                 lmpISO,
                 cycleLength,
-                updatedAt: serverTimestamp()
+                updatedAt: fs.serverTimestamp()
             };
-            await setDoc(docRef, payload, { merge: true });
+
+            await fs.setDoc(docRef, payload, { merge: true });
             console.log('[SRH] setDoc completed for', docRef.path);
             savedPeriod = { ...payload };
-
         }
 
         function renderPeriodReminder() {
@@ -829,34 +868,59 @@
             renderPeriodReminder();
         }
 
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            authReady = true;
-            if (user) {
-                // Flush any pending save that happened before auth finished initializing
-                if (pendingPeriodSave) {
-                    console.log('[SRH] Flushing pending save on auth ready', pendingPeriodSave);
-                    const { lmpISO, cycleLength } = pendingPeriodSave;
-                    pendingPeriodSave = null;
-                    if (typeof savePeriodFromCalculator === 'function') {
-                        await savePeriodFromCalculator({ lmpISO, cycleLength });
-                        console.log('[SRH] Pending setDoc completed');
-                        renderPeriodReminder();
-                    }
-                }
+        firestoreExportsReady.then(async () => {
+            const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+            // Firestore modular functions used below (getDoc/doc/setDoc/serverTimestamp)
+            const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+            const { getDoc, doc, setDoc, serverTimestamp } = fsMod;
 
-                await ensureUserProfile(user);
-                // For username, read from users doc quickly
-                const snap = await getDoc(doc(db, 'users', user.uid));
-                currentUserProfile = snap.exists() ? snap.data() : { username: user.displayName || user.email?.split('@')[0] || 'User' };
-                await loadSavedPeriod();
-                hydrateLoginAndPeriodUI();
-            } else {
-                currentUserProfile = null;
-                savedPeriod = null;
-                setAuthUI({ loggedIn: false });
-                renderPeriodReminder();
+            // (authReady is already declared; keep listener structure stable)
+
+
+            // Fallback: if user is already signed in, hydrate UI immediately.
+            // This helps when the auth callback is delayed.
+            try {
+                const immediateUser = auth.currentUser;
+                if (immediateUser) {
+                    console.log('[SRH] immediate auth.currentUser found:', immediateUser.email);
+                    currentUser = immediateUser;
+                }
+            } catch (e) {
+                console.log('[SRH] immediate currentUser read failed', e);
             }
+
+            authMod.onAuthStateChanged(auth, async (user) => {
+                console.log('[SRH] onAuthStateChanged fired:', !!user, 'email=', user?.email);
+                currentUser = user;
+
+                authReady = true;
+
+                if (user) {
+                    // Flush any pending save that happened before auth finished initializing
+                    if (pendingPeriodSave) {
+                        console.log('[SRH] Flushing pending save on auth ready', pendingPeriodSave);
+                        const { lmpISO, cycleLength } = pendingPeriodSave;
+                        pendingPeriodSave = null;
+                        if (typeof savePeriodFromCalculator === 'function') {
+                            await savePeriodFromCalculator({ lmpISO, cycleLength });
+                            console.log('[SRH] Pending setDoc completed');
+                            renderPeriodReminder();
+                        }
+                    }
+
+                    await ensureUserProfile(user);
+                    // For username, read from users doc quickly
+                    const snap = await getDoc(doc(db, 'users', user.uid));
+                    currentUserProfile = snap.exists() ? snap.data() : { username: user.displayName || user.email?.split('@')[0] || 'User' };
+                    await loadSavedPeriod();
+                    hydrateLoginAndPeriodUI();
+                } else {
+                    currentUserProfile = null;
+                    savedPeriod = null;
+                    setAuthUI({ loggedIn: false });
+                    renderPeriodReminder();
+                }
+            });
         });
 
         // Language switching - works for ALL text on the page
@@ -963,6 +1027,8 @@
 
 
         async function maybeSavePeriodToAccount({ lmpISO, cycleLength }) {
+            console.log('[SRH] Auth currentUser at maybeSavePeriodToAccount:', currentUser);
+
             // Debug visibility for save issues
             try {
                 console.log('[SRH] maybeSavePeriodToAccount called', { lmpISO, cycleLength });
@@ -1074,7 +1140,7 @@
             if (!document.body.getAttribute('data-lang')) {
                 document.body.setAttribute('data-lang', 'rw');
             }
-            
+
             // Make sure active button is correct on load
             const currentLang = document.body.getAttribute('data-lang');
             updateVoiceNotes(currentLang);
@@ -1085,8 +1151,17 @@
                 btnEn.classList.toggle('active', currentLang === 'en');
             }
 
-            console.log('%c✅ srh.html fully loaded with language switching + all lessons + bilingual calculator', 'color:#db2777; font-weight:600');
+            console.log('%c✅ srh.html fully loaded', 'color:#db2777; font-weight:600');
+            console.log('[SRH] initializePage sees currentUser=', currentUser);
+
+            // Render auth UI using currentUser immediately if already available
+            try {
+                setAuthUI({ loggedIn: !!currentUser, username: currentUserProfile?.username || '' });
+            } catch (e) {
+                console.log('[SRH] setAuthUI on initializePage failed', e);
+            }
         }
+
 
         // Run on load
         window.onload = initializePage;

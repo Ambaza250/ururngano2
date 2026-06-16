@@ -1,0 +1,25 @@
+{
+  "name": "ururngano2",
+  "version": "1.0.0",
+  "description": "**Urungano** — A safe, trusted, and youth-friendly digital platform providing information and support on **Sexual & Reproductive Health (SRH)** and **Mental Health** in **Kinyarwanda**.",
+  "main": "chat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ambaza250/ururngano2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ambaza250/ururngano2/issues"
+  },
+  "homepage": "https://github.com/Ambaza250/ururngano2#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
