@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a therapist - Urungano</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .lang-btn { transition: all 0.3s ease; }
+    .lang-btn.active {
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50" data-lang="rw">
+
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+      <div class="flex justify-between items-center gap-2">
+        <div class="flex items-center gap-2 md:gap-3 min-w-0">
+          <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+          <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
+        </div>
+
+        <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+          <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+          <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-3 py-10 md:px-6 md:py-14">
+    <div class="text-center">
+      <h2 class="text-3xl md:text-5xl font-bold text-slate-800" data-en="Book a therapist" data-rw="Tegura umujyanama w'ubuvuzi">Book a therapist</h2>
+      <p class="text-slate-600 mt-3 text-base md:text-lg" data-en="Use the USSD code below to start the booking process." data-rw="Koresha kode ya USSD ibonye hepfo kugirango utangire itegura ry'inama.">
+        Use the USSD code below to start the booking process.
+      </p>
+    </div>
+
+    <div class="mt-8 bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+      <div class="p-6 md:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="text-sm font-semibold text-pink-600 flex items-center gap-2">
+              <i class="fa-solid fa-mobile-screen-button"></i>
+              <span data-en="USSD Code" data-rw="Kode ya USSD">USSD Code</span>
+            </div>
+            <div class="mt-3">
+              <div class="text-center font-mono text-xl md:text-2xl font-bold text-blue-700 break-all">
+                <span>*182*8*1*34345*10000#</span>
+              </div>
+            </div>
+          </div>
+          <div class="hidden sm:block">
+            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-pink-50 flex items-center justify-center border border-pink-100">
+              <i class="fa-solid fa-stethoscope text-pink-600 text-lg md:text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 grid gap-3">
+          <div class="grid gap-2">
+            <label class="text-sm font-semibold text-slate-700" for="payment-phone" data-en="Your payment phone number" data-rw="Numero ya telefoni y'ishyuwe">Your payment phone number</label>
+            <input
+              id="payment-phone"
+              name="paymentPhone"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+              class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-pink-100"
+              placeholder="e.g. 07XXXXXXXX / e.g. 0782XXXXXX"
+            />
+          </div>
+
+          <button
+            id="confirm-payment"
+            onclick="confirmPayment()"
+            class="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold text-lg shadow-sm"
+          >
+            <span data-en="Confirm payment" data-rw="Emeza ubwishyu">Confirm payment</span>
+          </button>
+
+          <div id="booking-status" class="text-sm text-center min-h-[24px] text-slate-600"></div>
+
+          <p class="text-xs md:text-sm text-slate-500 text-center" data-en="Note: If your phone/app provider does not support USSD, the booking may require an alternative step." data-rw="Ubutumwa: Niba telefone/app yawe itajya ikoresha USSD, kwiyandikisha/booking bishobora gusaba undi mwanzuro.">
+            Note: If your phone/app provider does not support USSD, the booking may require an alternative step.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-slate-900 text-white py-10">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+        <div class="space-y-3 text-sm">
+          <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+          <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
+          <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+        <div class="grid grid-cols-2 gap-y-2 text-sm">
+          <a href="srh.html" class="hover:text-pink-400" data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</a>
+          <a href="mental-health.html" class="hover:text-pink-400" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+          <a href="chat.html" class="hover:text-pink-400" data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</a>
+          <a href="about-us.html" class="hover:text-pink-400" data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</a>
+        </div>
+      </div>
+      <div class="text-sm opacity-75">
+        <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">
+          Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.
+        </p>
+        <p class="mt-6 text-xs">© 2026 Urungano Platform</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const USSD_CODE = '*182*8*1*34345*10000#';
+
+    function switchLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      document.body.setAttribute('data-lang', lang);
+
+      document.querySelectorAll('[data-en]').forEach(el => {
+        el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+      });
+
+      const btnRw = document.getElementById('btn-rw');
+      const btnEn = document.getElementById('btn-en');
+      if (btnRw && btnEn) {
+        btnRw.classList.toggle('active', lang === 'rw');
+        btnEn.classList.toggle('active', lang === 'en');
+      }
+    }
+
+    async function confirmPayment() {
+      const statusEl = document.getElementById('booking-status');
+      if (!statusEl) return;
+
+      const bookingId = (window.crypto?.randomUUID?.() || (Date.now().toString(16) + '-' + Math.random().toString(16).slice(2)));
+
+      // UI first
+      statusEl.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i>
+        <span data-en="Creating booking..." data-rw="Turimo gushyiraho booking...">Creating booking...</span>
+      `;
+
+      // Attempt to create a pending booking in Firestore.
+      try {
+        const user = auth?.currentUser;
+        if (!user) {
+          statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-600 mr-2"></i><span>${document.body.getAttribute('data-lang') === 'en' ? 'Please log in again.' : 'Fyonda kongera kwinjira.'}</span>`;
+          window.location.href = 'auth.html';
+          return;
+        }
+
+        if (typeof firestoreExportsReady === 'undefined') {
+          throw new Error('Firestore not initialized on this page (firestoreExportsReady is undefined).');
+        }
+
+        const fs = await firestoreExportsReady;
+        const bookingDocRef = fs.doc(fs.db, 'users', user.uid, 'bookings', bookingId);
+
+
+        const paymentPhoneRaw = (document.getElementById('payment-phone')?.value || '').trim();
+        const paymentPhone = paymentPhoneRaw === '' ? null : Number(paymentPhoneRaw);
+
+        if (paymentPhone === null || !Number.isFinite(paymentPhone) || paymentPhone < 0) {
+          statusEl.innerHTML = `
+            <i class="fa-solid fa-circle-exclamation text-amber-500 mr-2"></i>
+            <span>${document.body.getAttribute('data-lang') === 'en' ? 'Please enter the phone number you paid with.' : 'Andika nimero ya telefone wishyuwe ukoresheje.'}</span>
+          `;
+          return;
+        }
+
+        const payload = {
+          id: bookingId,
+          createdAt: fs.serverTimestamp(),
+          status: 'pending',
+          payment: {
+            method: 'USSD',
+            ussdCode: USSD_CODE,
+            confirmed: true,
+            phone: paymentPhone
+          }
+        };
+
+        await fs.setDoc(bookingDocRef, payload);
+
+        statusEl.innerHTML = `
+          <i class="fa-solid fa-check-circle text-green-600 mr-2"></i>
+          <span data-en="Booking saved as pending. Dial the USSD code now." data-rw="Booking yanditswe nka pending. Hamagara kode ya USSD noneho." data-lang="en">Booking saved as pending. Dial the USSD code now.</span>
+          <div class="mt-2 text-xs text-slate-600">${USSD_CODE}</div>
+        `;
+
+      } catch (e) {
+        console.error(e);
+
+        const lang = document.body.getAttribute('data-lang');
+        const errText = (lang === 'en')
+          ? 'Booking could not be saved to database.'
+          : 'Booking ntibashije kubikwa muri database.';
+
+        const debug = (e && (e.message || e.code))
+          ? `${e.message || e.code}`
+          : String(e);
+
+        statusEl.innerHTML = `
+          <i class="fa-solid fa-circle-exclamation text-amber-500 mr-2"></i>
+          <span>${errText}</span>
+          <div class="mt-2 text-xs text-slate-600">
+            <div class="font-mono break-all">${debug}</div>
+            <div class="mt-1">${USSD_CODE}</div>
+          </div>
+        `;
+      }
+
+
+
+      // Always show dialing instructions.
+      // Do NOT auto-open `tel:` here because browsers can show a "file:// wants to open this application" prompt.
+      // The user should manually dial the USSD code.
+    }
+
+
+    // Initialize language
+    window.onload = () => {
+      if (!document.body.getAttribute('data-lang')) document.body.setAttribute('data-lang', 'rw');
+      const lang = document.body.getAttribute('data-lang');
+      if (lang === 'en') switchLanguage('en');
+      if (lang !== 'en') switchLanguage('rw');
+    };
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+      authDomain: "urungano-chat-50d62.firebaseapp.com",
+      projectId: "urungano-chat-50d62",
+      storageBucket: "urungano-chat-50d62.firebasestorage.app",
+      messagingSenderId: "730372170670",
+      appId: "1:730372170670:web:91300da03f18f488afde3f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Expose auth globally so the non-module confirmPayment() can access it.
+    window.auth = auth;
+
+    // Initialize Firestore exports using the same pattern as srh.html
+    // so booking writes work.
+    const firestoreExportsReady = (async () => {
+      const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+      const db = fsMod.getFirestore(app);
+
+      return {
+        db,
+        doc: fsMod.doc,
+        setDoc: fsMod.setDoc,
+        serverTimestamp: fsMod.serverTimestamp
+      };
+    })();
+
+    // Expose firestoreExportsReady globally for confirmPayment().
+    window.firestoreExportsReady = firestoreExportsReady;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Redirect to auth page if not logged in
+        try {
+          window.location.href = 'auth.html';
+        } catch (e) {
+          // fallback
+          window.location = 'auth.html';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+
+

@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 
+require('dotenv').config();
+
 const app = express();
 
 // Allow local dev + same-origin.
@@ -42,8 +44,226 @@ function sanitizeInt(n, fallback) {
   return Number.isFinite(v) ? v : fallback;
 }
 
+// ===== Firebase Admin (server-side) =====
+const adminEmailAllowed = process.env.ADMIN_EMAIL || 'admin@urungano.com';
+function getAdminAllowedEmails() {
+  const raw = process.env.ADMIN_EMAILS; // comma-separated list
+  if (!raw || typeof raw !== 'string') return [adminEmailAllowed];
+  return raw
+    .split(',')
+    .map(s => (s || '').trim())
+    .filter(Boolean);
+}
+
+
+function safeToString(v) {
+  try {
+    if (typeof v === 'string') return v;
+    return JSON.stringify(v);
+  } catch {
+    return String(v);
+  }
+}
+
+
+let firebaseAdmin = null;
+try {
+  firebaseAdmin = require('firebase-admin');
+} catch (e) {
+  // If firebase-admin isn't installed yet, startup will still work for period saver.
+  // Therapist creation endpoint will fail with a clear error.
+}
+
+let firebaseInitialized = false;
+async function ensureFirebaseAdminInit() {
+  if (firebaseInitialized) return;
+  if (!firebaseAdmin) throw new Error('firebase-admin is not installed.');
+
+  // Preferred for local dev: use a service account JSON file path via GOOGLE_APPLICATION_CREDENTIALS.
+  // Fallback: allow passing service account JSON via env var FIREBASE_SERVICE_ACCOUNT_JSON.
+  let credential;
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    // Preferred: inline JSON via env var (no file path issues)
+    const parsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    credential = firebaseAdmin.credential.cert(parsed);
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    // GOOGLE_APPLICATION_CREDENTIALS may point to a JSON key file OR be the JSON contents.
+    // If it looks like JSON, parse it; otherwise treat it as a path.
+    const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    if (typeof gac === 'string' && gac.trim().startsWith('{')) {
+      credential = firebaseAdmin.credential.cert(JSON.parse(gac));
+    } else {
+      credential = firebaseAdmin.credential.cert(gac);
+    }
+  } else {
+    // Last resort (will throw the same Project Id detection error in many local setups)
+    credential = firebaseAdmin.credential.applicationDefault();
+  }
+
+
+  function extractProjectIdFromServiceAccount(serviceAccountObj) {
+    if (!serviceAccountObj || typeof serviceAccountObj !== 'object') return null;
+    // service account JSON uses `project_id` (snake_case) in most exports.
+    return serviceAccountObj.project_id || serviceAccountObj.projectId || null;
+  }
+
+  // Provide projectId explicitly.
+  // 1) Prefer env var FIREBASE_PROJECT_ID
+  // 2) If we have service account JSON inline, extract project_id
+  // 3) If GOOGLE_APPLICATION_CREDENTIALS is a *path*, read the JSON and extract project_id
+  // 4) Otherwise throw a clear error (avoids the opaque "Unable to detect a Project Id" message)
+
+  const projectIdFromEnv = process.env.FIREBASE_PROJECT_ID || null;
+
+  // If GOOGLE_APPLICATION_CREDENTIALS is a path (common), parse the file to extract project_id.
+  // This is specifically to avoid relying on firebase-admin internal heuristics.
+  let serviceAccountParsed = null;
+  try {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      serviceAccountParsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      if (typeof gac === 'string' && gac.trim().startsWith('{')) {
+        // inline json
+        serviceAccountParsed = JSON.parse(gac);
+      } else {
+        // path to json file
+        const absPath = path.isAbsolute(gac) ? gac : path.join(process.cwd(), gac);
+        const raw = fs.readFileSync(absPath, 'utf8');
+        serviceAccountParsed = JSON.parse(raw);
+      }
+    }
+  } catch (e) {
+    // keep null; we’ll surface clearer error below
+  }
+
+  const projectIdFromSa = extractProjectIdFromServiceAccount(serviceAccountParsed);
+  const projectId = projectIdFromEnv || projectIdFromSa;
+
+  if (!projectId) {
+    throw new Error(
+      'Firebase Admin init failed: missing FIREBASE_PROJECT_ID and could not extract project id. ' +
+      'Set FIREBASE_PROJECT_ID and ensure GOOGLE_APPLICATION_CREDENTIALS points to a service account JSON file. '
+    );
+  }
+
+  // Avoid double-initialize issues in hot reload / repeated calls
+  if (!firebaseAdmin.apps || firebaseAdmin.apps.length === 0) {
+    firebaseAdmin.initializeApp({ credential, projectId });
+  }
+
+
+
+
+
+  firebaseInitialized = true;
+
+}
+
 app.get('/health', (_req, res) => {
   res.json({ ok: true });
+});
+
+// ===== Therapist creation endpoint =====
+app.post('/api/admin/therapists/create', async (req, res) => {
+  try {
+    if (!firebaseAdmin) {
+      return res.status(500).json({ error: 'firebase-admin is not installed on the server.' });
+    }
+
+
+    // DEBUG env (keep minimal - remove once fixed)
+    console.log('DEBUG env:', {
+      FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+      GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    });
+
+    await ensureFirebaseAdminInit();
+
+
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice('Bearer '.length) : null;
+    console.log('DEBUG authHeader present:', !!authHeader, 'tokenLen:', token ? token.length : 0);
+
+    if (!token) {
+      return res.status(401).json({ error: 'Missing Authorization Bearer token.' });
+    }
+
+    const adminEmails = getAdminAllowedEmails();
+    console.log('DEBUG allowed admin emails:', adminEmails);
+
+
+    let decoded;
+    try {
+      decoded = await firebaseAdmin.auth().verifyIdToken(token);
+    } catch (e) {
+      // Make token errors explicit for the frontend (instead of generic 500)
+      const code = e?.code || '';
+      if (code.startsWith('auth/')) {
+        return res.status(401).json({ error: 'Invalid Firebase ID token. Ensure the frontend sends currentUser.getIdToken() as Authorization: Bearer <token>.' });
+      }
+      throw e;
+    }
+    const email = decoded?.email;
+
+    // Admin authorization: allow any email in ADMIN_EMAILS (comma-separated) or fallback to ADMIN_EMAIL.
+    // This prevents hard failures when the configured admin email differs from the default string.
+    const allowedEmails = getAdminAllowedEmails();
+    const isAllowed = !!email && allowedEmails.includes(email);
+
+    console.log('DEBUG therapist auth:', {
+      uid: decoded?.uid,
+      email,
+      allowedEmails
+    });
+
+    if (!isAllowed) {
+      return res.status(403).json({
+        error: 'Forbidden: admin email not allowed to create therapists.',
+        allowedEmails
+      });
+    }
+
+
+    const body = req.body || {};
+    const username = sanitizeString(body?.username, 100);
+    const password = (body?.password || '').toString();
+    const emailTherapist = sanitizeString(body?.email, 250);
+    const institution = sanitizeString(body?.institution, 150);
+    const yearsOfExperience = sanitizeInt(body?.yearsOfExperience, null);
+
+    if (!username || !emailTherapist || !password || !institution || yearsOfExperience === null) {
+      return res.status(400).json({ error: 'Missing/invalid fields: username, password, email, institution, yearsOfExperience.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+
+    // Create Firebase Auth user
+    const userRecord = await firebaseAdmin.auth().createUser({
+      email: emailTherapist,
+      password,
+      displayName: username
+    });
+
+    // Create Firestore doc (collection auto-creates)
+    const db = firebaseAdmin.firestore();
+    await db.collection('therapists').doc(userRecord.uid).set({
+      uid: userRecord.uid,
+      username,
+      email: emailTherapist,
+      institution,
+      yearsOfExperience,
+      createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return res.json({ ok: true, uid: userRecord.uid });
+  } catch (e) {
+    console.error(e);
+    const msg = e?.message || 'Failed to create therapist.';
+    return res.status(500).json({ error: msg });
+  }
 });
 
 app.post('/api/periods/save', async (req, res) => {
@@ -101,10 +321,8 @@ app.get('/', (_req, res) => {
   return res.redirect('/urungano.html');
 });
 
-
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Urungano period saver listening on http://localhost:${PORT}`);
+  console.log(`Urungano server listening on http://localhost:${PORT}`);
 });
-
 
