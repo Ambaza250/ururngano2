@@ -231,6 +231,9 @@
                     <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
                         <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
                     </button>
+                    <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
+                        <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
+                    </button>
                     <button id="logout-btn" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
                         <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
                     </button>
@@ -589,6 +592,153 @@
             }
         };
 
+        window.goToTherapyCta = () => {
+            const btn = document.getElementById('therapy-cta-btn');
+            if (!btn) return;
+            const dest = btn.dataset.therapyDest;
+            if (dest) {
+                window.location.href = dest;
+            } else {
+                window.location.href = 'booking.html';
+            }
+        };
+
+        function setTherapyCtaUI({ show = false, label = 'Book a therapist', dest = 'booking.html' } = {}) {
+            const btn = document.getElementById('therapy-cta-btn');
+            const text = document.getElementById('therapy-cta-text');
+            if (!btn || !text) return;
+
+            btn.dataset.therapyDest = dest;
+
+            // Write label deterministically
+            // (avoid race with language switcher that may re-write [data-en]/[data-rw] contents)
+            text.textContent = label;
+            btn.style.display = show ? 'inline-flex' : 'none';
+
+            // Also keep original data attributes consistent with current label
+            // so that switchLanguage() won't revert the CTA text later.
+            if (label === 'Book a therapist' || label === 'Book a therapist ') {
+                text.setAttribute('data-en', 'Book a therapist');
+                text.setAttribute('data-rw', 'Tegura umujyanama');
+            } else if (label === 'Tegura umujyanama' || label === 'Tegura umujyanama ') {
+                text.setAttribute('data-en', 'Book a therapist');
+                text.setAttribute('data-rw', 'Tegura umujyanama');
+            } else if (label.toLowerCase().includes('chat')) {
+                text.setAttribute('data-en', "Chat with a therapist");
+                text.setAttribute('data-rw', "Ganira n'umujyanama");
+            } else {
+                // Generic fallback; keep whatever label we set.
+                text.setAttribute('data-en', label);
+                text.setAttribute('data-rw', label);
+            }
+        }
+
+
+        async function evaluateTherapyCtaForUser(user) {
+            // Defaults (safer): book a therapist
+            const bookingDest = 'booking.html';
+            const chatDest = 'therapychat.html';
+            const lang = document.body.getAttribute('data-lang') === 'en' ? 'en' : 'rw';
+            const labels = {
+                booking: lang === 'en' ? 'Book a therapist' : 'Tegura umujyanama',
+                chat: lang === 'en' ? 'Chat with a therapist' : 'Ganira n’umujyanama'
+            };
+
+            try {
+                const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+                const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+
+                const app = appMod.initializeApp(firebaseConfig);
+                const db = fsMod.getFirestore(app);
+
+                const uid = user?.uid;
+                if (!uid) {
+                    return { show: false, dest: bookingDest, label: labels.booking };
+                }
+
+                // Latest booking: prefer orderBy('createdAt','desc') if createdAt exists.
+                // We also handle missing createdAt by falling back to scanning a small set.
+                const bookingsCol = fsMod.collection(db, 'users', uid, 'bookings');
+
+                let latest = null;
+                let canOrderBy = true;
+
+                try {
+                    const q = fsMod.query(bookingsCol, fsMod.orderBy('createdAt', 'desc'), fsMod.limit(1));
+                    const snap = await fsMod.getDocs(q);
+                    if (!snap.empty) {
+                        const doc = snap.docs[0];
+                        latest = { id: doc.id, ...doc.data() };
+                    }
+                } catch (e) {
+                    // orderBy may fail if createdAt missing/unindexed; fallback to scanning recent docs
+                    canOrderBy = false;
+                }
+
+                if (!latest) {
+                    // Fallback: scan first 10 docs and choose max by createdAt when present.
+                    const snap = await fsMod.getDocs(fsMod.query(bookingsCol, fsMod.limit(10)));
+                    let best = null;
+                    let bestCreatedAt = null;
+                    snap.forEach((doc) => {
+                        const data = doc.data() || {};
+                        const createdAtRaw = data.createdAt;
+                        let createdAtMs = null;
+                        if (createdAtRaw) {
+                            createdAtMs = createdAtRaw.toMillis ? createdAtRaw.toMillis() : new Date(createdAtRaw).getTime();
+                            if (!Number.isFinite(createdAtMs)) createdAtMs = null;
+                        }
+                        if (!best) {
+                            best = { id: doc.id, ...data };
+                            bestCreatedAt = createdAtMs;
+                        } else {
+                            if (createdAtMs !== null && bestCreatedAt !== null) {
+                                if (createdAtMs > bestCreatedAt) {
+                                    best = { id: doc.id, ...data };
+                                    bestCreatedAt = createdAtMs;
+                                }
+                            } else if (bestCreatedAt === null && createdAtMs !== null) {
+                                best = { id: doc.id, ...data };
+                                bestCreatedAt = createdAtMs;
+                            }
+                        }
+                    });
+                    latest = best;
+                }
+
+                if (!latest) {
+                    return { show: true, dest: bookingDest, label: labels.booking };
+                }
+
+                const latestStatus = latest?.status;
+                const payment = latest?.payment || {};
+                const confirmed = latestStatus === 'confirmed' || payment?.confirmed === true;
+
+                const expiryRaw = payment?.expiryDate;
+                let expiryDate = null;
+                if (expiryRaw) {
+                    if (expiryRaw.toDate) {
+                        expiryDate = expiryRaw.toDate();
+                    } else {
+                        expiryDate = new Date(expiryRaw);
+                    }
+                }
+
+                const now = new Date();
+                const expired = !expiryDate || !(expiryDate instanceof Date) || Number.isNaN(expiryDate.getTime()) || expiryDate <= now;
+
+                if (!confirmed || expired) {
+                    return { show: true, dest: bookingDest, label: labels.booking };
+                }
+
+                return { show: true, dest: chatDest, label: labels.chat };
+            } catch (e) {
+                console.log('Therapy CTA evaluation failed:', e);
+                return { show: true, dest: bookingDest, label: labels.booking };
+            }
+        }
+
+
         function setAuthUI(loggedIn) {
             const loginBtn = document.getElementById('login-btn');
             const logoutBtn = document.getElementById('logout-btn');
@@ -609,9 +759,30 @@
                 const app = appMod.initializeApp(firebaseConfig);
                 _auth = authMod.getAuth(app);
 
-                _unsubscribe = authMod.onAuthStateChanged(_auth, (user) => {
+                _unsubscribe = authMod.onAuthStateChanged(_auth, async (user) => {
                     _currentUser = user;
                     setAuthUI(!!user);
+
+                    const btn = document.getElementById('therapy-cta-btn');
+                    if (!btn) return;
+
+                    if (!user) {
+                        setTherapyCtaUI({ show: false });
+                        return;
+                    }
+
+                    // Show immediately while we evaluate
+                    const lang = document.body.getAttribute('data-lang') === 'en' ? 'en' : 'rw';
+                    setTherapyCtaUI({
+                        show: true,
+                        dest: 'booking.html',
+                        label: lang === 'en' ? 'Book a therapist' : 'Tegura umujyanama'
+                    });
+
+
+
+                    const decision = await evaluateTherapyCtaForUser(user);
+                    setTherapyCtaUI(decision);
                 });
             } catch (e) {
                 console.log('Auth header init failed', e);
@@ -697,8 +868,12 @@
             document.body.setAttribute('data-lang', lang);
 
             document.querySelectorAll('[data-en]').forEach(el => {
+                // Keep CTA text deterministic: it uses textContent directly.
+                // This prevents switchLanguage() from forcing it back to Kinyarwanda.
+                if (el && el.id === 'therapy-cta-text') return;
                 el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
             });
+
 
             document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');

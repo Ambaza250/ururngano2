@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Urungano</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .lang-btn { transition: all 0.3s ease; }
+    .lang-btn.active {
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50" data-lang="rw">
+
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+      <div class="flex justify-between items-center gap-2">
+        <div class="flex items-center gap-2 md:gap-3 min-w-0">
+          <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+          <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano Admin</h1>
+        </div>
+
+        <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+          <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+          <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <a href="index.html" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-blue-600">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span data-en="Back" data-rw="Subira inyuma">Subira inyuma</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-3 py-10 md:px-6 md:py-14">
+    <!-- LOGIN -->
+    <section id="login-section" class="flex items-start justify-center">
+      <div class="w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8">
+        <div class="text-center">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100 mb-4">
+            <i class="fa-solid fa-user-shield text-blue-600 text-xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-800">
+            <span data-en="Admin Login" data-rw="Kwinjira muri Admin">Admin Login</span>
+          </h2>
+          <p class="text-slate-600 text-sm mt-2">
+            <span data-en="View therapist bookings that were paid." data-rw="Reba imyiyoboro/booking y'abitabiriye umujyanama yishyuwe."">
+              View therapist bookings that were paid.
+            </span>
+          </p>
+        </div>
+
+        <div class="mt-6 grid gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1" for="admin-username" data-en="Username" data-rw="Izina ry' ukoresha">Username</label>
+            <input id="admin-username" type="text" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="aime" autocomplete="username" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1" for="admin-password" data-en="Password" data-rw="Ijambo ry'ibanga">Password</label>
+            <input id="admin-password" type="password" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="campIO1!" autocomplete="current-password" />
+          </div>
+
+          <button id="admin-login-btn" onclick="adminLogin()" class="w-full px-5 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg shadow-sm">
+            <span data-en="Login" data-rw="Kwinjira">Login</span>
+          </button>
+
+          <div id="admin-status" class="text-sm min-h-[22px] text-center"></div>
+
+          <div class="text-xs text-slate-500 text-center">
+            <span data-en="If data fails to load, Firestore rules may block admin access." data-rw="Niba amakuru atagaragara, Firestore rules ishobora kuba ibuza admin kubona amakuru." >If data fails to load, Firestore rules may block admin access.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADD THERAPIST -->
+    <section id="therapist-section" class="hidden">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold text-slate-800">
+            <span data-en="Add Therapist" data-rw="Iyandikishe Umujyanama">Add Therapist</span>
+          </h2>
+          <p class="text-slate-600 text-sm mt-1">
+            <span data-en="Create a therapist login + profile." data-rw="Kora konti y'umujyanama na profil yayo.">Create a therapist login + profile.</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200">
+          <h3 class="font-bold text-slate-800">
+            <span data-en="Therapist details" data-rw="Amakuru y'umujyanama">Therapist details</span>
+          </h3>
+          <p class="text-sm text-slate-600 mt-1" id="therapist-subtext">
+            <span data-en="Only admin@urungano.com can create therapists." data-rw="Ni admin@urungano.com rukoresha ububiko bw'ubujyanama.">Only admin@urungano.com can create therapists.</span>
+          </p>
+        </div>
+
+        <div class="p-5">
+          <form onsubmit="return addTherapist(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-username" data-en="Username" data-rw="Izina ry' ukoresha">Username</label>
+              <input id="therapist-username" type="text" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="e.g. Dr. Amani" autocomplete="username" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-email" data-en="Email" data-rw="Imeri">Email</label>
+              <input id="therapist-email" type="email" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="therapist@example.com" autocomplete="email" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-password" data-en="Password" data-rw="Ijambo ry'ibanga">Password</label>
+              <input id="therapist-password" type="password" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="Minimum 6 characters" autocomplete="new-password" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-institution" data-en="Institution" data-rw="Aho akorera">Institution</label>
+              <input id="therapist-institution" type="text" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="Hospital / Clinic / NGO" />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-years" data-en="Years of experience" data-rw="Imyaka y'ubumenyi">Years of experience</label>
+              <input id="therapist-years" type="number" min="0" step="1" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="e.g. 5" />
+            </div>
+
+            <div class="md:col-span-2 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-end">
+              <button type="button" onclick="clearTherapistForm()" class="px-4 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold">
+                <i class="fa-solid fa-broom mr-2 text-slate-600"></i>
+                <span data-en="Clear" data-rw="Siba">Clear</span>
+              </button>
+              <button type="submit" class="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-sm">
+                <i class="fa-solid fa-user-plus mr-2"></i>
+                <span data-en="Create Therapist" data-rw="Kora Umujyanama">Create Therapist</span>
+              </button>
+            </div>
+          </form>
+
+          <div id="therapist-status" class="text-sm min-h-[22px] text-center mt-4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADD THERAPIST -->
+    <section id="therapist-section" class="hidden mt-10">
+      <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-800">
+              <span data-en="Add Therapist" data-rw="Ongeramo Umujyanama">Add Therapist</span>
+            </h2>
+            <p class="text-sm text-slate-600 mt-1">
+              <span data-en="Create a therapist user (auth) and profile (Firestore)." data-rw="Kurema ukoresha (Auth) na profile (Firestore).">Create a therapist user (auth) and profile (Firestore).</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="p-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-username" data-en="Username" data-rw="Izina ry' ukoresha">Username</label>
+              <input id="therapist-username" type="text" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="ibisobanuro" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-email" data-en="Email" data-rw="Imeri">Email</label>
+              <input id="therapist-email" type="email" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="therapist@example.com" autocomplete="email" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-password" data-en="Password" data-rw="Ijambo ry'ibanga">Password</label>
+              <input id="therapist-password" type="password" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="Minimum 6 characters" autocomplete="new-password" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-institution" data-en="Institution" data-rw="Aho akorera">Institution</label>
+              <input id="therapist-institution" type="text" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="Hospital / Clinic / Institution" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1" for="therapist-years" data-en="Years of Experience" data-rw="Imyaka afite y'uburambe">Years of Experience</label>
+              <input id="therapist-years" type="number" min="0" step="1" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100" placeholder="e.g. 3" />
+            </div>
+
+            <div class="flex items-end">
+              <button onclick="addTherapist()" class="w-full md:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-sm">
+                <i class="fa-solid fa-user-plus mr-2"></i>
+                <span data-en="Create Therapist" data-rw="Kurema">Create Therapist</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="therapist-status" class="mt-4 min-h-[22px] text-center text-sm"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATA VIEW -->
+    <section id="data-section" class="hidden">
+
+
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold text-slate-800"> 
+            <span data-en="Paid Therapist Bookings" data-rw="Bookings z'Abishyuwe (Umujyanama)">Paid Therapist Bookings</span>
+          </h2>
+          <p class="text-slate-600 text-sm mt-1">
+            <span data-en="List of all people who paid (includes name + email)." data-rw="Urutonde rw'abishyuriye (harimo izina na imeri).">List of all people who paid (includes name + email).</span>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="refreshData()" class="px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold">
+            <i class="fa-solid fa-arrows-rotate mr-2 text-slate-600"></i>
+            <span data-en="Refresh" data-rw="Kongera gutegura">Refresh</span>
+          </button>
+          <button onclick="logoutAdmin()" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 font-semibold">
+            <i class="fa-solid fa-right-from-bracket mr-2"></i>
+            <span data-en="Logout" data-rw="Sohoka">Logout</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between gap-3">
+          <div>
+            <h3 class="font-bold text-slate-800">
+              <span data-en="Paid users" data-rw="Abishyuye">Paid users</span>
+              <span id="paid-count" class="text-blue-700 ml-2"></span>
+            </h3>
+            <p class="text-sm text-slate-600 mt-1" id="subtext">
+              <span data-en="Loading..." data-rw="Birimo kwinjizwa...">Loading...</span>
+            </p>
+          </div>
+          <div class="text-sm text-slate-600" id="loading-indicator"></div>
+        </div>
+
+        <div class="p-5">
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead>
+                <tr class="text-left text-sm text-slate-600">
+                  <th class="py-3 pr-4">#</th>
+                  <th class="py-3 pr-4" data-en="Name" data-rw="Izina">Name</th>
+                  <th class="py-3 pr-4" data-en="Email" data-rw="Imeri">Email</th>
+                  <th class="py-3 pr-4" data-en="Booking(s)" data-rw="Booking(s)">Booking(s)</th>
+                  <th class="py-3 pr-4" data-en="Paid With" data-rw="Yishyuriye ukoresheje">Paid With</th>
+                  <th class="py-3 pr-4 text-right" data-en="Action" data-rw="Igikorwa">Action</th>
+                </tr>
+              </thead>
+              <tbody id="paid-list" class="divide-y divide-slate-100">
+                <!-- rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="empty-state" class="hidden mt-6 text-center text-slate-600">
+            <i class="fa-regular fa-circle-check text-2xl text-blue-600 mb-2"></i>
+            <div class="font-semibold">
+              <span data-en="No paid bookings found." data-rw="Nta byishyuwe byabonetse." >No paid bookings found.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
+
+    window.switchLanguage = function switchLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      document.body.setAttribute('data-lang', lang);
+
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const en = el.getAttribute('data-en');
+        const rw = el.getAttribute('data-rw');
+        if (!en || !rw) return;
+        el.textContent = (lang === 'en') ? en : rw;
+      });
+
+      const btnRw = document.getElementById('btn-rw');
+      const btnEn = document.getElementById('btn-en');
+      if (btnRw && btnEn) {
+        btnRw.classList.toggle('active', lang === 'rw');
+        btnEn.classList.toggle('active', lang === 'en');
+      }
+    };
+
+    function setStatus(html) {
+      const el = document.getElementById('admin-status');
+      if (el) el.innerHTML = html;
+    }
+
+    function getLang() {
+      return document.body.getAttribute('data-lang') === 'en' ? 'en' : 'rw';
+    }
+
+    function t(en, rw) {
+      return getLang() === 'en' ? en : rw;
+    }
+
+    window.adminLogin = async () => {
+      const username = (document.getElementById('admin-username').value || '').trim();
+      const password = (document.getElementById('admin-password').value || '').trim();
+
+      if (!username || !password) {
+        setStatus(`<span class="text-red-600"><i class="fa-solid fa-circle-exclamation mr-2"></i>${t('Enter username and password', 'Andika izina ryukoreshа nijambo ryibanga')}</span>`);
+        return;
+      }
+
+      // Hardcoded UI credentials as requested
+      if (username !== 'aime' || password !== 'campIO1!') {
+        setStatus(`<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${t('Invalid credentials', 'Amakuru ntaho ahuriye na yo')}</span>`);
+        return;
+      }
+
+      setStatus(`<span class="text-blue-700"><i class="fa-solid fa-spinner fa-spin mr-2"></i>${t('Authorizing...', 'Birimo kwemezwa...')}</span>`);
+
+      // Sign in to Firebase Auth so Firestore permissions allow reads (request.auth != null)
+      try {
+        const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+        const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+        const app = appMod.initializeApp(firebaseConfig);
+        const auth = authMod.getAuth(app);
+
+        // Admin Firebase Auth credentials
+        const adminEmail = 'admin@urungano.com';
+        const adminPassword = 'campIO1!';
+
+        await authMod.signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+
+        localStorage.setItem('urungano_admin_authed', '1');
+        localStorage.setItem('urungano_admin_fb_signedin', '1');
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('therapist-section').classList.remove('hidden');
+        document.getElementById('data-section').classList.remove('hidden');
+        await refreshData();
+        setStatus('');
+
+      } catch (e) {
+        console.error(e);
+        setStatus(`<span class="text-red-600"><i class="fa-solid fa-circle-exclamation mr-2"></i>${t('Failed to load data', 'Byanze gupakira amakuru')}</span>`);
+      }
+    };
+
+    window.logoutAdmin = () => {
+      localStorage.removeItem('urungano_admin_authed');
+      document.getElementById('data-section').classList.add('hidden');
+      document.getElementById('therapist-section').classList.add('hidden');
+      document.getElementById('login-section').classList.remove('hidden');
+      setStatus('');
+    };
+
+    window.clearTherapistForm = () => {
+      const ids = ['therapist-username','therapist-email','therapist-password','therapist-institution','therapist-years'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const st = document.getElementById('therapist-status');
+      if (st) st.innerHTML = '';
+    };
+
+    window.addTherapist = async (ev) => {
+      if (ev && ev.preventDefault) ev.preventDefault();
+
+      const username = (document.getElementById('therapist-username').value || '').trim();
+      const email = (document.getElementById('therapist-email').value || '').trim();
+      const password = (document.getElementById('therapist-password').value || '').trim();
+      const institution = (document.getElementById('therapist-institution').value || '').trim();
+      const yearsRaw = (document.getElementById('therapist-years').value || '').trim();
+      const yearsOfExperience = yearsRaw === '' ? null : Number(yearsRaw);
+
+      const st = document.getElementById('therapist-status');
+      const setSt = (html) => { if (st) st.innerHTML = html; };
+
+      if (!username || !email || !password || !institution || yearsOfExperience === null || !Number.isFinite(yearsOfExperience) || yearsOfExperience < 0) {
+        setSt(`<span class="text-red-600"><i class="fa-solid fa-circle-exclamation mr-2"></i>${t('Please fill all fields with valid values', 'Uzuza amakuru yose neza.')}</span>`);
+        return false;
+      }
+
+      try {
+        setSt(`<span class="text-blue-700"><i class="fa-solid fa-spinner fa-spin mr-2"></i>${t('Creating therapist...', 'Turi gukora umujyanama...')}</span>`);
+
+        const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+        const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+        const app = appMod.initializeApp(firebaseConfig);
+        const auth = authMod.getAuth(app);
+
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          setSt(`<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${t('Admin not signed in', 'Admin ntabwo yongeye kwinjira.')}</span>`);
+          return false;
+        }
+
+        const idToken = await currentUser.getIdToken();
+
+        const resp = await fetch('/api/admin/therapists/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + idToken
+          },
+          body: JSON.stringify({
+            username,
+            password,
+            email,
+            institution,
+            yearsOfExperience
+          })
+        });
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok) {
+          const err = data?.error || 'Request failed';
+          setSt(`<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${escapeHtml(err)}</span>`);
+          return false;
+        }
+
+        setSt(`<span class="text-green-700"><i class="fa-solid fa-check mr-2"></i>${t('Therapist created successfully!', 'Umujyanama yaremwe neza!')}</span>`);
+        clearTherapistForm();
+        return false;
+      } catch (e) {
+        console.error(e);
+        setSt(`<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${t('Creation failed. Check console.', 'Kurema byananiwe. Reba console.')}</span>`);
+        return false;
+      }
+    };
+
+
+    function markEmptyIfNeeded(users) {
+      const empty = document.getElementById('empty-state');
+      if (!empty) return;
+      empty.classList.toggle('hidden', Array.isArray(users) && users.length > 0);
+    }
+
+    // Confirm all pending bookings for a specific user by setting payment.confirmed=true
+    window.confirmPaidForBooking = async (uid, bookingId) => {
+      if (!uid || !bookingId) return;
+
+      setStatus(`<span class="text-blue-700"><i class="fa-solid fa-spinner fa-spin mr-2"></i>${t('Updating...', 'Turi kuvugurura...')}</span>`);
+
+      try {
+        const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+        const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+        const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+
+        const { getFirestore, doc, getDoc, updateDoc } = fsMod;
+        const app = appMod.initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const bookingRef = fsMod.doc(db, 'users', uid, 'bookings', bookingId);
+        const snap = await getDoc(bookingRef);
+
+        if (!snap.exists()) {
+          throw new Error('Booking not found');
+        }
+
+        const bData = snap.data() || {};
+        const currentStatus = bData?.status;
+
+        // Only transition pending -> confirmed (as requested)
+        // Also set payment.expiryDate = 30 days after admin confirmation time.
+        if (currentStatus === 'pending') {
+          const now = new Date();
+          const expiryDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+          await updateDoc(bookingRef, {
+            status: 'confirmed',
+            payment: {
+              ...(bData.payment || {}),
+              confirmed: true,
+              expiryDate: expiryDate
+            }
+          });
+        }
+
+        await refreshData();
+        setStatus(`<span class="text-green-700"><i class="fa-solid fa-check mr-2"></i>${t('Done.', 'Byarangiye.')}</span>`);
+      } catch (e) {
+        console.error(e);
+        setStatus(`<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${t('Update failed', 'Kuvugurura byananiwe')}</span>`);
+      }
+    };
+
+    // ====== FIRESTORE DATA LOADING ======
+    const firebaseConfig = {
+      apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+      authDomain: "urungano-chat-50d62.firebaseapp.com",
+      projectId: "urungano-chat-50d62",
+      storageBucket: "urungano-chat-50d62.firebasestorage.app",
+      messagingSenderId: "730372170670",
+      appId: "1:730372170670:web:91300da03f18f488afde3f"
+    };
+
+    async function refreshData() {
+      const list = document.getElementById('paid-list');
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const subtext = document.getElementById('subtext');
+      const countEl = document.getElementById('paid-count');
+
+      if (!list) return;
+
+      list.innerHTML = '';
+      loadingIndicator.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i>${t('Loading...', 'Birimo kwinjiza...')}`;
+      subtext.textContent = t('Loading...', 'Birimo kwinjiza...');
+      countEl.textContent = '';
+
+      // Client-side Firestore read (admin credentials are only UI-side as requested)
+      try {
+        const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+        const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+        const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+
+        const { getFirestore, collection, getDocs } = fsMod;
+        const app = appMod.initializeApp(firebaseConfig);
+        const auth = authMod.getAuth(app);
+
+        const currentUser = authMod.getAuth(app).currentUser;
+
+        if (!currentUser) {
+          throw new Error('Admin Firebase user not signed in. Firestore will be blocked by security rules.');
+        }
+
+        setStatus(`<span class="text-blue-700"><i class="fa-solid fa-user-check mr-2"></i>Firebase admin signed in as: ${escapeHtml(currentUser.email || currentUser.uid || '')}</span>`);
+
+        const db = getFirestore(app);
+        const usersSnap = await getDocs(collection(db, 'users'));
+
+        // For each user, read bookings and check payment.confirmed
+        // Note: This is potentially heavy if you have many users.
+        const paidUsersMap = new Map(); // uid -> { uid, name, email, bookingCount, paidWith, pendingBookingId }
+
+        // Sequential to avoid throttling; can be parallelized later.
+        for (const userDoc of usersSnap.docs) {
+          const u = userDoc.data() || {};
+          const uid = u.uid || userDoc.id;
+
+          const bookingsColRef = fsMod.collection(db, 'users', uid, 'bookings');
+          const bookingsSnap = await getDocs(bookingsColRef);
+
+          let paidCount = 0;
+          let pendingCount = 0;
+          bookingsSnap.forEach(b => {
+            const bData = b.data() || {};
+            if (bData?.payment?.confirmed === true) paidCount += 1;
+            if (bData?.status === 'pending') pendingCount += 1;
+          });
+
+        // Pick one pending booking id for this user to use the Confirm button.
+          // Prefer bookings that have status === 'pending'.
+          let pendingBookingId = null;
+          let newestBookingId = null;
+          let newestBookingCreatedAt = null;
+
+          bookingsSnap.forEach(b => {
+            const bData = b.data() || {};
+
+            // Newest booking (for expiry computation / confirm target)
+            const createdAtRaw = bData?.createdAt;
+            const createdAt = createdAtRaw ? (createdAtRaw.toMillis ? createdAtRaw.toMillis() : createdAtRaw) : null;
+            if (createdAt !== null) {
+              if (newestBookingCreatedAt === null || createdAt > newestBookingCreatedAt) {
+                newestBookingCreatedAt = createdAt;
+                newestBookingId = b.id;
+              }
+            } else if (!newestBookingId) {
+              // fallback when createdAt is missing/unreadable
+              newestBookingId = b.id;
+            }
+
+            if (bData?.status !== 'pending') return;
+            if (!pendingBookingId) pendingBookingId = b.id;
+          });
+
+          // Fallback: if no status===pending booking exists, pick any booking that isn't payment.confirmed.
+          if (!pendingBookingId) {
+            bookingsSnap.forEach(b => {
+              const bData = b.data() || {};
+              if (bData?.payment?.confirmed === true) return;
+              if (!pendingBookingId) pendingBookingId = b.id;
+            });
+          }
+
+          // Show this user in the admin list only if there is at least one pending booking.
+          // This prevents confirmed-only users from remaining visible.
+          if (pendingCount > 0 && paidCount > 0) {
+            // Paid With from most recent booking of this user (based on createdAt)
+            // Display the phone number the user paid with from payment.phone.
+            let paidWith = '-';
+            if (newestBookingId) {
+              const newestSnap = bookingsSnap.docs.find(d => d.id === newestBookingId);
+              const newestData = newestSnap?.data?.() || {};
+              paidWith = newestData?.payment?.phone ?? '-';
+            }
+
+            paidUsersMap.set(uid, {
+              uid,
+              name: u.username || u.name || 'User',
+              email: u.email || '',
+              bookingCount: paidCount,
+              paidWith,
+              pendingBookingId
+            });
+          }
+        }
+
+        const paidUsers = Array.from(paidUsersMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        markEmptyIfNeeded(paidUsers);
+
+        list.innerHTML = paidUsers.map((u, idx) => {
+          return `
+            <tr class="text-sm">
+              <td class="py-3 pr-4 text-slate-500">${idx + 1}</td>
+              <td class="py-3 pr-4 font-semibold text-slate-800">${escapeHtml(u.name)}</td>
+              <td class="py-3 pr-4 text-slate-700">${escapeHtml(u.email)}</td>
+              <td class="py-3 pr-4 text-slate-700">${u.bookingCount}</td>
+              <td class="py-3 pr-4 text-slate-700">${escapeHtml(u.paidWith || '-')}</td>
+              <td class="py-3 pr-4 text-right">
+                <button onclick="confirmPaidForBooking('${escapeHtml(u.uid)}','${escapeHtml(u.pendingBookingId)}')" class="px-4 py-2 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-semibold text-sm" ${!u.pendingBookingId ? 'disabled' : ''}>
+                  <i class="fa-solid fa-check mr-2"></i>
+                  ${getLang() === 'en' ? 'Confirm' : 'Emeza'}
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        countEl.textContent = `(${paidUsers.length})`;
+        subtext.textContent = t('Done.', 'Byarangiye.');
+        loadingIndicator.textContent = '';
+      } catch (e) {
+        console.error(e);
+        loadingIndicator.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-500 mr-2"></i>${t('Failed to load data', 'Byanze gupakira amakuru')}`;
+        subtext.textContent = t('Check console for details.', 'Reba console ku bisobanuro.');
+      }
+    }
+
+    // ====== INIT ======
+    window.onload = async () => {
+      const lang = document.body.getAttribute('data-lang') || 'rw';
+      switchLanguage(lang);
+
+      const authed = localStorage.getItem('urungano_admin_authed') === '1';
+      if (authed) {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('therapist-section').classList.remove('hidden');
+        document.getElementById('data-section').classList.remove('hidden');
+
+        // refreshData() depends on an authenticated Firebase client. If the admin is not actually signed-in
+        // on the client (auth.currentUser is null), skip refresh to avoid console errors.
+        // Therapist UI should still be available.
+        try {
+          const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+          const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+          const app = appMod.initializeApp(firebaseConfig);
+          const auth = authMod.getAuth(app);
+          if (auth.currentUser) {
+            await refreshData();
+          }
+        } catch (_e) {
+          // ignore; UI is still shown
+        }
+      }
+
+
+
+    };
+  </script>
+</body>
+</html>
+
