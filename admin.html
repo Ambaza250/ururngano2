@@ -597,9 +597,10 @@
             });
           }
 
-          // Show this user in the admin list only if there is at least one pending booking.
-          // This prevents confirmed-only users from remaining visible.
-          if (pendingCount > 0 && paidCount > 0) {
+          // Show this user only if the MOST RECENT booking for this user is pending.
+          // Also require that the user has at least one paid/confirmed booking.
+          const newestBooking = newestBookingId ? bookingsSnap.docs.find(d => d.id === newestBookingId)?.data() : null;
+          if (paidCount > 0 && newestBooking?.status === 'pending') {
             // Paid With from most recent booking of this user (based on createdAt)
             // Display the phone number the user paid with from payment.phone.
             let paidWith = '-';

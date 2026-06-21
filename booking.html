@@ -48,12 +48,12 @@
         <div class="flex items-start justify-between gap-4">
           <div>
             <div class="text-sm font-semibold text-pink-600 flex items-center gap-2">
-              <i class="fa-solid fa-mobile-screen-button"></i>
-              <span data-en="USSD Code" data-rw="Kode ya USSD">USSD Code</span>
+              <i class="fa-solid fa-users"></i>
+              <span data-en="Choose a therapist" data-rw="Hitamo umujyanama">Choose a therapist</span>
             </div>
             <div class="mt-3">
               <div class="text-center font-mono text-xl md:text-2xl font-bold text-blue-700 break-all">
-                <span>*182*8*1*34345*10000#</span>
+                <span data-en="Available therapists" data-rw="Abajyanama baboneka">Available therapists</span>
               </div>
             </div>
           </div>
@@ -64,35 +64,65 @@
           </div>
         </div>
 
-        <div class="mt-8 grid gap-3">
-          <div class="grid gap-2">
-            <label class="text-sm font-semibold text-slate-700" for="payment-phone" data-en="Your payment phone number" data-rw="Numero ya telefoni y'ishyuwe">Your payment phone number</label>
-            <input
-              id="payment-phone"
-              name="paymentPhone"
-              type="number"
-              min="0"
-              step="1"
-              inputmode="numeric"
-              required
-              class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-pink-100"
-              placeholder="e.g. 07XXXXXXXX / e.g. 0782XXXXXX"
-            />
+        <div id="therapists-grid" class="mt-8 grid gap-3"></div>
+
+        <div class="mt-10">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-sm font-semibold text-pink-600 flex items-center gap-2">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <span data-en="Payment (USSD)" data-rw="Ishyura (USSD)">Payment (USSD)</span>
+              </div>
+              <div class="mt-3">
+                <div class="text-center font-mono text-xl md:text-2xl font-bold text-blue-700 break-all">
+                  <span>*182*8*1*34345*10000#</span>
+                </div>
+              </div>
+            </div>
+            <div class="hidden sm:block">
+              <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-pink-50 flex items-center justify-center border border-pink-100">
+                <i class="fa-solid fa-wallet text-pink-600 text-lg md:text-xl"></i>
+              </div>
+            </div>
           </div>
 
-          <button
-            id="confirm-payment"
-            onclick="confirmPayment()"
-            class="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold text-lg shadow-sm"
-          >
-            <span data-en="Confirm payment" data-rw="Emeza ubwishyu">Confirm payment</span>
-          </button>
+          <div class="mt-8 grid gap-3">
+            <div id="selected-therapist-banner" class="hidden bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 text-sm text-emerald-900">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                <span><b data-en="Selected:" data-rw="Wahisemo:">Selected:</b> <span id="selected-therapist-name"></span></span>
+              </div>
+            </div>
 
-          <div id="booking-status" class="text-sm text-center min-h-[24px] text-slate-600"></div>
+            <div class="grid gap-2">
+              <label class="text-sm font-semibold text-slate-700" for="payment-phone" data-en="Your payment phone number" data-rw="Numero ya telefoni y'ishyuwe">Your payment phone number</label>
+              <input
+                id="payment-phone"
+                name="paymentPhone"
+                type="number"
+                min="0"
+                step="1"
+                inputmode="numeric"
+                required
+                class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-pink-100"
+                placeholder="e.g. 07XXXXXXXX / e.g. 0782XXXXXX"
+              />
+            </div>
 
-          <p class="text-xs md:text-sm text-slate-500 text-center" data-en="Note: If your phone/app provider does not support USSD, the booking may require an alternative step." data-rw="Ubutumwa: Niba telefone/app yawe itajya ikoresha USSD, kwiyandikisha/booking bishobora gusaba undi mwanzuro.">
-            Note: If your phone/app provider does not support USSD, the booking may require an alternative step.
-          </p>
+            <button
+              id="confirm-payment"
+              onclick="confirmPayment()"
+              class="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold text-lg shadow-sm"
+            >
+              <span data-en="Confirm payment" data-rw="Emeza ubwishyu">Confirm payment</span>
+            </button>
+
+            <div id="booking-status" class="text-sm text-center min-h-[24px] text-slate-600"></div>
+
+            <p class="text-xs md:text-sm text-slate-500 text-center" data-en="Note: If your phone/app provider does not support USSD, the booking may require an alternative step." data-rw="Ubutumwa: Niba telefone/app yawe itajya ikoresha USSD, kwiyandikisha/booking bishobora gusaba undi mwanzuro.">
+              Note: If your phone/app provider does not support USSD, the booking may require an alternative step.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -145,6 +175,133 @@
       }
     }
 
+    function getSelectedTherapistFromSession(){
+      try{
+        const raw = sessionStorage.getItem('booking_selected_therapist');
+        if(!raw) return null;
+        const obj = JSON.parse(raw);
+        if(!obj || !obj.therapistUid) return null;
+        return obj;
+      }catch(e){
+        return null;
+      }
+    }
+
+    function setSelectedTherapistInSession(therapist){
+      sessionStorage.setItem('booking_selected_therapist', JSON.stringify(therapist));
+
+      const banner = document.getElementById('selected-therapist-banner');
+      const nameEl = document.getElementById('selected-therapist-name');
+      if(banner && nameEl){
+        banner.classList.remove('hidden');
+        nameEl.textContent = therapist.therapistName || therapist.therapistUid;
+      }
+    }
+
+    function escapeHtml(text){
+      const div = document.createElement('div');
+      div.textContent = text ?? '';
+      return div.innerHTML;
+    }
+
+    async function loadTherapists(){
+      const grid = document.getElementById('therapists-grid');
+
+      // Defensive: ensure the expected Firestore functions exist.
+      if (typeof firestoreExportsReady === 'undefined') {
+        grid.innerHTML = `<div class="text-sm text-red-600">Firestore not initialized.</div>`;
+        return;
+      }
+      if(!grid) return;
+      grid.innerHTML = `<div class="text-sm text-slate-600">Loading therapists...</div>`;
+
+      try{
+        if(typeof firestoreExportsReady === 'undefined'){
+          throw new Error('Firestore not initialized on this page (firestoreExportsReady is undefined).');
+        }
+        const fs = await firestoreExportsReady;
+
+        const snapshot = await fs.getDocs(fs.collection(fs.db, 'therapists'));
+        const therapists = [];
+        snapshot.forEach((docSnap)=>{
+          const data = docSnap.data() || {};
+          const uid = docSnap.id;
+          therapists.push({
+            therapistUid: uid,
+            therapistName: data.username || data.name || 'Therapist',
+            institution: data.institution || '',
+            yearsOfExperience: data.yearsOfExperience ?? null,
+            ...data
+          });
+        });
+
+        therapists.sort((a,b)=> (a.therapistName||'').localeCompare(b.therapistName||''));
+
+        if(therapists.length===0){
+          grid.innerHTML = `<div class="text-sm text-slate-600">No therapists available right now.</div>`;
+          return;
+        }
+
+        grid.innerHTML = '';
+        therapists.forEach((th)=>{
+          const yearsText = (th.yearsOfExperience === null || th.yearsOfExperience === undefined) ? '' : `${th.yearsOfExperience}`;
+          const card = document.createElement('div');
+          card.className = 'rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow transition';
+          card.innerHTML = `
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-2xl bg-pink-50 border border-pink-100 flex items-center justify-center">
+                    <i class="fa-solid fa-user-doctor text-pink-600"></i>
+                  </div>
+                  <h3 class="text-lg font-bold text-slate-800 truncate">${escapeHtml(th.therapistName)}</h3>
+                </div>
+                
+                <div class="mt-3 flex flex-wrap gap-2">
+                  ${th.institution ? `<span class="text-sm px-3 py-2 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Institution: ${escapeHtml(th.institution)}</span>` : ''}
+
+                  ${yearsText ? `<span class="text-sm md:text-base px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold">${escapeHtml(yearsText)} yrs experience</span>` : ''}
+                </div>
+              </div>
+            </div>
+
+            <button
+              class="mt-5 w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold shadow-sm"
+              onclick="selectTherapist('${escapeHtml(th.therapistUid)}')"
+            >
+              <span data-en="Book this therapist" data-rw="Tegura uyu muujyanama">Book this therapist</span>
+            </button>
+          `;
+
+          card.querySelector('button').dataset.uid = th.therapistUid;
+          grid.appendChild(card);
+        });
+
+        // If user already selected before, show banner
+        const selected = getSelectedTherapistFromSession();
+        if(selected){
+          setSelectedTherapistInSession(selected);
+        }
+      }catch(e){
+        console.error(e);
+        grid.innerHTML = `<div class="text-sm text-red-600">Failed to load therapists.</div>`;
+      }
+    }
+
+    function selectTherapist(therapistUid){
+      // Find the therapist name from the clicked card.
+      const thCard = Array.from(document.querySelectorAll('#therapists-grid .rounded-3xl')).find(el=>{
+        const btn = el.querySelector('button');
+        return btn && btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(therapistUid);
+      });
+      let therapistName = '';
+      if(thCard){
+        const h3 = thCard.querySelector('h3');
+        therapistName = h3 ? h3.textContent : therapistUid;
+      }
+      setSelectedTherapistInSession({ therapistUid, therapistName });
+    }
+
     async function confirmPayment() {
       const statusEl = document.getElementById('booking-status');
       if (!statusEl) return;
@@ -185,10 +342,21 @@
           return;
         }
 
+        const selectedTherapist = getSelectedTherapistFromSession();
+        if (!selectedTherapist?.therapistUid) {
+          statusEl.innerHTML = `
+            <i class="fa-solid fa-circle-exclamation text-amber-500 mr-2"></i>
+            <span>${document.body.getAttribute('data-lang') === 'en' ? 'Please select a therapist first.' : 'Mbere yo hitamo umujyanama.'}</span>
+          `;
+          return;
+        }
+
         const payload = {
           id: bookingId,
           createdAt: fs.serverTimestamp(),
           status: 'pending',
+          therapistUid: selectedTherapist.therapistUid,
+          therapistName: selectedTherapist.therapistName || selectedTherapist.therapistUid,
           payment: {
             method: 'USSD',
             ussdCode: USSD_CODE,
@@ -235,12 +403,15 @@
     }
 
 
-    // Initialize language
-    window.onload = () => {
+    // Initialize language + load therapists
+    window.onload = async () => {
       if (!document.body.getAttribute('data-lang')) document.body.setAttribute('data-lang', 'rw');
       const lang = document.body.getAttribute('data-lang');
       if (lang === 'en') switchLanguage('en');
       if (lang !== 'en') switchLanguage('rw');
+
+      // Load therapists after UI init
+      await loadTherapists();
     };
   </script>
 
@@ -273,7 +444,9 @@
         db,
         doc: fsMod.doc,
         setDoc: fsMod.setDoc,
-        serverTimestamp: fsMod.serverTimestamp
+        serverTimestamp: fsMod.serverTimestamp,
+        collection: fsMod.collection,
+        getDocs: fsMod.getDocs
       };
     })();
 

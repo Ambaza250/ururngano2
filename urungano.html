@@ -608,15 +608,13 @@
             const text = document.getElementById('therapy-cta-text');
             if (!btn || !text) return;
 
+            // Always set both the destination and visible label deterministically.
+            // This avoids stale dataset.dest when language/UI rerenders.
             btn.dataset.therapyDest = dest;
-
-            // Write label deterministically
-            // (avoid race with language switcher that may re-write [data-en]/[data-rw] contents)
-            text.textContent = label;
             btn.style.display = show ? 'inline-flex' : 'none';
+            text.textContent = label;
 
-            // Also keep original data attributes consistent with current label
-            // so that switchLanguage() won't revert the CTA text later.
+            // Keep attributes aligned so switchLanguage() won’t overwrite our deterministic label.
             if (label === 'Book a therapist' || label === 'Book a therapist ') {
                 text.setAttribute('data-en', 'Book a therapist');
                 text.setAttribute('data-rw', 'Tegura umujyanama');
@@ -624,15 +622,46 @@
                 text.setAttribute('data-en', 'Book a therapist');
                 text.setAttribute('data-rw', 'Tegura umujyanama');
             } else if (label.toLowerCase().includes('chat')) {
-                text.setAttribute('data-en', "Chat with a therapist");
-                text.setAttribute('data-rw', "Ganira n'umujyanama");
+                text.setAttribute('data-en', 'Chat with a therapist');
+                text.setAttribute('data-rw', 'Ganira n\'umujyanama');
             } else {
-                // Generic fallback; keep whatever label we set.
                 text.setAttribute('data-en', label);
                 text.setAttribute('data-rw', label);
             }
         }
 
+
+        function coerceFirestoreDateToJS(value) {
+            // Handles: Firestore Timestamp, JS Date, ISO strings, and {seconds,nanoseconds}.
+            if (!value) return null;
+            try {
+                if (value?.toDate && typeof value.toDate === 'function') {
+                    return value.toDate();
+                }
+                if (typeof value?.toMillis === 'function') {
+                    const ms = value.toMillis();
+                    const d = new Date(ms);
+                    return Number.isFinite(d.getTime()) ? d : null;
+                }
+                if (value instanceof Date) {
+                    return Number.isNaN(value.getTime()) ? null : value;
+                }
+                if (typeof value === 'string') {
+                    const d = new Date(value);
+                    return Number.isNaN(d.getTime()) ? null : d;
+                }
+                if (typeof value === 'object' && value.seconds != null) {
+                    const ms = Number(value.seconds) * 1000;
+                    const d = new Date(ms);
+                    return Number.isNaN(d.getTime()) ? null : d;
+                }
+
+                const d = new Date(value);
+                return Number.isNaN(d.getTime()) ? null : d;
+            } catch (e) {
+                return null;
+            }
+        }
 
         async function evaluateTherapyCtaForUser(user) {
             // Defaults (safer): book a therapist
@@ -645,8 +674,8 @@
             };
 
             try {
-                const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
-                const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+                const appMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js');
+                const fsMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js');
 
                 const app = appMod.initializeApp(firebaseConfig);
                 const db = fsMod.getFirestore(app);
@@ -656,13 +685,11 @@
                     return { show: false, dest: bookingDest, label: labels.booking };
                 }
 
-                // Latest booking: prefer orderBy('createdAt','desc') if createdAt exists.
-                // We also handle missing createdAt by falling back to scanning a small set.
                 const bookingsCol = fsMod.collection(db, 'users', uid, 'bookings');
 
                 let latest = null;
-                let canOrderBy = true;
 
+                // Prefer server ordering, fallback to scanning a small set.
                 try {
                     const q = fsMod.query(bookingsCol, fsMod.orderBy('createdAt', 'desc'), fsMod.limit(1));
                     const snap = await fsMod.getDocs(q);
@@ -671,33 +698,29 @@
                         latest = { id: doc.id, ...doc.data() };
                     }
                 } catch (e) {
-                    // orderBy may fail if createdAt missing/unindexed; fallback to scanning recent docs
-                    canOrderBy = false;
+                    // createdAt missing/unindexed
                 }
 
                 if (!latest) {
-                    // Fallback: scan first 10 docs and choose max by createdAt when present.
                     const snap = await fsMod.getDocs(fsMod.query(bookingsCol, fsMod.limit(10)));
                     let best = null;
                     let bestCreatedAt = null;
                     snap.forEach((doc) => {
                         const data = doc.data() || {};
                         const createdAtRaw = data.createdAt;
-                        let createdAtMs = null;
-                        if (createdAtRaw) {
-                            createdAtMs = createdAtRaw.toMillis ? createdAtRaw.toMillis() : new Date(createdAtRaw).getTime();
-                            if (!Number.isFinite(createdAtMs)) createdAtMs = null;
-                        }
+                        const createdAtMs = createdAtRaw ? (createdAtRaw.toMillis ? createdAtRaw.toMillis() : new Date(createdAtRaw).getTime()) : null;
+
+                        const msValid = createdAtMs != null && Number.isFinite(createdAtMs);
                         if (!best) {
                             best = { id: doc.id, ...data };
-                            bestCreatedAt = createdAtMs;
+                            bestCreatedAt = msValid ? createdAtMs : null;
                         } else {
-                            if (createdAtMs !== null && bestCreatedAt !== null) {
+                            if (msValid && bestCreatedAt != null) {
                                 if (createdAtMs > bestCreatedAt) {
                                     best = { id: doc.id, ...data };
                                     bestCreatedAt = createdAtMs;
                                 }
-                            } else if (bestCreatedAt === null && createdAtMs !== null) {
+                            } else if (bestCreatedAt == null && msValid) {
                                 best = { id: doc.id, ...data };
                                 bestCreatedAt = createdAtMs;
                             }
@@ -714,29 +737,35 @@
                 const payment = latest?.payment || {};
                 const confirmed = latestStatus === 'confirmed' || payment?.confirmed === true;
 
-                const expiryRaw = payment?.expiryDate;
-                let expiryDate = null;
-                if (expiryRaw) {
-                    if (expiryRaw.toDate) {
-                        expiryDate = expiryRaw.toDate();
-                    } else {
-                        expiryDate = new Date(expiryRaw);
-                    }
-                }
+                // expiryDate might be Firestore Timestamp or a different shape/key.
+                // Try multiple likely locations.
+                const rawExpiry =
+                    payment?.expiryDate ??
+                    payment?.expiry_date ??
+                    latest?.expiryDate ??
+                    latest?.expiry_date;
+
+                const expiryDate = coerceFirestoreDateToJS(rawExpiry);
 
                 const now = new Date();
-                const expired = !expiryDate || !(expiryDate instanceof Date) || Number.isNaN(expiryDate.getTime()) || expiryDate <= now;
+                const parsedValid = expiryDate instanceof Date && !Number.isNaN(expiryDate.getTime());
+
+                // Defensive: if booking is confirmed but expiry cannot be parsed,
+                // do NOT block chat (prevents the “confirmed but still booking” bug).
+                const expired = parsedValid ? expiryDate < now : false;
 
                 if (!confirmed || expired) {
                     return { show: true, dest: bookingDest, label: labels.booking };
                 }
 
+
                 return { show: true, dest: chatDest, label: labels.chat };
             } catch (e) {
                 console.log('Therapy CTA evaluation failed:', e);
-                return { show: true, dest: bookingDest, label: labels.booking };
+                return { show: true, dest: booking.html, label: labels.booking };
             }
         }
+
 
 
         function setAuthUI(loggedIn) {
