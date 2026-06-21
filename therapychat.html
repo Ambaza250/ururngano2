@@ -207,34 +207,88 @@
 
     async function loadTherapistsForUserSidebar() {
       const list = document.getElementById("users-list");
-      // In therapy chat UI we reuse "users-list" as "therapists-list" for the user role.
       list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
 
-      const snapshot = await getDocs(collection(db, "therapists"));
       list.innerHTML = "";
 
-      const therapists = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data() || {};
-        const uid = docSnap.id;
-        if (!uid) return;
-        const username = data.username || data.email || "Therapist";
-        userCache[uid] = { uid, username, ...(data || {}) };
-        therapists.push({ uid, username, ...data });
-      });
+      // USER MODE: only show the therapist that the user paid for.
+      // Latest booking is stored at: users/{uid}/bookings/{bookingId}
+      // and includes: therapistUid + therapistName.
+      const bookingRef = collection(db, "users", currentUser?.uid, "bookings");
 
-      therapists.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
+      let latest = null;
+      try {
+        // Prefer orderBy if createdAt exists.
+        const q = query(bookingRef, orderBy("createdAt", "desc"), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          latest = { id: snap.docs[0].id, ...(snap.docs[0].data() || {}) };
+        }
+      } catch (e) {
+        // Fallback: grab a few and pick latest by createdAt when present.
+        try {
+          const snap = await getDocs(query(bookingRef, limit(10)));
+          let best = null;
+          let bestMs = null;
+          snap.forEach((docSnap) => {
+            const d = docSnap.data() || {};
+            const raw = d.createdAt;
+            let ms = null;
+            if (raw) {
+              ms = raw.toMillis ? raw.toMillis() : new Date(raw).getTime();
+              if (!Number.isFinite(ms)) ms = null;
+            }
+            if (!best) {
+              best = { id: docSnap.id, ...d };
+              bestMs = ms;
+            } else if (ms !== null && bestMs !== null) {
+              if (ms > bestMs) {
+                best = { id: docSnap.id, ...d };
+                bestMs = ms;
+              }
+            } else if (bestMs === null && ms !== null) {
+              best = { id: docSnap.id, ...d };
+              bestMs = ms;
+            }
+          });
+          latest = best;
+        } catch (e2) {
+          console.error(e2);
+        }
+      }
 
-      therapists.forEach((therapist) => {
-        const div = document.createElement("div");
-        div.className = "user-item sidebar-item";
-        div.dataset.type = "therapist";
-        div.dataset.id = therapist.uid;
-        div.innerHTML = `<strong>${escapeHtml(therapist.username || "Therapist")}</strong>`;
-        div.onclick = () => openPrivateChat(therapist);
-        list.appendChild(div);
-      });
+      const latestStatus = latest?.status;
+      const payment = latest?.payment || {};
+      const paid = (latestStatus === "confirmed") || (payment?.confirmed === true);
+
+      if (!latest || !paid || !latest?.therapistUid) {
+        const hint = document.createElement("div");
+        hint.style.color = "#64748b";
+        hint.style.marginTop = "10px";
+        hint.textContent = isEnglish
+          ? "You need to book a therapist first to start therapy chat."
+          : "Ugomba kubanza gutegura umujyanama kugira ngo utangire ikiganiro (therapy chat).";
+        list.appendChild(hint);
+        return;
+      }
+
+      const therapist = {
+        uid: latest.therapistUid,
+        username: latest.therapistName || latest.therapistUid,
+      };
+
+      // Cache therapist name so header + message rendering works.
+      userCache[therapist.uid] = { uid: therapist.uid, username: therapist.username };
+
+      const div = document.createElement("div");
+      div.className = "user-item sidebar-item";
+      div.dataset.type = "therapist";
+      div.dataset.id = therapist.uid;
+      div.innerHTML = `<strong>${escapeHtml(therapist.username || "Therapist")}</strong>`;
+      div.onclick = () => openPrivateChat(therapist);
+      list.appendChild(div);
     }
+
 
     async function loadUsersWhoMessagedTherapistSidebar() {
       const list = document.getElementById("users-list");
@@ -350,8 +404,27 @@
       // disabled
     }
 
-    function openPrivateChat(otherUser) {
-      // otherUser can be therapist when currentUser is a user; or can be user when currentUser is therapist.
+    async function openPrivateChat(otherUser) {
+      // USER MODE: allow chat ONLY with the therapist they paid for.
+      if (userRole === "user") {
+        const bookingRef = collection(db, "users", currentUser?.uid, "bookings");
+        let latest = null;
+        try {
+          const qLatest = query(bookingRef, orderBy("createdAt", "desc"), limit(1));
+          const snap = await getDocs(qLatest);
+          if (!snap.empty) latest = { id: snap.docs[0].id, ...(snap.docs[0].data() || {}) };
+        } catch (e) {
+          // ignore and keep latest null
+          }
+
+        const paidTherapistUid = latest?.therapistUid;
+        if (!paidTherapistUid || otherUser?.uid !== paidTherapistUid) {
+          const container = document.getElementById("messages");
+          container.innerHTML = `<div style="color:#b45309; padding:10px;">${isEnglish ? "You can only chat with your selected therapist." : "Ushobora kuganira n'umujyanama watoranijwe."}</div>`;
+          return;
+        }
+      }
+
       currentTarget = { type: "private", data: otherUser };
       markActiveItem(otherUser.uid ? (userRole === "therapist" ? "user" : "therapist") : "user", otherUser.uid);
       refreshHeader();
@@ -369,6 +442,7 @@
         }
       );
     }
+
 
     function refreshHeader() {
       if (!currentTarget) return;

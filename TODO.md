@@ -10,4 +10,13 @@
   - [ ] If latest confirmed AND expiry not reached => `therapychat.html` with label “chat with a therapist”.
 - [ ] Test manually by running server and logging in/out.
 
+---
+
+## Therapist booking + restricted therapy chat
+- [x] Update `booking.html`: load all therapists from Firestore and display therapist profile cards with a “Book this therapist” button.
+- [x] Update `booking.html`: on payment, write booking fields `therapistUid` and `therapistName` to `users/{uid}/bookings/{bookingId}`.
+- [x] Update `therapychat.html` (user mode only): load ONLY the therapist from the latest confirmed booking; block other therapists.
+
+- [ ] Manual test: book -> payment write -> therapy chat sidebar should show exactly one therapist.
+
 
