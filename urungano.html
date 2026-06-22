@@ -155,8 +155,16 @@
     
 </head>
 
-<script>
+    <script>
     let map;
+
+    // ====== Current location + markers state ======
+    let userLatLng = null;
+    let userMarker = null;
+
+    // We’ll keep references so we can clear old results/routes.
+    let resultsLayer = null;
+    let routeLine = null;
 
     function initMap() {
         map = L.map('map', { zoomControl: true }).setView([-1.9441, 30.0619], 12);
@@ -166,8 +174,10 @@
             maxZoom: 19
         }).addTo(map);
 
-        // Search box optimized for Rwanda
-        L.Control.geocoder({
+        resultsLayer = L.layerGroup().addTo(map);
+
+        // ====== Search control (we will override its behavior) ======
+        const geocoderControl = L.Control.geocoder({
             position: 'topleft',
             placeholder: 'Search Police, Hospital, Isange, Kigali...',
             geocoder: L.Control.Geocoder.nominatim({
@@ -175,24 +185,223 @@
             })
         }).addTo(map);
 
+        // Bias results by current location (distance sort), and render clickable candidates.
+        geocoderControl.on('markgeocode', (e) => {
+            // We want results based on the user’s SEARCH TEXT + their current location.
+            // Leaflet’s geocoder event may provide the *resolved place* name instead of the raw user query.
+            // So we read the input value from the geocoder control.
+            try {
+                const input = geocoderControl._input && geocoderControl._input.value;
+                const rawQuery = (input || '').trim();
+
+                // If userLatLng unknown, fall back to default behavior.
+                if (!userLatLng) return;
+
+                if (rawQuery) {
+                    // Clear Leaflet’s default marker and render our distance-sorted candidates.
+                    e.layer && e.layer.remove && e.layer.remove();
+                    geocodeNearby(rawQuery);
+                }
+            } catch (err) {
+                console.log('geocoder markgeocode override error', err);
+            }
+        });
+
         // Force map to redraw after 300ms (fixes most blank map issues)
         setTimeout(() => {
             map.invalidateSize();
         }, 300);
     }
 
-    function locateUser() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const latlng = [pos.coords.latitude, pos.coords.longitude];
-                    map.flyTo(latlng, 15, { duration: 2 });
-                    L.marker(latlng).addTo(map)
-                        .bindPopup("<b>You are here</b>").openPopup();
-                },
-                () => alert("Please allow location access.")
-            );
+    async function geocodeNearby(query) {
+        if (!query || !userLatLng) return;
+
+        // Nominatim search with a “viewbox” around user to naturally bias results.
+        // Note: For production, your own backend is recommended.
+        const [uLat, uLng] = userLatLng;
+        const latDelta = 0.25; // ~25km-ish
+        const lngDelta = 0.25;
+        const viewbox = [uLng - lngDelta, uLat - latDelta, uLng + lngDelta, uLat + latDelta].join(',');
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=rw&addressdetails=0&limit=3&viewbox=${encodeURIComponent(viewbox)}&bounded=1&q=${encodeURIComponent(query)}`;
+
+        // Prevent slow searches stacking up.
+        if (!geocodeNearby._inflight) geocodeNearby._inflight = 0;
+        const token = ++geocodeNearby._inflight;
+
+        let data = [];
+        try {
+            const controller = new AbortController();
+            const t = setTimeout(() => controller.abort(), 4000);
+
+            const res = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: controller.signal
+            });
+
+            clearTimeout(t);
+            data = await res.json();
+
+            // If a newer search started, ignore this result.
+            if (token !== geocodeNearby._inflight) return;
+        } catch (e) {
+            clearTimeout && clearTimeout(t);
+            // Ignore aborted requests silently.
+            if (e && e.name === 'AbortError') return;
+            console.log('Nominatim fetch failed', e);
+            return;
         }
+
+        if (!Array.isArray(data) || data.length === 0) return;
+
+        const toLatLng = (item) => [parseFloat(item.lat), parseFloat(item.lon)];
+
+        // Sort by distance from user.
+        data.sort((a, b) => {
+            const aLL = toLatLng(a);
+            const bLL = toLatLng(b);
+            return haversineKm(userLatLng[0], userLatLng[1], aLL[0], aLL[1]) -
+                   haversineKm(userLatLng[0], userLatLng[1], bLL[0], bLL[1]);
+        });
+
+        renderResults(data.slice(0, 6));
+    }
+
+    function renderResults(items) {
+        // Clear old markers
+        resultsLayer.clearLayers();
+
+        // Also clear old route when user searches again.
+        clearRoute();
+
+        const [uLat, uLng] = userLatLng || [null, null];
+
+        items.forEach((item, idx) => {
+            const latlng = [parseFloat(item.lat), parseFloat(item.lon)];
+            const title = item.display_name || item.name || 'Location';
+
+            const m = L.marker(latlng, { title })
+                .addTo(resultsLayer)
+                .bindPopup(`${idx === 0 ? '<b>Closest</b><br/>' : ''}${title}`);
+
+            // Click marker => draw route from user (or map center)
+            m.on('click', () => {
+                const start = userLatLng ? userLatLng : map.getCenter().toArray();
+                const dest = latlng;
+                drawRoute(start, dest);
+            });
+        });
+    }
+
+    function clearRoute() {
+        if (routeLine) {
+            map.removeLayer(routeLine);
+            routeLine = null;
+        }
+    }
+
+    // Haversine distance in km
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // Draw driving route using OSRM public demo router.
+    async function drawRoute(startLatLng, destLatLng) {
+        if (!startLatLng || !destLatLng) return;
+
+        clearRoute();
+
+        // OSRM expects [lon,lat]
+        const [sLat, sLng] = startLatLng;
+        const [dLat, dLng] = destLatLng;
+
+        const url = `https://router.project-osrm.org/route/v1/driving/${encodeURIComponent(sLng)},${encodeURIComponent(sLat)};${encodeURIComponent(dLng)},${encodeURIComponent(dLat)}?overview=full&geometries=geojson&steps=false`;
+
+        let data = null;
+        try {
+            const res = await fetch(url);
+            data = await res.json();
+        } catch (e) {
+            console.log('Routing failed', e);
+            alert('Routing failed. Please try again.');
+            return;
+        }
+
+        if (!data || !data.routes || !data.routes[0] || !data.routes[0].geometry) {
+            alert('No route found between these locations.');
+            return;
+        }
+
+        const coords = data.routes[0].geometry.coordinates; // [lon,lat]
+        const latlngs = coords.map(c => [c[1], c[0]]);
+
+        routeLine = L.polyline(latlngs, { color: '#ef4444', weight: 6, opacity: 0.85 }).addTo(map);
+
+        // Fit bounds
+        const bounds = routeLine.getBounds();
+        map.fitBounds(bounds, { padding: [30, 30] });
+
+        // Add start/end markers
+        L.marker([sLat, sLng]).addTo(map).bindPopup('<b>Start</b>').openPopup();
+        L.marker([dLat, dLng]).addTo(map).bindPopup('<b>Destination</b>').openPopup();
+    }
+
+    function locateUser() {
+        if (!navigator.geolocation) return;
+
+        // Ask for more accurate location when possible.
+        // Also retry once: sometimes the first fix is a coarse network estimate.
+        const opts = {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        };
+
+        const applyFix = (pos) => {
+            const accuracyM = pos.coords.accuracy;
+            const latlng = [pos.coords.latitude, pos.coords.longitude];
+
+            // If accuracy is poor, avoid using it (this prevents wrong jumps like defaulting to Kigali).
+            // You can tune this threshold.
+            if (Number.isFinite(accuracyM) && accuracyM > 2000) {
+                // Still store, but don’t move the map.
+                userLatLng = latlng;
+                return;
+            }
+
+            userLatLng = latlng;
+            map.flyTo(latlng, 15, { duration: 2 });
+
+            if (userMarker) userMarker.remove();
+            userMarker = L.marker(latlng).addTo(map)
+                .bindPopup("<b>You are here</b>")
+                .openPopup();
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                applyFix(pos);
+
+                // If first fix looks inaccurate, try once more.
+                if (Number.isFinite(pos.coords.accuracy) && pos.coords.accuracy > 2000) {
+                    navigator.geolocation.getCurrentPosition(
+                        applyFix,
+                        () => {},
+                        opts
+                    );
+                }
+            },
+            () => alert("Please allow location access."),
+            opts
+        );
     }
 
     // Initialize
