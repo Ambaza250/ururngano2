@@ -64,6 +64,99 @@
       document.getElementById("chat-section").style.display = section === "chat" ? "flex" : "none";
     }
 
+    function isMobileViewport() {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
+
+    function setMobileModeChatListOnly(active) {
+      const chatArea = document.querySelector(".chat-area");
+      if (!chatArea) return;
+
+      if (active) {
+        chatArea.style.display = "none";
+      } else {
+        chatArea.style.display = "flex";
+      }
+    }
+
+    function updateMobileViews() {
+      if (!isMobileViewport()) return;
+      // Mobile: show sidebar only by default; when a chat is selected, show chat.
+      if (currentTarget) {
+        enterChatView();
+      } else {
+        enterChatListView();
+      }
+    }
+
+
+    function enterChatView() {
+      if (!isMobileViewport()) return;
+      // In mobile, hide chat list (sidebar) only after user picks a chat.
+      // WhatsApp-like flow: sidebar -> chat -> back to sidebar.
+      const sidebar = document.querySelector(".sidebar");
+      const chatArea = document.querySelector(".chat-area");
+      if (sidebar) sidebar.style.display = "none";
+      if (chatArea) chatArea.style.display = "flex";
+
+      // Ensure a mobile back button exists.
+      const header = document.getElementById("chat-header");
+      if (header) {
+        const html = header.innerHTML;
+        if (!html.includes('id="mobile-back-btn"')) {
+          // Prepend a back button.
+          header.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; justify-content:flex-start;">
+              <button id="mobile-back-btn" onclick="window.mobileBackToList()" style="background:#0f766e; padding:10px 16px; border-radius:30px; font-weight:700; border:none; cursor:pointer;">← ${t("Garuka", "Back")}</button>
+              <span id="chat-header-title">${header.textContent}</span>
+            </div>
+          `;
+        }
+      }
+
+      // Keep header title updated for the selected chat.
+      const titleEl = document.getElementById("chat-header-title");
+      if (titleEl) {
+        titleEl.textContent = header.textContent.replace('← ' + t("Garuka", "Back"), '').trim();
+      }
+    }
+
+
+
+    function enterChatListView() {
+      if (!isMobileViewport()) return;
+      const sidebar = document.querySelector(".sidebar");
+      const chatArea = document.querySelector(".chat-area");
+      if (sidebar) sidebar.style.display = "block";
+      if (chatArea) chatArea.style.display = "none";
+
+      // Ensure header looks like a list and remove any mobile back button UI.
+      const header = document.getElementById("chat-header");
+      if (header) {
+        header.innerHTML = t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo", "Select a chat");
+      }
+    }
+
+
+    function handleResponsiveMobileMode() {
+      if (!isMobileViewport()) {
+        // Desktop/tablet: show both.
+        const sidebar = document.querySelector(".sidebar");
+        if (sidebar) sidebar.style.display = "block";
+        const chatArea = document.querySelector(".chat-area");
+        if (chatArea) chatArea.style.display = "flex";
+        return;
+      }
+
+      // Mobile: default to list-only view unless a target is already selected.
+      if (currentTarget) {
+        enterChatView();
+      } else {
+        enterChatListView();
+      }
+    }
+
+
     async function saveUserProfile(user, username = "") {
       const finalUsername = username || user.displayName || user.email?.split("@")[0] || "User";
       await setDoc(doc(db, "users", user.uid), {
@@ -186,7 +279,11 @@
       clearMessages();
       const q = query(collection(db, "groups", group.id, "messages"), orderBy("createdAt"));
       unsubscribeMessages = onSnapshot(q, renderMessages);
+
+      // WhatsApp-like mobile navigation: go to chat view.
+      updateMobileViews();
     }
+
 
     function openPrivateChat(user) {
       currentTarget = { type: "private", data: user };
@@ -196,7 +293,11 @@
       const chatId = [currentUser.uid, user.uid].sort().join("_");
       const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
       unsubscribeMessages = onSnapshot(q, renderMessages);
+
+      // WhatsApp-like mobile navigation: go to chat view.
+      updateMobileViews();
     }
+
 
     function refreshHeader() {
       if (!currentTarget) return;
@@ -255,7 +356,17 @@
 
     window.logout = () => signOut(auth);
 
+    window.mobileBackToList = () => {
+      currentTarget = null;
+      markActiveItem("group", "");
+      markActiveItem("user", "");
+      clearMessages();
+      // Ensure mobile UI shows sidebar only.
+      enterChatListView();
+    };
+
     function refreshLanguage() {
+
       // Translate static elements
       document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
       document.getElementById("users-title").textContent = t("Abandi bakoresha", "Other Users");
@@ -280,10 +391,17 @@
         await loadGroups();
         await loadUsers();
         refreshLanguage();
+
+        // Apply WhatsApp-like mobile view on load.
+        handleResponsiveMobileMode();
+
+        // Keep view in sync if user rotates/resizes.
+        window.addEventListener("resize", handleResponsiveMobileMode);
       } else {
         showSection("auth");
       }
     });
+
   </script>
 
   <style>
