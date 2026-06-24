@@ -441,6 +441,9 @@
           container.innerHTML = `<div style="color:red; padding:10px;">Failed to load messages.</div>`;
         }
       );
+
+      // Match chat.html behavior: switch to chat view immediately on mobile.
+      updateMobileViews();
     }
 
 
@@ -506,8 +509,77 @@
 
     window.logout = () => signOut(auth);
 
+    function isMobileViewport() {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
+
+    function enterChatView() {
+      if (!isMobileViewport()) return;
+      const sidebar = document.querySelector(".sidebar");
+      const chatArea = document.querySelector(".chat-area");
+      if (sidebar) sidebar.style.display = "none";
+      if (chatArea) chatArea.style.display = "flex";
+
+      // Ensure messages area takes the correct space.
+      const messages = document.getElementById("messages");
+      if (messages) {
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      const header = document.getElementById("chat-header");
+      if (header) {
+        const html = header.innerHTML;
+        if (!html.includes('id="mobile-back-btn"')) {
+          header.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; justify-content:flex-start;">
+              <button id="mobile-back-btn" onclick="window.mobileBackToList()" style="background:#0f766e; padding:10px 16px; border-radius:30px; font-weight:700; border:none; cursor:pointer;">← ${t("Garuka", "Back")}</button>
+              <span id="chat-header-title">${header.textContent}</span>
+            </div>
+          `;
+        }
+      }
+    }
+
+
+    function enterChatListView() {
+      if (!isMobileViewport()) return;
+      const sidebar = document.querySelector(".sidebar");
+      const chatArea = document.querySelector(".chat-area");
+      if (sidebar) sidebar.style.display = "block";
+      if (chatArea) chatArea.style.display = "none";
+
+      const header = document.getElementById("chat-header");
+      if (header) {
+        header.innerHTML = t(
+          "Hitamo itsinda cyangwa umuntu ushaka kuganiramo",
+          "Select a chat"
+        );
+      }
+    }
+
+    function updateMobileViews() {
+      if (!isMobileViewport()) return;
+      if (currentTarget) enterChatView();
+      else enterChatListView();
+    }
+
+    window.mobileBackToList = () => {
+      currentTarget = null;
+      // clear visual active state (best-effort)
+      try {
+        if (typeof document !== 'undefined') {
+          document.querySelectorAll('.sidebar-item').forEach(el => {
+            el.classList.remove('active');
+          });
+        }
+      } catch (e) {}
+      clearMessages();
+      enterChatListView();
+    };
+
     function refreshLanguage() {
       document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
+
 
       // Sidebar title depends on role
       const usersTitle = document.getElementById("users-title");

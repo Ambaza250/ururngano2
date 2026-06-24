@@ -149,11 +149,12 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Geocoder for powerful search box -->
+<!-- Geocoder UI (we will override its behavior; actual search will use Geoapify) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     
 </head>
+
 
     <script>
     let map;
@@ -169,10 +170,15 @@
     function initMap() {
         map = L.map('map', { zoomControl: true }).setView([-1.9441, 30.0619], 12);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-            maxZoom: 19
+        // Geoapify base tiles (raster)
+        const geoapifyKey = '6ca1c4e580ca4b89adb10ce089fb466e';
+        // Using "osm-bright" style for good readability (you can switch styles later)
+        const geoapifyTilesUrl = `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${encodeURIComponent(geoapifyKey)}`;
+        L.tileLayer(geoapifyTilesUrl, {
+            attribution: '&copy; Geoapify',
+            maxZoom: 20
         }).addTo(map);
+
 
         resultsLayer = L.layerGroup().addTo(map);
 
@@ -187,25 +193,24 @@
 
         // Bias results by current location (distance sort), and render clickable candidates.
         geocoderControl.on('markgeocode', (e) => {
-            // We want results based on the user’s SEARCH TEXT + their current location.
-            // Leaflet’s geocoder event may provide the *resolved place* name instead of the raw user query.
-            // So we read the input value from the geocoder control.
+            // Use the user typed value as the text for Geoapify search.
+            // Then we bias/score the returned places using `userLatLng`.
             try {
                 const input = geocoderControl._input && geocoderControl._input.value;
                 const rawQuery = (input || '').trim();
 
-                // If userLatLng unknown, fall back to default behavior.
+                // If userLatLng unknown, we can’t bias results.
                 if (!userLatLng) return;
+                if (!rawQuery) return;
 
-                if (rawQuery) {
-                    // Clear Leaflet’s default marker and render our distance-sorted candidates.
-                    e.layer && e.layer.remove && e.layer.remove();
-                    geocodeNearby(rawQuery);
-                }
+                // Clear Leaflet’s default marker and render our distance-sorted candidates.
+                e.layer && e.layer.remove && e.layer.remove();
+                geocodeNearby(rawQuery);
             } catch (err) {
                 console.log('geocoder markgeocode override error', err);
             }
         });
+
 
         // Force map to redraw after 300ms (fixes most blank map issues)
         setTimeout(() => {
@@ -216,25 +221,37 @@
     async function geocodeNearby(query) {
         if (!query || !userLatLng) return;
 
-        // Nominatim search with a “viewbox” around user to naturally bias results.
-        // Note: For production, your own backend is recommended.
+        const geoapifyKey = '6ca1c4e580ca4b89adb10ce089fb466e';
         const [uLat, uLng] = userLatLng;
-        const latDelta = 0.25; // ~25km-ish
-        const lngDelta = 0.25;
-        const viewbox = [uLng - lngDelta, uLat - latDelta, uLng + lngDelta, uLat + latDelta].join(',');
 
-        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=rw&addressdetails=0&limit=3&viewbox=${encodeURIComponent(viewbox)}&bounded=1&q=${encodeURIComponent(query)}`;
+        // Geoapify Places search around user (radius gives locality bias)
+        const radiusKm = 25; // ~25km-ish (keeps your previous behavior close)
 
         // Prevent slow searches stacking up.
         if (!geocodeNearby._inflight) geocodeNearby._inflight = 0;
         const token = ++geocodeNearby._inflight;
 
-        let data = [];
+        const url = new URL('https://api.geoapify.com/v1/geocode/search');
+        url.searchParams.set('text', query);
+        url.searchParams.set('apiKey', geoapifyKey);
+        url.searchParams.set('limit', '8');
+        url.searchParams.set('country', 'RW');
+        url.searchParams.set('type', 'places');
+        // Geoapify supports both proximity bias and bounding circle.
+        // Use both to strongly localize results around the user.
+        url.searchParams.set('bias', `proximity:${uLng},${uLat}`);
+        url.searchParams.set('radius', `${radiusKm}`);
+        // Also pass location explicitly (some Geoapify setups honor it better).
+        url.searchParams.set('lon', `${uLng}`);
+        url.searchParams.set('lat', `${uLat}`);
+
+
+        let data;
         try {
             const controller = new AbortController();
-            const t = setTimeout(() => controller.abort(), 4000);
+            const t = setTimeout(() => controller.abort(), 5000);
 
-            const res = await fetch(url, {
+            const res = await fetch(url.toString(), {
                 headers: { 'Accept': 'application/json' },
                 signal: controller.signal
             });
@@ -246,26 +263,39 @@
             if (token !== geocodeNearby._inflight) return;
         } catch (e) {
             clearTimeout && clearTimeout(t);
-            // Ignore aborted requests silently.
             if (e && e.name === 'AbortError') return;
-            console.log('Nominatim fetch failed', e);
+            console.log('Geoapify fetch failed', e);
             return;
         }
 
-        if (!Array.isArray(data) || data.length === 0) return;
+        const features = data?.features;
+        if (!Array.isArray(features) || features.length === 0) return;
 
-        const toLatLng = (item) => [parseFloat(item.lat), parseFloat(item.lon)];
+        const normalized = features.map((f) => {
+            const lat = f?.properties?.lat ?? f?.geometry?.coordinates?.[1];
+            const lon = f?.properties?.lon ?? f?.geometry?.coordinates?.[0];
+            const display_name = f?.properties?.name || f?.properties?.formatted || 'Location';
+
+            return {
+                lat: String(lat),
+                lon: String(lon),
+                display_name
+            };
+        }).filter((x) => Number.isFinite(parseFloat(x.lat)) && Number.isFinite(parseFloat(x.lon)));
 
         // Sort by distance from user.
-        data.sort((a, b) => {
-            const aLL = toLatLng(a);
-            const bLL = toLatLng(b);
-            return haversineKm(userLatLng[0], userLatLng[1], aLL[0], aLL[1]) -
-                   haversineKm(userLatLng[0], userLatLng[1], bLL[0], bLL[1]);
+        normalized.sort((a, b) => {
+            const aLat = parseFloat(a.lat);
+            const aLng = parseFloat(a.lon);
+            const bLat = parseFloat(b.lat);
+            const bLng = parseFloat(b.lon);
+            return haversineKm(userLatLng[0], userLatLng[1], aLat, aLng) -
+                   haversineKm(userLatLng[0], userLatLng[1], bLat, bLng);
         });
 
-        renderResults(data.slice(0, 6));
+        renderResults(normalized.slice(0, 6));
     }
+
 
     function renderResults(items) {
         // Clear old markers
@@ -371,14 +401,20 @@
 
             // If accuracy is poor, avoid using it (this prevents wrong jumps like defaulting to Kigali).
             // You can tune this threshold.
+            // If accuracy is poor, still store it for search bias,
+            // but don't move the map (prevents wrong jumps).
             if (Number.isFinite(accuracyM) && accuracyM > 2000) {
-                // Still store, but don’t move the map.
                 userLatLng = latlng;
+                if (userMarker) userMarker.remove();
+                userMarker = L.marker(latlng).addTo(map)
+                    .bindPopup("<b>You are here</b>")
+                    .openPopup();
                 return;
             }
 
             userLatLng = latlng;
             map.flyTo(latlng, 15, { duration: 2 });
+
 
             if (userMarker) userMarker.remove();
             userMarker = L.marker(latlng).addTo(map)
@@ -440,9 +476,9 @@
                     <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
                         <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
                     </button>
-                    <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
-                        <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
-                    </button>
+                <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:inline-flex;">
+                    <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
+                </button>
                     <button id="logout-btn" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
                         <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
                     </button>
@@ -466,6 +502,15 @@
                    data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
                 <a href="chat.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
                    data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
+
+                <!-- Auth CTA buttons (same elements used by desktop header logic) -->
+                <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
+                    <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
+                </button>
+
+                <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:inline-flex;">
+                    <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
+                </button>
             </div>
         </nav>
 
@@ -633,142 +678,66 @@
     </div>
 </section>
 
-<!-- Footer -->
-<footer style="background-color: #1d4ed8; color: white; margin-top: 3rem;">
-
-    
 <!-- Quick Links Section - Footer Top -->
 <div class="quick-links bg-white border-b border-gray-100 py-8">
     <div class="max-w-6xl mx-auto px-6">
         <div class="mb-6 text-center md:text-left">
-            <h3 class="quick-links-title text-2xl text-center font-bold text-slate-900"
-                data-en="Quick Links"
-                data-rw="Aho Wahita Ujya">
-                Aho Wahita Ujya
-            </h3>
-            <p class="quick-links-subtitle text-center text-slate-500 mt-2"
-               data-en="Explore the most-used sections of Urungano."
-               data-rw="Sura ibice bikunze gukoreshwa kuri Urungano.">
-                Sura ibice bikunze gukoreshwa kuri Urungano.
-            </p>
+            <h3 class="quick-links-title text-2xl text-center font-bold text-slate-900" data-en="Quick Links" data-rw="Aho Wahita Ujya">Aho Wahita Ujya</h3>
+            <p class="quick-links-subtitle text-center text-slate-500 mt-2" data-en="Explore the most-used sections of Urungano." data-rw="Sura ibice bikunze gukoreshwa kuri Urungano.">Sura ibice bikunze gukoreshwa kuri Urungano.</p>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            
-            <a href="srh.html" 
-               class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-red-50 transition-all duration-300">
+            <a href="srh.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-red-50 transition-all duration-300">
                 <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🌸</div>
-                <span class="font-medium text-gray-800 group-hover:text-red-600 transition-colors"
-                      data-en="Sexual & Reproductive Health"
-                      data-rw="Ubuzima bw'Imyororokere">
-                    Ubuzima bw'Imyororokere
-                </span>
+                <span class="font-medium text-gray-800 group-hover:text-red-600 transition-colors" data-en="Sexual & Reproductive Health" data-rw="Ubuzima bw'Imyororokere">Ubuzima bw'Imyororokere</span>
             </a>
 
-            <a href="srh.html#calculator" 
-               class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-pink-50 transition-all duration-300">
+            <a href="srh.html#calculator" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-pink-50 transition-all duration-300">
                 <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">📅</div>
-                <span class="font-medium text-gray-800 group-hover:text-pink-600 transition-colors"
-                      data-en="Period Tracker"
-                      data-rw="Kubara Ukwezi k'Umugore">
-                    Kubara Ukwezi k'Umugore
-                </span>
+                <span class="font-medium text-gray-800 group-hover:text-pink-600 transition-colors" data-en="Period Tracker" data-rw="Kubara Ukwezi k'Umugore">Kubara Ukwezi k'Umugore</span>
             </a>
 
-            <a href="mental-health.html" 
-               class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-blue-50 transition-all duration-300">
+            <a href="mental-health.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-blue-50 transition-all duration-300">
                 <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🧠</div>
-                <span class="font-medium text-gray-800 group-hover:text-blue-600 transition-colors"
-                      data-en="Mental Health"
-                      data-rw="Ubuzima bwo mu Mutwe">
-                    Ubuzima bwo mu Mutwe
-                </span>
+                <span class="font-medium text-gray-800 group-hover:text-blue-600 transition-colors" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span>
             </a>
 
-            <a href="chat.html" 
-               class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-purple-50 transition-all duration-300">
+            <a href="chat.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-purple-50 transition-all duration-300">
                 <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">💬</div>
-                <span class="font-medium text-gray-800 group-hover:text-purple-600 transition-colors"
-                      data-en="Chat with your peers"
-                      data-rw="Ganira n'Urungano">
-                    Ganira n'Urungano
-                </span>
+                <span class="font-medium text-gray-800 group-hover:text-purple-600 transition-colors" data-en="Chat with your peers" data-rw="Ganira n'Urungano">Ganira n'Urungano</span>
             </a>
-
         </div>
     </div>
 </div>
 
-
-    <div style="max-width: 1152px; margin: 0 auto; padding: 2.5rem 1.5rem;">
-        
-        <!-- Top row -->
-        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
-            
-            <!-- Brand -->
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <img src="urungano-logo.jpeg" alt="Urungano Logo"
-                     style="width: 44px; height: 44px; object-fit: cover; border-radius: 12px;">
-                <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px;"
-                      data-en="Urungano Platform"
-                      data-rw="Urungano Platform">
-                    Urungano Platform
-                </span>
+<!-- Footer -->
+<footer class="bg-slate-900 text-white py-12">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+            <div class="space-y-3 text-sm">
+                <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+                <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
+                <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
             </div>
-
-            
-            <!-- Contact links -->
-<div class="footer-contact-wrap" style="display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start;">
-    <h4 class="footer-contact-title"
-        style="color: white; font-size: 1rem; font-weight: 700; margin: 0;"
-        data-en="Contact Information"
-        data-rw="Amakuru y'Uko Watwandikira">
-        Amakuru y'Uko Watwandikira
-    </h4>
-
-    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
-        <a href="tel:+250786561823"
-           style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem; transition: color 0.2s;"
-           onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-            <span>📞</span>
-            <span data-en="Phone:" data-rw="Telefoni:">Phone:</span>
-            <span>+250 786 561 823</span>
-        </a>
-        <a href="mailto:Urunganoplatform@gmail.com"
-           style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
-           onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-            <span>✉️</span>
-            <span data-en="Email:" data-rw="Imeyili:">Email:</span>
-            <span>Urunganoplatform@gmail.com</span>
-        </a>
-        <!--a href="https://instagram.com/c-frederic1" target="_blank" rel="noopener noreferrer"
-           style="display: flex; align-items: center; gap: 8px; color: #bfdbfe; text-decoration: none; font-size: 0.9rem;"
-           onmouseover="this.style.color='white'" onmouseout="this.style.color='#bfdbfe'">
-            <span>📸</span>
-            <span data-en="Instagram:" data-rw="Instagram:">Instagram:</span>
-            <span>@c-frederic1</span>
-    </a-->
-    </div>
-</div>
-
-            <!-- Copyright -->
-            <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;"
-               data-en="© 2026 Urungano Platform. All rights reserved."
-               data-rw="© 2026 Urungano Platform. Uburenganzira bwose bwihariwe.">
-                © 2026 Urungano Platform. Uburenganzira bwose bwihariwe.
-            </p>
         </div>
-
-        <!-- Divider + tagline -->
-        <div style="border-top: 1px solid #2563eb; margin-top: 1.5rem; padding-top: 1.25rem; text-align: center;">
-            <p style="color: #93c5fd; font-size: 0.8rem; margin: 0;"
-               data-en="Anonymous • Secure • Stigma-Free Support"
-               data-rw="Ubwihisho • Umutekano • Ubufasha butagira akato">
-                Ubwihisho • Umutekano • Ubufasha butagira akato
-            </p>
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+            <div class="grid grid-cols-2 gap-y-2 text-sm">
+                <a href="chat.html" class="hover:text-pink-400" data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</a>
+                <a href="srh.html" class="hover:text-pink-400" data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</a>
+                <a href="mental-health.html" class="hover:text-pink-400" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="hover:text-pink-400" data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</a>
+            </div>
+        </div>
+        <div class="text-sm opacity-75">
+            <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
+            <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
         </div>
     </div>
 </footer>
+
+
     
     <script>
         // ===================== AUTH + LOGIN BUTTON (SRH/Chat shared) =====================
@@ -813,6 +782,8 @@
         };
 
         function setTherapyCtaUI({ show = false, label = 'Book a therapist', dest = 'booking.html' } = {}) {
+            console.log('[therapy-cta]', { show, label, dest, lang: document.body.getAttribute('data-lang') });
+
             const btn = document.getElementById('therapy-cta-btn');
             const text = document.getElementById('therapy-cta-text');
             if (!btn || !text) return;
@@ -820,7 +791,12 @@
             // Always set both the destination and visible label deterministically.
             // This avoids stale dataset.dest when language/UI rerenders.
             btn.dataset.therapyDest = dest;
+            // Keep it visible on mobile dropdown when auth logic says to show it.
+            // Using inline-flex matches Tailwind/desktop styling and avoids layout quirks.
             btn.style.display = show ? 'inline-flex' : 'none';
+            console.log('[therapy-cta:apply]', { show });
+
+
             text.textContent = label;
 
             // Keep attributes aligned so switchLanguage() won’t overwrite our deterministic label.
@@ -1106,11 +1082,9 @@
             document.body.setAttribute('data-lang', lang);
 
             document.querySelectorAll('[data-en]').forEach(el => {
-                // Keep CTA text deterministic: it uses textContent directly.
-                // This prevents switchLanguage() from forcing it back to Kinyarwanda.
-                if (el && el.id === 'therapy-cta-text') return;
                 el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
             });
+
 
 
             document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
