@@ -43,15 +43,13 @@
             font-weight: 600;
         }
 
-        /* Accordion - exactly congruent */
-        .accordion-btn { transition: all 0.3s ease; }
-.accordion-content {
+        /* Accordion - always expanded (toggle removed) */
+        .accordion-content {
             max-height: none;
             overflow: visible;
             transition: none;
         }
         .accordion-content.open { max-height: none; }
-        .icon { transition: transform 0.3s ease; }
 
         .voice-note {
             margin-top: 1.25rem;
@@ -306,7 +304,7 @@
             border-top: 1px solid #f3e8ff;
             background: #fdf4ff;
         }
-        .lesson-icon { transition: transform 0.4s ease; }
+        
     </style>
 </head>
 <body class="bg-slate-50" data-lang="rw">
@@ -398,14 +396,12 @@
 
             <!-- Lesson 1 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
-                <button onclick="toggleSection('lesson1')" 
-                        class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-seedling text-emerald-500 lesson-icon"></i>
+                        <i class="fas fa-seedling text-emerald-500"></i>
                         <span data-en="Lesson 1: Understanding Menstruation" data-rw="Isomo 1: Gusobanukirwa Imihango">Isomo 1: Gusobanukirwa Imihango</span>
                     </span>
-                    <i class="fas fa-chevron-down icon"></i>
-                </button>
+                </div>
                 <div id="lesson1" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
                     <div class="voice-note">
                         <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 1: Understanding Menstruation" data-rw="Isomo 1: Gusobanukirwa Imihango">Isomo 1: Gusobanukirwa Imihango</button>
@@ -420,14 +416,12 @@
 
             <!-- Lesson 2 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
-                <button onclick="toggleSection('lesson2')" 
-                        class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-tint text-pink-500 lesson-icon"></i>
+                        <i class="fas fa-tint text-pink-500"></i>
                         <span data-en="Lesson 2: Signs Before Menstruation" data-rw="Isomo 2: Ibimenyetso Bibanziriza Imihango">Isomo 2: Ibimenyetso Bibanziriza Imihango</span>
                     </span>
-                    <i class="fas fa-chevron-down icon"></i>
-                </button>
+                </div>
                 <div id="lesson2" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
                     <div class="voice-note">
                         <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 2: Signs Before Menstruation" data-rw="Isomo 2: Ibimenyetso Bibanziriza Imihango">Isomo 2: Ibimenyetso Bibanziriza Imihango</button>
@@ -442,14 +436,12 @@
 
             <!-- Lesson 3 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
-                <button onclick="toggleSection('lesson3')" 
-                        class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shield-alt text-amber-500 lesson-icon"></i>
+                        <i class="fas fa-shield-alt text-amber-500"></i>
                         <span data-en="Lesson 3: Managing Menstrual Pain" data-rw="Isomo 3: Kugabanya Ububabare bwo mu Mihango">Isomo 3: Kugabanya Ububabare bwo mu Mihango</span>
                     </span>
-                    <i class="fas fa-chevron-down icon"></i>
-                </button>
+                </div>
                 <div id="lesson3" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
                     <div class="voice-note">
                         <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 3: Managing Menstrual Pain" data-rw="Isomo 3: Kugabanya Ububabare bwo mu Mihango">Isomo 3: Kugabanya Ububabare bwo mu Mihango</button>
@@ -464,14 +456,12 @@
 
             <!-- Lesson 4 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
-                <button onclick="toggleSection('lesson4')" 
-                        class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-virus text-red-500 lesson-icon"></i>
+                        <i class="fas fa-virus text-red-500"></i>
                         <span data-en="Lesson 4: Fertility and the Menstrual Cycle" data-rw="Isomo 4: Uburumbuke n'Ukwezi k'Umugore">Isomo 4: Uburumbuke n'Ukwezi k'Umugore</span>
                     </span>
-                    <i class="fas fa-chevron-down icon"></i>
-                </button>
+                </div>
                 <div id="lesson4" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
                     <div class="voice-note">
                         <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 4: Fertility and the Menstrual Cycle" data-rw="Isomo 4: Uburumbuke n'Ukwezi k'Umugore">Isomo 4: Uburumbuke n'Ukwezi k'Umugore</button>
@@ -486,14 +476,12 @@
 
             <!-- Lesson 5 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
-                <button onclick="toggleSection('lesson5')" 
-                        class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-heart text-rose-500 lesson-icon"></i>
+                        <i class="fas fa-heart text-rose-500"></i>
                         <span data-en="Lesson 5: HIV Basics and Transmission" data-rw="Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura">Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura</span>
                     </span>
-                    <i class="fas fa-chevron-down icon"></i>
-                </button>
+                </div>
                 <div id="lesson5" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
                     <div class="voice-note">
                         <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 5: HIV Basics and Transmission" data-rw="Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura">Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura</button>
@@ -508,14 +496,12 @@
 
             <!-- Lesson 6 -->
             <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
-                <button onclick="toggleSection('lesson6')" 
-                        class="accordion-btn w-full px-6 py-6 text-left flex justify-between items-center text-lg font-semibold">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-baby text-purple-500 lesson-icon"></i>
+                        <i class="fas fa-baby text-purple-500"></i>
                         <span data-en="Lesson 6: HIV Prevention and Youth Guidance" data-rw="Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko">Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko</span>
                     </span>
-                    <i class="fas fa-chevron-down icon"></i>
-                </button>
+                </div>
                 <div id="lesson6" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
                     <div class="voice-note">
                         <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 6: HIV Prevention and Youth Guidance" data-rw="Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko">Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko</button>
@@ -1063,23 +1049,7 @@ window.logout = async () => {
             menu.classList.toggle('open');
         }
 
-        // Accordion for lessons
-        function toggleSection(id) {
-            const content = document.getElementById(id);
-            if (!content) return;
-            
-            const isOpen = content.classList.contains('open');
-            
-            // Close all others
-            document.querySelectorAll('.accordion-content').forEach(el => {
-                el.classList.remove('open');
-            });
-            
-            // Toggle current
-            if (!isOpen) content.classList.add('open');
-        }
-
-        // Calculator logic (original kept + language support)
+        // Calculator logic
         // NOTE: keep isPregnantMode declared with var (not let/const) to avoid TDZ when calculateCycle is called
         // before this line runs due to script execution order.
         var isPregnantMode = false;
