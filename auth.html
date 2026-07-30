@@ -105,6 +105,68 @@
             Urasanzwe ufite konti? Jya kuri Kwinjira.
           </span>
         </div>
+
+        <!-- Forgot Password Link -->
+        <div class="text-center pt-2">
+          <button onclick="showForgotPassword()" class="text-sm text-pink-600 hover:text-pink-800 font-semibold underline">
+            <span data-en="Forgot Password?" data-rw="Wibagiwe ijambo ry'ibanga?">Wibagiwe ijambo ry'ibanga?</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden px-3">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md relative">
+      <button onclick="closeForgotModal()" class="absolute top-3 right-4 text-slate-500 hover:text-slate-800 text-xl">&times;</button>
+
+      <!-- Step 1: Enter Email -->
+      <div id="fp-step-1">
+        <h3 class="text-xl font-bold text-slate-800 text-center">
+          <span data-en="Reset Password" data-rw="Kubika ijambo ry'ibanga">Kubika ijambo ry'ibanga</span>
+        </h3>
+        <p class="text-sm text-slate-600 text-center mt-1">
+          <span data-en="Enter your email to receive a verification code." data-rw="Shyiramo imeri yawe kugirango ubone kode y'impamyabumenyi.">
+            Shyiramo imeri yawe kugirango ubone kode y'impamyabumenyi.
+          </span>
+        </p>
+        <div class="mt-4">
+          <label class="block text-sm font-semibold text-slate-700 mb-1" for="fp-email" data-en="Email" data-rw="Imeri">Imeri</label>
+          <input id="fp-email" type="email" placeholder="Email" class="w-full" />
+        </div>
+        <button onclick="sendResetCode()" class="w-full mt-4 px-4 py-3 rounded-2xl bg-pink-600 hover:bg-pink-700 text-white font-bold">
+          <span data-en="Send Code" data-rw="Ohereza kode">Ohereza kode</span>
+        </button>
+        <div id="fp-status-1" class="text-sm min-h-[22px] text-center mt-2"></div>
+      </div>
+
+      <!-- Step 2: Success Message -->
+      <div id="fp-step-2" class="hidden">
+        <div class="text-center py-4">
+          <i class="fa-solid fa-envelope-circle-check text-green-500 text-5xl mb-4"></i>
+          <h3 class="text-xl font-bold text-slate-800">
+            <span data-en="Check Your Email" data-rw="Reba imeri yawe">Reba imeri yawe</span>
+          </h3>
+          <p class="text-sm text-slate-600 mt-2">
+            <span data-en="A password reset link has been sent to your email. Click the link in the email to reset your password." data-rw="Imeri yo kubika ijambo ry'ibanga yoherejwe. Kanda kuri linki iri muri imeri yawe kugirango ubike ijambo ry'ibanga rishya.">
+              Imeri yo kubika ijambo ry'ibanga yoherejwe. Kanda kuri linki iri muri imeri yawe kugirango ubike ijambo ry'ibanga rishya.
+            </span>
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <span data-en="Didn't receive it? Check your spam folder or try again." data-rw="Ntiwayiboneye? Reba mu spam cyangwa ugerageze nanone.">
+              Ntiwayiboneye? Reba mu spam cyangwa ugerageze nanone.
+            </span>
+          </p>
+        </div>
+        <div class="flex gap-3 mt-4">
+          <button onclick="goBackToStep1()" class="flex-1 px-4 py-3 rounded-2xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold">
+            <span data-en="Resend" data-rw="Ohereza nanone">Ohereza nanone</span>
+          </button>
+          <button onclick="closeForgotModal()" class="flex-1 px-4 py-3 rounded-2xl bg-pink-600 hover:bg-pink-700 text-white font-bold">
+            <span data-en="Close" data-rw="Gufunga">Gufunga</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -121,15 +183,19 @@
       </div>
       <div>
         <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
-        <div class="grid grid-cols-2 gap-y-2 text-sm">
-          <a href="chat.html" class="hover:text-pink-400" data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</a>
-          <a href="srh.html" class="hover:text-pink-400" data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</a>
-          <a href="mental-health.html" class="hover:text-pink-400" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-          <a href="about-us.html" class="hover:text-pink-400" data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</a>
+        <div class="flex flex-col space-y-3 text-sm">
+          <a href="chat.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+          <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+          <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+          <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
         </div>
       </div>
       <div class="text-sm opacity-75">
         <p data-en="Urungano is a safe space for young people in Rwanda." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda.</p>
+        <div class="mt-4 space-y-2">
+          <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+          <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+        </div>
         <p class="mt-6 text-xs">© 2026 Urungano Platform</p>
       </div>
     </div>
@@ -143,7 +209,8 @@
       signInWithEmailAndPassword,
       onAuthStateChanged,
       signOut,
-      updateProfile
+      updateProfile,
+      sendPasswordResetEmail
     } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
     import {
       getFirestore,
@@ -227,7 +294,6 @@
 
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Registration successful!' : 'Iyandikishwa ryagenze neza!'}</span>`;
 
-        // Redirect after a moment
         setTimeout(() => {
           window.location.href = 'srh.html';
         }, 600);
@@ -262,9 +328,7 @@
     };
 
     onAuthStateChanged(auth, async (user) => {
-      // If already logged in, skip straight to SRH
       if (user) {
-        // ensure profile exists (matches chat.html expectation)
         const snap = await getDoc(doc(db, 'users', user.uid));
         if (!snap.exists()) {
           await setDoc(doc(db, 'users', user.uid), {
@@ -274,10 +338,89 @@
             createdAt: serverTimestamp()
           }, { merge: true });
         }
-        // Keep language button correct
         const currentLang = document.body.getAttribute('data-lang') || 'rw';
         switchLanguage(currentLang);
         window.location.href = 'srh.html';
+      }
+    });
+
+// ===== Forgot Password Logic =====
+    // Uses Firebase's built-in sendPasswordResetEmail (client-side SDK).
+    // No backend calls needed - Firebase handles the email + reset flow.
+
+    window.showForgotPassword = function () {
+      const modal = document.getElementById('forgotModal');
+      modal.classList.remove('hidden');
+      document.getElementById('fp-step-1').classList.remove('hidden');
+      document.getElementById('fp-step-2').classList.add('hidden');
+      document.getElementById('fp-email').value = '';
+      document.getElementById('fp-status-1').textContent = '';
+
+      const lang = document.body.getAttribute('data-lang') || 'rw';
+      switchLanguage(lang);
+    };
+
+    window.closeForgotModal = function () {
+      document.getElementById('forgotModal').classList.add('hidden');
+    };
+
+    window.goBackToStep1 = function () {
+      document.getElementById('fp-step-1').classList.remove('hidden');
+      document.getElementById('fp-step-2').classList.add('hidden');
+      document.getElementById('fp-status-1').textContent = '';
+    };
+
+    window.sendResetCode = async function () {
+      const email = document.getElementById('fp-email').value.trim();
+      const status = document.getElementById('fp-status-1');
+      const lang = document.body.getAttribute('data-lang') || 'rw';
+
+      if (!email) {
+        status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-circle-exclamation"></i> ${lang === 'en' ? 'Please enter your email' : 'Shyiramo imeri yawe'}</span>`;
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-circle-exclamation"></i> ${lang === 'en' ? 'Invalid email format' : 'Imeri ntabwo ari yo'}</span>`;
+        return;
+      }
+
+      status.textContent = lang === 'en' ? 'Sending reset email...' : 'Imeri irimo koherezwa...';
+
+      try {
+        // Use Firebase's built-in password reset email (no backend required)
+        await sendPasswordResetEmail(auth, email);
+
+        // Success - move to step 2
+        status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${lang === 'en' ? 'Reset email sent!' : 'Imeri yoherejwe!'}</span>`;
+
+        setTimeout(() => {
+          document.getElementById('fp-step-1').classList.add('hidden');
+          document.getElementById('fp-step-2').classList.remove('hidden');
+        }, 800);
+      } catch (e) {
+        console.error('sendPasswordResetEmail error:', e);
+        // Provide user-friendly error messages
+        const code = e?.code || '';
+        let msg;
+        if (code === 'auth/user-not-found') {
+          msg = lang === 'en' ? 'No account found with this email address.' : 'Nta konti ibonetse kuri iyi imeri.';
+        } else if (code === 'auth/invalid-email') {
+          msg = lang === 'en' ? 'Invalid email address.' : 'Imeri ntabwo ari yo.';
+        } else if (code === 'auth/too-many-requests') {
+          msg = lang === 'en' ? 'Too many attempts. Please try again later.' : 'Mugerageje inshuro nyinshi. Gerageza nanone nyuma.';
+        } else {
+          msg = lang === 'en' ? 'Failed to send reset email. Please try again.' : 'Imeri yohereza yananiwe. Gerageza nanone.';
+        }
+        status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-circle-exclamation"></i> ${msg}</span>`;
+      }
+    };
+
+    // Close modal on background click
+    document.addEventListener('click', function (e) {
+      const modal = document.getElementById('forgotModal');
+      if (e.target === modal) {
+        closeForgotModal();
       }
     });
 
