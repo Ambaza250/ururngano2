@@ -188,6 +188,7 @@
                 </span>
             </div>
             <div id="lesson1" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <img src="lesson thumbnails/mental health lesson 1.jpg" alt="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
                 <div class="voice-note">
                     <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 1: Understanding Mental Illness" data-rw="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe">Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe</button>
                     <audio controls preload="none" data-topic="mental health" data-lesson="1"></audio>
@@ -233,6 +234,7 @@
                 </span>
             </div>
             <div id="lesson3" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <img src="lesson thumbnails/mental health lesson 3.jpg" alt="Isomo rya 3: Ibimenyetso Wakwitaho" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
                 <div class="voice-note">
                     <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 3: Signs and Symptoms to Notice" data-rw="Isomo rya 3: Ibimenyetso Wakwitaho">Isomo rya 3: Ibimenyetso Wakwitaho</button>
                     <audio controls preload="none" data-topic="mental health" data-lesson="3"></audio>
@@ -283,6 +285,7 @@
                 </span>
             </div>
             <div id="lesson5" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <img src="lesson thumbnails/mental health lesson 5.jpg" alt="Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
                 <div class="voice-note">
                     <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 5: How to Listen and Support Well" data-rw="Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza">Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza</button>
                     <audio controls preload="none" data-topic="mental health" data-lesson="5"></audio>
@@ -340,10 +343,10 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-3 max-w-md mx-auto">
-                            <button onclick="recordAnswer(0)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Hoya (Not at all)</button>
-                            <button onclick="recordAnswer(1)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Iminsi mike (Several days)</button>
-                            <button onclick="recordAnswer(2)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Igihe kirekire (More than half the days)</button>
-                            <button onclick="recordAnswer(3)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all">Buri munsi (Nearly every day)</button>
+                            <button onclick="recordAnswer(0)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="Not at all" data-rw="Hoya">Hoya</button>
+                            <button onclick="recordAnswer(1)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="Several days" data-rw="Iminsi mike">Iminsi mike</button>
+                            <button onclick="recordAnswer(2)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="More than half the days" data-rw="Igihe kirekire">Igihe kirekire</button>
+                            <button onclick="recordAnswer(3)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="Nearly every day" data-rw="Buri munsi">Buri munsi</button>
                         </div>
                     </div>
 
@@ -355,13 +358,15 @@
                         
                         <div id="emergency-action" class="hidden mt-8">
                             <a href="tel:3530" 
-                               class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-lg transition">
+                               class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-lg transition"
+                               data-en="📞 Call 3530 Now!" data-rw="📞 Hamagara 3530 Ubu!">
                                 📞 Hamagara 3530 Ubu!
                             </a>
                         </div>
 
                         <button onclick="resetQuiz()" 
-                                class="mt-10 text-blue-600 hover:text-blue-700 font-semibold underline">
+                                class="mt-10 text-blue-600 hover:text-blue-700 font-semibold underline"
+                                data-en="Start again" data-rw="Ongera utangire">
                             Ongera utangire
                         </button>
                     </div>
@@ -391,15 +396,19 @@
             </div>
             <div>
                 <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
-                <div class="grid grid-cols-2 gap-y-2 text-sm">
-                    <a href="chat.html" class="hover:text-pink-400" data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</a>
-                    <a href="srh.html" class="hover:text-pink-400" data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</a>
-                    <a href="mental-health.html" class="hover:text-pink-400" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                    <a href="about-us.html" class="hover:text-pink-400" data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</a>
+                <div class="flex flex-col space-y-3 text-sm">
+                    <a href="chat.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                    <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+                    <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+                    <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
                 </div>
             </div>
             <div class="text-sm opacity-75">
                 <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
+                <div class="mt-4 space-y-2">
+                    <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+                    <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+                </div>
                 <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
             </div>
         </div>
@@ -427,6 +436,7 @@
             });
 
             updateVoiceNotes(lang);
+            updateQuizLanguage(lang);
 
             document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
@@ -499,28 +509,32 @@
 <script>
     const questions = {
         PHQA: [
-            "Kuba ufite agahinda, cyangwa kwiheba?",
-            "Kuba utakishimira ibintu wahoze ukunda?",
-            "Kugira ikibazo cyo gusinzira cyangwa gusinzira cyane?",
-            "Kuba wumva unaniwe cyangwa udafite imbaraga?",
-            "Kuba utumva ushaka kurya cyangwa urya birenze urugero?",
-            "Kuba wumva utiyizeye cyangwa wumva uri ikigwari?",
-            "Kugira ikibazo cyo kwerekeza imitekerereze ku kintu kimwe?",
-            "Kugenda buhoro cyangwa kuvuga buhoro cyane?",
-            "Kugira ibitekerezo byo kwigirira nabi cyangwa kwiyambura ubuzima?"
+            { rw: "Kuba ufite agahinda, cyangwa kwiheba?", en: "Feeling sad, depressed, or irritable?" },
+            { rw: "Kuba utakishimira ibintu wahoze ukunda?", en: "Little interest or pleasure in doing things?" },
+            { rw: "Kugira ikibazo cyo gusinzira cyangwa gusinzira cyane?", en: "Trouble falling or staying asleep, or sleeping too much?" },
+            { rw: "Kuba wumva unaniwe cyangwa udafite imbaraga?", en: "Feeling tired or having little energy?" },
+            { rw: "Kuba utumva ushaka kurya cyangwa urya birenze urugero?", en: "Poor appetite or overeating?" },
+            { rw: "Kuba wumva utiyizeye cyangwa wumva uri ikigwari?", en: "Feeling bad about yourself — or that you are a failure?" },
+            { rw: "Kugira ikibazo cyo kwerekeza imitekerereze ku kintu kimwe?", en: "Trouble concentrating on things?" },
+            { rw: "Kugenda buhoro cyangwa kuvuga buhoro cyane?", en: "Moving or speaking so slowly that others could have noticed?" },
+            { rw: "Kugira ibitekerezo byo kwigirira nabi cyangwa kwiyambura ubuzima?", en: "Thoughts that you would be better off dead or of hurting yourself?" }
         ],
         GAD7: [
-            "Kuba wumva ufite ubwoba cyangwa uhangayitse cyane?",
-            "Kuba udashobora guhagarika kwibaza ibibazo?",
-            "Kuba uhangayikishwa n'ibintu bitandukanye?",
-            "Kugira ikibazo cyo kuruhuka?",
-            "Kuba wumva ufite imihangayiko ituma udicara hamwe?",
-            "Kuba urakazwa n'ubusa cyangwa urasirwa vuba?",
-            "Kuba wumva hari ikintu kibi kigiye kubaho?"
+            { rw: "Kuba wumva ufite ubwoba cyangwa uhangayitse cyane?", en: "Feeling nervous, anxious, or on edge?" },
+            { rw: "Kuba udashobora guhagarika kwibaza ibibazo?", en: "Not being able to stop or control worrying?" },
+            { rw: "Kuba uhangayikishwa n'ibintu bitandukanye?", en: "Worrying too much about different things?" },
+            { rw: "Kugira ikibazo cyo kuruhuka?", en: "Trouble relaxing?" },
+            { rw: "Kuba wumva ufite imihangayiko ituma udicara hamwe?", en: "Being so restless that it's hard to sit still?" },
+            { rw: "Kuba urakazwa n'ubusa cyangwa urasirwa vuba?", en: "Becoming easily annoyed or irritable?" },
+            { rw: "Kuba wumva hari ikintu kibi kigiye kubaho?", en: "Feeling afraid as if something awful might happen?" }
         ]
     };
 
     let currentQuiz = '', currentStep = 0, score = 0, urgent = false;
+
+    function getCurrentLang() {
+        return document.documentElement.getAttribute('lang') || 'rw';
+    }
 
     function startQuiz(type) {
         currentQuiz = type;
@@ -533,10 +547,14 @@
     }
 
     function updateQuestion() {
+        const lang = getCurrentLang();
         const qList = questions[currentQuiz];
+        const currentQ = qList[currentStep];
         document.getElementById('progress').innerText = 
-            `Ikibazo ${currentStep + 1} kuri ${qList.length}`;
-        document.getElementById('question-text').innerText = qList[currentStep];
+            lang === 'en' 
+                ? `Question ${currentStep + 1} of ${qList.length}`
+                : `Ikibazo ${currentStep + 1} kuri ${qList.length}`;
+        document.getElementById('question-text').innerText = currentQ[lang];
     }
 
     function recordAnswer(points) {
@@ -552,22 +570,43 @@
     }
 
     function showResults() {
+        const lang = getCurrentLang();
         document.getElementById('question-view').classList.add('hidden');
         document.getElementById('result-view').classList.remove('hidden');
 
-        let title = "Umeze neza 🎉";
-        let desc = "Ibisubizo byanyu bigaragaza ko nta kibazo gikomeye ufite. Komeza kwita ku buzima bwawe!";
-        let icon = "🌟";
+        let title, desc, icon = "🌟";
+        
+        const resultTexts = {
+            good: {
+                rw: { title: "Umeze neza 🎉", desc: "Ibisubizo byanyu bigaragaza ko nta kibazo gikomeye ufite. Komeza kwita ku buzima bwawe!" },
+                en: { title: "You're doing well 🎉", desc: "Your results show no major concerns. Keep taking care of yourself!" }
+            },
+            moderate: {
+                rw: { title: "Ibimenyetso biringaniye ⚖️", desc: "Wumva ufite ibimenyetso biringaniye. Byaba byiza uganiriye n'umujyanama cyangwa inshuti wizeye." },
+                en: { title: "Moderate symptoms ⚖️", desc: "You may have moderate symptoms. Consider talking to a counselor or a trusted person." }
+            },
+            urgent: {
+                rw: { title: "Ukeneye Ubufasha bwihuse ⚠️", desc: "Isuzumwa ryerekanye ibimenyetso bikomeye. Turakwinginga guhamagara 3530 cyangwa ugane Isange One Stop Centre ikwegereye." },
+                en: { title: "Urgent Help Needed ⚠️", desc: "Your screening shows serious symptoms. We urge you to call 3530 or visit the nearest Isange One Stop Centre." }
+            }
+        };
 
         if (score >= 15 || urgent) {
-            title = "Ukeneye Ubufasha bwihuse ⚠️";
-            desc = "Isuzumwa ryerekanye ibimenyetso bikomeye. Turakwinginga guhamagara 3530 cyangwa ugane Isange One Stop Centre ikwegereye.";
+            const t = resultTexts.urgent[lang];
+            title = t.title;
+            desc = t.desc;
             icon = "🚨";
             document.getElementById('emergency-action').classList.remove('hidden');
         } else if (score >= 10) {
-            title = "Ibimenyetso biringaniye ⚖️";
-            desc = "Wumva ufite ibimenyetso biringaniye. Byaba byiza uganiriye n'umujyanama cyangwa inshuti wizeye.";
+            const t = resultTexts.moderate[lang];
+            title = t.title;
+            desc = t.desc;
             icon = "⚖️";
+        } else {
+            const t = resultTexts.good[lang];
+            title = t.title;
+            desc = t.desc;
+            icon = "🌟";
         }
 
         document.getElementById('result-icon').innerText = icon;
@@ -579,6 +618,20 @@
         document.getElementById('result-view').classList.add('hidden');
         document.getElementById('emergency-action').classList.add('hidden');
         document.getElementById('selection-view').classList.remove('hidden');
+    }
+
+    function updateQuizLanguage(lang) {
+        // If currently viewing a question, refresh the question text
+        if (currentQuiz && !document.getElementById('question-view').classList.contains('hidden')) {
+            updateQuestion();
+        }
+        // If currently viewing results, refresh the result text
+        if (!document.getElementById('result-view').classList.contains('hidden')) {
+            // Store current state and re-show results
+            const tempScore = score;
+            const tempUrgent = urgent;
+            showResults();
+        }
     }
 </script>
 </body>

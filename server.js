@@ -96,8 +96,15 @@ async function ensureFirebaseAdminInit() {
       credential = firebaseAdmin.credential.cert(gac);
     }
   } else {
-    // Last resort (will throw the same Project Id detection error in many local setups)
-    credential = firebaseAdmin.credential.applicationDefault();
+    // Fallback: try the local serviceAccountKey.json file
+    const localKeyPath = path.join(__dirname, 'serviceAccountKey.json');
+    if (fs.existsSync(localKeyPath)) {
+      const parsed = JSON.parse(fs.readFileSync(localKeyPath, 'utf8'));
+      credential = firebaseAdmin.credential.cert(parsed);
+    } else {
+      // Last resort (will throw the same Project Id detection error in many local setups)
+      credential = firebaseAdmin.credential.applicationDefault();
+    }
   }
 
 
@@ -265,6 +272,11 @@ app.post('/api/admin/therapists/create', async (req, res) => {
     return res.status(500).json({ error: msg });
   }
 });
+
+// ===== Forgot Password / Reset endpoints =====
+// Note: Password reset is now handled entirely client-side via Firebase's
+// sendPasswordResetEmail() in auth.html. No backend endpoints needed.
+// The client-side SDK sends the reset email directly without needing the Admin SDK.
 
 app.post('/api/periods/save', async (req, res) => {
   try {

@@ -46,9 +46,41 @@
     let currentUserProfile = null;
     let currentTarget = null;
     let unsubscribeMessages = null;
-    let isEnglish = false;
+let isEnglish = false;
     const userCache = {};
     let groupsCache = [];
+
+    // Hardcoded translations for known group names (fallback if Firestore data lacks nameRw/nameEn)
+    const groupNameTranslations = {
+      "mental health": { rw: "Ubuzima Bwo mu Mutwe", en: "Mental Health" },
+      "ubuzima bwo mu mutwe": { rw: "Ubuzima Bwo mu Mutwe", en: "Mental Health" },
+      "srh": { rw: "Imirire n'Ubuzima", en: "SRH" },
+      "imirire": { rw: "Imirire n'Ubuzima", en: "SRH" },
+      "sexuelle": { rw: "Imirire n'Ubuzima", en: "SRH" },
+      "générale": { rw: "Rusange", en: "General" },
+      "rusange": { rw: "Rusange", en: "General" }
+    };
+
+    function getTranslatedGroupName(group) {
+      // If Firestore has separate nameEn/nameRw fields, use them directly
+      if (isEnglish) {
+        if (group.nameEn) return group.nameEn;
+      } else {
+        if (group.nameRw) return group.nameRw;
+      }
+      // Fallback: try the other language field
+      if (isEnglish && group.nameRw) return group.nameRw;
+      if (!isEnglish && group.nameEn) return group.nameEn;
+      // Fallback to hardcoded translations based on the name field
+      const name = (group.name || group.nameEn || group.nameRw || "").toLowerCase().trim();
+      for (const key of Object.keys(groupNameTranslations)) {
+        if (name.includes(key)) {
+          return isEnglish ? groupNameTranslations[key].en : groupNameTranslations[key].rw;
+        }
+      }
+      // Last resort: return whatever name is available
+      return group.name || group.nameEn || group.nameRw || "Group";
+    }
 
     function t(rw, en) {
       return isEnglish ? en : rw;
@@ -249,7 +281,8 @@
         div.dataset.type = "group";
         div.dataset.id = g.id;
         const icon = getGroupIcon(g);
-        div.innerHTML = `<span class="item-icon">${icon}</span><strong>${escapeHtml(isEnglish ? (g.nameEn || g.nameRw) : (g.nameRw || g.nameEn))}</strong>`;
+        const displayName = getTranslatedGroupName(g);
+        div.innerHTML = `<span class="item-icon">${icon}</span><strong>${escapeHtml(displayName)}</strong>`;
         div.onclick = () => openGroup(g);
         list.appendChild(div);
       });
@@ -318,13 +351,14 @@
     }
 
 
-    function refreshHeader() {
+function refreshHeader() {
       if (!currentTarget) return;
       const header = document.getElementById("chat-header");
       if (currentTarget.type === "group") {
+        const groupName = getTranslatedGroupName(currentTarget.data);
         header.textContent = isEnglish 
-          ? `Group: ${currentTarget.data.nameEn || currentTarget.data.nameRw}`
-          : `Itsinda: ${currentTarget.data.nameRw || currentTarget.data.nameEn}`;
+          ? `Group: ${groupName}`
+          : `Itsinda: ${groupName}`;
       } else {
         header.textContent = isEnglish 
           ? `Chatting with ${currentTarget.data.username}`
@@ -394,12 +428,30 @@
       // Update segmented language toggle
       const langEl = document.getElementById("lang-toggle");
       if (langEl) {
-        langEl.innerHTML = isEnglish
-          ? `<span class="lang-option">English</span><span class="lang-option active">Kinyarwanda</span>`
-          : `<span class="lang-option active">English</span><span class="lang-option">Kinyarwanda</span>`;
+langEl.innerHTML = isEnglish
+          ? `<span class="lang-option active">English</span><span class="lang-option">Kinyarwanda</span>`
+          : `<span class="lang-option">English</span><span class="lang-option active">Kinyarwanda</span>`;
       }
       document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
       document.querySelectorAll(".back-btn").forEach(el => el.textContent = t("← Ahabanza", "← Back"));
+
+      // Translate the chat header (when no chat selected)
+      if (!currentTarget) {
+        const header = document.getElementById("chat-header");
+        if (header) {
+          header.textContent = t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo", "Select a chat");
+        }
+      }
+
+      // Translate empty chat state
+      const emptyTitle = document.getElementById("empty-chat-title");
+      const emptyDesc = document.getElementById("empty-chat-desc");
+      if (emptyTitle) {
+        emptyTitle.textContent = t("Hitamo ikiganiro", "Select a conversation");
+      }
+      if (emptyDesc) {
+        emptyDesc.textContent = t("Hitamo itsinda cyangwa umuntu wo here hose ugire ibyo uvuga", "Choose a group or person from the list to start chatting");
+      }
 
       // Re-render groups to update their displayed names (nameRw / nameEn)
       renderGroups();
@@ -775,8 +827,8 @@
 
         <div style="margin:15px 0; text-align:right;">
           <span onclick="toggleLanguage()" id="lang-toggle" class="lang-segmented">
-            <span class="lang-option active">English</span>
-            <span class="lang-option">Kinyarwanda</span>
+            <span class="lang-option">English</span>
+            <span class="lang-option active">Kinyarwanda</span>
           </span>
         </div>
 
@@ -806,8 +858,8 @@
               <circle cx="20" cy="65" r="3" fill="#10b981" opacity="0.1"/>
               <circle cx="100" cy="60" r="6" fill="#10b981" opacity="0.08"/>
             </svg>
-            <h3>Hitamo ikiganiro</h3>
-            <p>Hitamo itsinda cyangwa umuntu wo here hose ugire ibyo uvuga</p>
+            <h3 id="empty-chat-title">Hitamo ikiganiro</h3>
+            <p id="empty-chat-desc">Hitamo itsinda cyangwa umuntu wo here hose ugire ibyo uvuga</p>
           </div>
         </div>
         
