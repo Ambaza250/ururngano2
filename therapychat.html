@@ -816,6 +816,23 @@
     @media (max-width: 900px) {
       #chat-section { flex-direction: column; }
       .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+
+      /* Ensure the send button stays fully visible on mobile */
+      .input-area {
+        padding: 10px 12px;
+        gap: 8px;
+        flex-wrap: nowrap;
+      }
+      #message-input {
+        min-width: 0; /* allow the input to shrink so the button fits */
+        padding: 14px 16px;
+      }
+      #send-btn {
+        padding: 14px 18px;
+        font-size: 14px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
     }
 
     #therapist-picker { display: none; }
