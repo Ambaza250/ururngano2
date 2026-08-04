@@ -294,8 +294,8 @@
 
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Registration successful!' : 'Iyandikishwa ryagenze neza!'}</span>`;
 
-        setTimeout(() => {
-          window.location.href = 'srh.html';
+setTimeout(() => {
+          window.location.href = 'index.html';
         }, 600);
       } catch (e) {
         status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(e.message)}</span>`;
@@ -319,8 +319,8 @@
 
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Login successful!' : 'Kwinjira byagenze neza!'}</span>`;
 
-        setTimeout(() => {
-          window.location.href = 'srh.html';
+setTimeout(() => {
+          window.location.href = 'index.html';
         }, 600);
       } catch (e) {
         status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(e.message)}</span>`;
@@ -338,9 +338,9 @@
             createdAt: serverTimestamp()
           }, { merge: true });
         }
-        const currentLang = document.body.getAttribute('data-lang') || 'rw';
+const currentLang = document.body.getAttribute('data-lang') || 'rw';
         switchLanguage(currentLang);
-        window.location.href = 'srh.html';
+        window.location.href = 'index.html';
       }
     });
 
