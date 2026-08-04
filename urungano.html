@@ -503,13 +503,17 @@
                 <a href="chat.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
                    data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
 
-                <!-- Auth CTA buttons (same elements used by desktop header logic) -->
-                <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
-                    <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
+<!-- Auth CTA buttons (mobile variants, controlled by same auth logic) -->
+                <button id="login-btn-mobile" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
+                    <span id="login-btn-text-mobile" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
                 </button>
 
-                <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:inline-flex;">
-                    <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
+                <button id="therapy-cta-btn-mobile" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
+                    <span id="therapy-cta-text-mobile" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
+                </button>
+
+                <button id="logout-btn-mobile" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
+                    <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
                 </button>
             </div>
         </nav>
@@ -774,8 +778,8 @@
             }
         };
 
-        window.goToTherapyCta = () => {
-            const btn = document.getElementById('therapy-cta-btn');
+window.goToTherapyCta = () => {
+            const btn = document.getElementById('therapy-cta-btn') || document.getElementById('therapy-cta-btn-mobile');
             if (!btn) return;
             const dest = btn.dataset.therapyDest;
             if (dest) {
@@ -785,38 +789,39 @@
             }
         };
 
-        function setTherapyCtaUI({ show = false, label = 'Book a therapist', dest = 'booking.html' } = {}) {
+function setTherapyCtaUI({ show = false, label = 'Book a therapist', dest = 'booking.html' } = {}) {
             console.log('[therapy-cta]', { show, label, dest, lang: document.body.getAttribute('data-lang') });
 
-            const btn = document.getElementById('therapy-cta-btn');
-            const text = document.getElementById('therapy-cta-text');
-            if (!btn || !text) return;
+            const btns = document.querySelectorAll('#therapy-cta-btn, #therapy-cta-btn-mobile');
+            const texts = document.querySelectorAll('#therapy-cta-text, #therapy-cta-text-mobile');
+            if (!btns.length) return;
 
-            // Always set both the destination and visible label deterministically.
-            // This avoids stale dataset.dest when language/UI rerenders.
-            btn.dataset.therapyDest = dest;
-            // Keep it visible on mobile dropdown when auth logic says to show it.
-            // Using inline-flex matches Tailwind/desktop styling and avoids layout quirks.
-            btn.style.display = show ? 'inline-flex' : 'none';
+            btns.forEach((btn) => {
+                // Always set destination deterministically to avoid stale dataset.dest.
+                btn.dataset.therapyDest = dest;
+                // inline-flex matches Tailwind/desktop styling and avoids layout quirks.
+                btn.style.display = show ? 'inline-flex' : 'none';
+            });
             console.log('[therapy-cta:apply]', { show });
 
+            texts.forEach((text) => {
+                text.textContent = label;
 
-            text.textContent = label;
-
-            // Keep attributes aligned so switchLanguage() won’t overwrite our deterministic label.
-            if (label === 'Book a therapist' || label === 'Book a therapist ') {
-                text.setAttribute('data-en', 'Book a therapist');
-                text.setAttribute('data-rw', 'Tegura umujyanama');
-            } else if (label === 'Tegura umujyanama' || label === 'Tegura umujyanama ') {
-                text.setAttribute('data-en', 'Book a therapist');
-                text.setAttribute('data-rw', 'Tegura umujyanama');
-            } else if (label.toLowerCase().includes('chat')) {
-                text.setAttribute('data-en', 'Chat with a therapist');
-                text.setAttribute('data-rw', 'Ganira n\'umujyanama');
-            } else {
-                text.setAttribute('data-en', label);
-                text.setAttribute('data-rw', label);
-            }
+                // Keep attributes aligned so switchLanguage() won’t overwrite our deterministic label.
+                if (label === 'Book a therapist' || label === 'Book a therapist ') {
+                    text.setAttribute('data-en', 'Book a therapist');
+                    text.setAttribute('data-rw', 'Tegura umujyanama');
+                } else if (label === 'Tegura umujyanama' || label === 'Tegura umujyanama ') {
+                    text.setAttribute('data-en', 'Book a therapist');
+                    text.setAttribute('data-rw', 'Tegura umujyanama');
+                } else if (label.toLowerCase().includes('chat')) {
+                    text.setAttribute('data-en', 'Chat with a therapist');
+                    text.setAttribute('data-rw', 'Ganira n\'umujyanama');
+                } else {
+                    text.setAttribute('data-en', label);
+                    text.setAttribute('data-rw', label);
+                }
+            });
         }
 
 
@@ -957,17 +962,12 @@
 
 
 
-        function setAuthUI(loggedIn) {
-            const loginBtn = document.getElementById('login-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-            if (!loginBtn || !logoutBtn) return;
-            if (loggedIn) {
-                loginBtn.style.display = 'none';
-                logoutBtn.style.display = 'inline-flex';
-            } else {
-                loginBtn.style.display = 'inline-flex';
-                logoutBtn.style.display = 'none';
-            }
+function setAuthUI(loggedIn) {
+            const loginBtns = document.querySelectorAll('#login-btn, #login-btn-mobile');
+            const logoutBtns = document.querySelectorAll('#logout-btn, #logout-btn-mobile');
+            if (!loginBtns.length) return;
+            loginBtns.forEach((btn) => { btn.style.display = loggedIn ? 'none' : 'inline-flex'; });
+            logoutBtns.forEach((btn) => { btn.style.display = loggedIn ? 'inline-flex' : 'none'; });
         }
 
         (async function initAuthHeader() {
