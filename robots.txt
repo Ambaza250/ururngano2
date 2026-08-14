@@ -1,0 +1,13 @@
+# robots.txt for Urungano Platform
+User-agent: *
+Allow: /
+
+# Allow all important pages
+Allow: /urungano.html
+Allow: /mental-health.html
+Allow: /srh.html
+Allow: /chat.html
+Allow: /about-us.html
+
+# Sitemap location
+Sitemap: https://urunganoai.vercel.app/sitemap.xml
