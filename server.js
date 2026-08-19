@@ -609,25 +609,25 @@ app.post('/api/periods/save', async (req, res) => {
   }
 });
 
-// Static file hosting for your frontend pages (srh.html, auth.html, images, etc.)
-app.use(express.static(__dirname));
+// ===== Static files (local development only) =====
+// On Vercel, static files are served by Vercel itself.
+// Running express.static on Vercel is a common cause of FUNCTION_INVOCATION_FAILED.
+if (!process.env.VERCEL) {
+  app.use(express.static(__dirname));
 
-// Serve the homepage at `/`
-app.get('/', (_req, res) => {
-  // If index.html exists, prefer it; otherwise fall back to urungano.html
-  if (fs.existsSync(path.join(__dirname, 'index.html'))) {
-    return res.sendFile(path.join(__dirname, 'index.html'));
-  }
-  return res.redirect('/urungano.html');
-});
+  app.get('/', (_req, res) => {
+    if (fs.existsSync(path.join(__dirname, 'index.html'))) {
+      return res.sendFile(path.join(__dirname, 'index.html'));
+    }
+    return res.redirect('/urungano.html');
+  });
+}
 
-// ===== Vercel + Local support =====
-// On Vercel we export the app. Locally we still listen on a port.
-if (process.env.VERCEL) {
-  // Running on Vercel → export the Express app
-  module.exports = app;
-} else {
-  // Running on your computer
+// ===== ALWAYS export the app for Vercel =====
+module.exports = app;
+
+// ===== Listen only when running on your own computer =====
+if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
     console.log(`Urungano server listening on http://localhost:${PORT}`);
