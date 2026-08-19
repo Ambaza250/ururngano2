@@ -537,13 +537,14 @@ app.post('/api/periods/save', async (req, res) => {
   }
 });
 
-// ===== Serve static files (HTML, images, CSS, etc.) =====
+// Serve all static files (HTML, images, etc.)
 app.use(express.static(__dirname));
 
 // Homepage
 app.get('/', (_req, res) => {
-  if (fs.existsSync(path.join(__dirname, 'index.html'))) {
-    return res.sendFile(path.join(__dirname, 'index.html'));
+  const indexPath = path.join(__dirname, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
   }
   return res.redirect('/urungano.html');
 });
@@ -551,7 +552,7 @@ app.get('/', (_req, res) => {
 // Always export for Vercel
 module.exports = app;
 
-// Listen only when running on your computer
+// Listen only on your computer
 if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
