@@ -621,8 +621,15 @@ app.get('/', (_req, res) => {
   return res.redirect('/urungano.html');
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Urungano server listening on http://localhost:${PORT}`);
-});
-
+// ===== Vercel + Local support =====
+// On Vercel we export the app. Locally we still listen on a port.
+if (process.env.VERCEL) {
+  // Running on Vercel → export the Express app
+  module.exports = app;
+} else {
+  // Running on your computer
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`Urungano server listening on http://localhost:${PORT}`);
+  });
+}
