@@ -204,6 +204,20 @@
       </div>
     </section>
 
+    <!-- ADD INSTITUTION -->
+    <section id="institution-section" class="hidden mt-10">
+      <div class="bg-white border border-slate-200 rounded-3xl shadow-sm p-5 md:p-6">
+        <h2 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-building-columns text-blue-600 mr-2"></i><span data-en="Add Institution" data-rw="Ongeramo Ikigo">Add Institution</span></h2>
+        <p class="text-sm text-slate-600 mt-1" data-en="Create a private institution dashboard login. Passwords are securely hashed." data-rw="Kora konti y'ikigo. Amagambo y'ibanga abikwa mu buryo bwizewe.">Create a private institution dashboard login. Passwords are securely hashed.</p>
+        <form onsubmit="return addInstitution(event)" class="grid md:grid-cols-3 gap-4 mt-5">
+          <div class="md:col-span-2"><label class="block text-sm font-semibold text-slate-700 mb-1" for="institution-name">Institution name</label><input id="institution-name" required class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="Hospital, school, or organisation"></div>
+          <div><label class="block text-sm font-semibold text-slate-700 mb-1" for="institution-password">Dashboard password</label><input id="institution-password" type="password" minlength="6" required class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="At least 6 characters"></div>
+          <div class="md:col-span-3"><button class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold"><i class="fa-solid fa-plus mr-2"></i>Create Institution</button></div>
+        </form>
+        <div id="institution-status" class="text-sm min-h-[22px] mt-3"></div>
+      </div>
+    </section>
+
     <!-- DATA VIEW -->
     <section id="data-section" class="hidden">
 
@@ -347,6 +361,7 @@
         localStorage.setItem('urungano_admin_fb_signedin', '1');
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('therapist-section').classList.remove('hidden');
+        document.getElementById('institution-section').classList.remove('hidden');
         document.getElementById('data-section').classList.remove('hidden');
         await refreshData();
         setStatus('');
@@ -359,8 +374,14 @@
 
     window.logoutAdmin = () => {
       localStorage.removeItem('urungano_admin_authed');
+      localStorage.removeItem('urungano_admin_fb_signedin');
+      import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js").then(async authMod => {
+        const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+        await authMod.signOut(authMod.getAuth(appMod.initializeApp(firebaseConfig)));
+      }).catch(() => {});
       document.getElementById('data-section').classList.add('hidden');
       document.getElementById('therapist-section').classList.add('hidden');
+      document.getElementById('institution-section').classList.add('hidden');
       document.getElementById('login-section').classList.remove('hidden');
       setStatus('');
     };
@@ -440,6 +461,29 @@
         setSt(`<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${t('Creation failed. Check console.', 'Kurema byananiwe. Reba console.')}</span>`);
         return false;
       }
+    };
+
+    window.addInstitution = async (ev) => {
+      ev.preventDefault();
+      const name = document.getElementById('institution-name').value.trim();
+      const password = document.getElementById('institution-password').value;
+      const status = document.getElementById('institution-status');
+      try {
+        const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+        const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+        const user = authMod.getAuth(appMod.initializeApp(firebaseConfig)).currentUser;
+        if (!user || (user.email || '').toLowerCase() !== 'admin@urungano.com') {
+          throw new Error('Your Firebase session is not the administrator account. Log out, then sign in again.');
+        }
+        status.innerHTML = '<span class="text-blue-700">Creating institution…</span>';
+        const response = await fetch('/api/admin/institutions/create', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + await user.getIdToken(true) }, body: JSON.stringify({ name, password }) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to create institution.');
+        document.getElementById('institution-name').value = '';
+        document.getElementById('institution-password').value = '';
+        status.innerHTML = `<span class="text-green-700"><i class="fa-solid fa-check mr-2"></i>${escapeHtml(data.institution.name)} created. Share its dashboard password securely.</span>`;
+      } catch (e) { status.innerHTML = `<span class="text-red-600">${escapeHtml(e.message)}</span>`; }
+      return false;
     };
 
 
@@ -660,23 +704,26 @@
 
       const authed = localStorage.getItem('urungano_admin_authed') === '1';
       if (authed) {
-        document.getElementById('login-section').classList.add('hidden');
-        document.getElementById('therapist-section').classList.remove('hidden');
-        document.getElementById('data-section').classList.remove('hidden');
-
-        // refreshData() depends on an authenticated Firebase client. If the admin is not actually signed-in
-        // on the client (auth.currentUser is null), skip refresh to avoid console errors.
-        // Therapist UI should still be available.
         try {
           const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
           const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
           const app = appMod.initializeApp(firebaseConfig);
           const auth = authMod.getAuth(app);
-          if (auth.currentUser) {
+          await auth.authStateReady();
+          if ((auth.currentUser?.email || '').toLowerCase() === 'admin@urungano.com') {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('therapist-section').classList.remove('hidden');
+            document.getElementById('institution-section').classList.remove('hidden');
+            document.getElementById('data-section').classList.remove('hidden');
             await refreshData();
+          } else {
+            localStorage.removeItem('urungano_admin_authed');
+            localStorage.removeItem('urungano_admin_fb_signedin');
+            setStatus(`<span class="text-amber-700">${t('Please sign in as admin again.', 'Ongera winjire nka admin.')}</span>`);
           }
         } catch (_e) {
-          // ignore; UI is still shown
+          localStorage.removeItem('urungano_admin_authed');
+          localStorage.removeItem('urungano_admin_fb_signedin');
         }
       }
 

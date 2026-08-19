@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Institution Dashboard | Urungano</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="bg-white border-b border-slate-200"><div class="max-w-6xl mx-auto px-5 py-5 flex items-center justify-between"><a href="index.html" class="font-bold text-xl text-blue-600"><i class="fa-solid fa-heart-pulse mr-2"></i>Urungano</a><span class="text-sm text-slate-500">Institution dashboard</span></div></header>
+  <main class="max-w-6xl mx-auto px-5 py-10">
+    <section id="login-view" class="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 p-7">
+      <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 grid place-items-center text-xl mb-4"><i class="fa-solid fa-building-columns"></i></div>
+      <h1 class="text-2xl font-bold">Institution sign in</h1><p class="text-sm text-slate-600 mt-2">Use the password provided by the Urungano administrator.</p>
+      <form id="login-form" class="mt-6 space-y-4">
+        <div><label class="block text-sm font-semibold mb-1">Institution name</label><input id="institution-name" type="text" required class="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="Enter your institution name" autocomplete="organization"></div>
+        <div><label class="block text-sm font-semibold mb-1">Password</label><input id="login-password" type="password" required class="w-full rounded-xl border border-slate-300 px-4 py-3" autocomplete="current-password"></div>
+        <button class="w-full rounded-xl bg-blue-600 hover:bg-blue-700 py-3 font-bold text-white">Sign in</button><p id="login-status" class="text-sm"></p>
+      </form>
+    </section>
+    <section id="dashboard-view" class="hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"><div><p class="text-blue-600 font-semibold text-sm">INSTITUTION ANALYTICS</p><h1 id="institution-title" class="text-3xl font-bold">Dashboard</h1><p class="text-slate-500 mt-1">Anonymous, cumulative activity only.</p></div><div class="flex gap-2"><button id="refresh" class="px-4 py-2 rounded-xl border bg-white font-semibold"><i class="fa-solid fa-rotate mr-2"></i>Refresh</button><button id="sign-out" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold">Sign out</button></div></div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Accounts choosing you</p><p id="accounts-count" class="text-3xl font-bold mt-2">0</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Total visits</p><p id="visits-count" class="text-3xl font-bold mt-2">0</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Quiz results</p><p id="quiz-count" class="text-3xl font-bold mt-2">0</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Average quiz score</p><p id="average-score" class="text-3xl font-bold mt-2">—</p></article>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-6"><article class="bg-white rounded-2xl border border-slate-200 p-6"><h2 class="font-bold text-lg">Pages visited</h2><div id="pages-list" class="mt-4 space-y-3"></div></article><article class="bg-white rounded-2xl border border-slate-200 p-6"><h2 class="font-bold text-lg">Mental health screening</h2><div id="quiz-list" class="mt-4 space-y-3"></div></article></div>
+      <section class="mt-6 bg-white rounded-2xl border border-slate-200 p-6 max-w-xl"><h2 class="font-bold text-lg">Change dashboard password</h2><form id="password-form" class="grid md:grid-cols-2 gap-3 mt-4"><input id="current-password" type="password" required placeholder="Current password" class="rounded-xl border border-slate-300 px-4 py-3"><input id="new-password" type="password" minlength="6" required placeholder="New password (6+ characters)" class="rounded-xl border border-slate-300 px-4 py-3"><button class="md:col-span-2 justify-self-start px-5 py-3 bg-blue-600 text-white rounded-xl font-bold">Update password</button></form><p id="password-status" class="text-sm mt-3"></p></section>
+    </section>
+  </main>
+  <script>
+    const sessionKey = 'urungano_institution_session';
+    const format = value => Number(value || 0).toLocaleString();
+    const safe = value => String(value || '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    function session() { return localStorage.getItem(sessionKey); }
+    const pageNames = {
+      index_html: 'Home', urungano_html: 'Home', 'mental-health_html': 'Mental health',
+      srh_html: 'Sexual & reproductive health', 'about-us_html': 'About us',
+      booking_html: 'Book a therapist', chat_html: 'Urungano AI chat', therapychat_html: 'Therapy chat'
+    };
+    function rows(entries, empty, labels = {}) { const items = Object.entries(entries || {}); return items.length ? items.sort((a,b) => b[1]-a[1]).map(([label, value]) => `<div class="flex justify-between border-b border-slate-100 pb-2"><span class="text-slate-600">${safe(labels[label] || label.replace(/_/g, ' '))}</span><strong>${format(value)}</strong></div>`).join('') : `<p class="text-sm text-slate-500">${empty}</p>`; }
+    async function loadDashboard() {
+      const res = await fetch('/api/institutions/dashboard', { headers: { Authorization: 'Bearer ' + session() } });
+      if (!res.ok) { localStorage.removeItem(sessionKey); showLogin(); return; }
+      const { institution } = await res.json(), stats = institution.stats || {}, quiz = stats.quiz || {};
+      document.getElementById('institution-title').textContent = institution.name;
+      document.getElementById('accounts-count').textContent = format(stats.accountsCount);
+      document.getElementById('visits-count').textContent = format(stats.totalVisits);
+      document.getElementById('quiz-count').textContent = format(quiz.totalResults);
+      document.getElementById('average-score').textContent = quiz.totalResults ? (Number(quiz.totalScore || 0) / quiz.totalResults).toFixed(1) : '—';
+      document.getElementById('pages-list').innerHTML = rows(stats.pages, 'No visits recorded yet.', pageNames);
+      document.getElementById('quiz-list').innerHTML = rows({ ...(quiz.byType || {}), ...(Object.fromEntries(Object.entries(quiz.bySeverity || {}).map(([k,v]) => [`${k} results`, v]))) }, 'No quiz results recorded yet.');
+    }
+    function showDashboard() { document.getElementById('login-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadDashboard().catch(error => { document.getElementById('dashboard-view').innerHTML = `<div class="bg-red-50 border border-red-200 rounded-2xl p-5 text-red-700">Unable to load the dashboard: ${safe(error.message)}. Please refresh and sign in again.</div>`; }); }
+    function showLogin() { document.getElementById('dashboard-view').classList.add('hidden'); document.getElementById('login-view').classList.remove('hidden'); }
+    document.getElementById('login-form').addEventListener('submit', async event => { event.preventDefault(); const status = document.getElementById('login-status'); status.textContent = 'Signing in…'; try { const res = await fetch('/api/institutions/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({institutionName:document.getElementById('institution-name').value,password:document.getElementById('login-password').value}) }); const data = await res.json(); if (!res.ok) return status.innerHTML = `<span class="text-red-600">${safe(data.error || 'Sign in failed.')}</span>`; localStorage.setItem(sessionKey, data.session); showDashboard(); } catch (error) { status.innerHTML = `<span class="text-red-600">${safe(error.message || 'Sign in failed.')}</span>`; } });
+    document.getElementById('password-form').addEventListener('submit', async event => { event.preventDefault(); const status = document.getElementById('password-status'); const res = await fetch('/api/institutions/password', {method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session()},body:JSON.stringify({currentPassword:document.getElementById('current-password').value,newPassword:document.getElementById('new-password').value})}); const data = await res.json(); status.innerHTML = res.ok ? '<span class="text-green-700">Password updated.</span>' : `<span class="text-red-600">${safe(data.error || 'Unable to update password.')}</span>`; if(res.ok) event.target.reset(); });
+    document.getElementById('refresh').onclick = loadDashboard; document.getElementById('sign-out').onclick = () => { localStorage.removeItem(sessionKey); showLogin(); };
+    if (session()) showDashboard();
+  </script>
+</body></html>

@@ -23,7 +23,7 @@
       width: 100%;
       max-width: 460px;
     }
-    input {
+    input, select {
       width: 100%;
       padding: 14px 16px;
       border: 1px solid #cbd5e1;
@@ -87,6 +87,11 @@
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-1" for="password" data-en="Password" data-rw="Ijambo ry'ibanga">Ijambo ry'ibanga</label>
           <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1" for="institution-select" data-en="Institution (optional)" data-rw="Ikigo (si itegeko)">Ikigo (si itegeko)</label>
+          <select id="institution-select"><option value="">No institution selected</option></select>
+          <p class="text-xs text-slate-500 mt-1" data-en="Choosing an institution contributes anonymous, aggregate usage statistics to it." data-rw="Guhitamo ikigo biha ikigo imibare y'ikoreshwa ihuriweho, itagaragaza umuntu.">Guhitamo ikigo biha ikigo imibare y'ikoreshwa ihuriweho, itagaragaza umuntu.</p>
         </div>
 
         <div class="grid grid-cols-1 gap-3 pt-2">
@@ -232,6 +237,24 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    let authFlowInProgress = false;
+
+    async function loadInstitutions() {
+      try {
+        const response = await fetch('/api/institutions');
+        const data = await response.json();
+        const select = document.getElementById('institution-select');
+        (data.institutions || []).forEach(institution => {
+          const option = document.createElement('option'); option.value = institution.id; option.textContent = institution.name; select.appendChild(option);
+        });
+      } catch { console.warn('Institutions could not be loaded.'); }
+    }
+    async function saveInstitutionChoice(user) {
+      const institutionId = document.getElementById('institution-select').value;
+      if (!institutionId) return;
+      const response = await fetch('/api/institutions/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + await user.getIdToken() }, body: JSON.stringify({ institutionId }) });
+      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || 'Could not save institution choice.'); }
+    }
 
     function escapeHtml(text) {
       const div = document.createElement('div');
@@ -282,6 +305,7 @@
       status.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Please wait...' : 'Tegereza...';
 
       try {
+        authFlowInProgress = true;
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(cred.user, { displayName: username });
 
@@ -291,6 +315,7 @@
           username: username,
           createdAt: serverTimestamp()
         }, { merge: true });
+        await saveInstitutionChoice(cred.user);
 
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Registration successful!' : 'Iyandikishwa ryagenze neza!'}</span>`;
 
@@ -298,6 +323,7 @@ setTimeout(() => {
           window.location.href = 'index.html';
         }, 600);
       } catch (e) {
+        authFlowInProgress = false;
         status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(e.message)}</span>`;
       }
     };
@@ -315,7 +341,9 @@ setTimeout(() => {
       status.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Please wait...' : 'Tegereza...';
 
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        authFlowInProgress = true;
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        await saveInstitutionChoice(cred.user);
 
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Login successful!' : 'Kwinjira byagenze neza!'}</span>`;
 
@@ -323,12 +351,14 @@ setTimeout(() => {
           window.location.href = 'index.html';
         }, 600);
       } catch (e) {
+        authFlowInProgress = false;
         status.innerHTML = `<span class="text-red-600"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(e.message)}</span>`;
       }
     };
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+        if (authFlowInProgress) return;
         const snap = await getDoc(doc(db, 'users', user.uid));
         if (!snap.exists()) {
           await setDoc(doc(db, 'users', user.uid), {
@@ -427,6 +457,7 @@ const currentLang = document.body.getAttribute('data-lang') || 'rw';
     window.onload = () => {
       const currentLang = document.body.getAttribute('data-lang') || 'rw';
       switchLanguage(currentLang);
+      loadInstitutions();
       console.log('✅ auth.html ready');
     };
   </script>
