@@ -121,31 +121,18 @@ async function ensureFirebaseAdminInit() {
   if (firebaseInitialized) return;
   if (!firebaseAdmin) throw new Error('firebase-admin is not installed.');
 
-  // Support multiple possible env var names for the service account JSON:
-  // 1. serviceAccountKey          ← the name you set on Vercel
-  // 2. FIREBASE_SERVICE_ACCOUNT_JSON
-  // 3. GOOGLE_APPLICATION_CREDENTIALS (can be JSON string or file path)
-  // 4. Fallback to local serviceAccountKey.json file
-
+  // Support multiple env var names for the service account JSON
   function getServiceAccountJsonString() {
-    // Highest priority: the exact name you used on Vercel
-    if (process.env.serviceAccountKey) {
-      return process.env.serviceAccountKey;
-    }
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-      return process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    }
+    if (process.env.serviceAccountKey) return process.env.serviceAccountKey;
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) return process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-      // If it looks like JSON content, return it; otherwise treat as path later
-      if (typeof gac === 'string' && gac.trim().startsWith('{')) {
-        return gac;
-      }
+      if (typeof gac === 'string' && gac.trim().startsWith('{')) return gac;
     }
     return null;
   }
 
-  let credential;
+  let credential = null;
   let serviceAccountParsed = null;
 
   const jsonString = getServiceAccountJsonString();
@@ -157,11 +144,11 @@ async function ensureFirebaseAdminInit() {
     } catch (e) {
       throw new Error(
         'Failed to parse service account JSON from environment variable. ' +
-        'Make sure the full JSON content is pasted correctly (including the private_key).'
+        'Make sure the full JSON is pasted correctly (including the private_key).'
       );
     }
   } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    // Path to a JSON file
+    // Treat as a file path
     const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
     const absPath = path.isAbsolute(gac) ? gac : path.join(process.cwd(), gac);
     if (!fs.existsSync(absPath)) {
@@ -171,7 +158,7 @@ async function ensureFirebaseAdminInit() {
     serviceAccountParsed = JSON.parse(raw);
     credential = firebaseAdmin.credential.cert(serviceAccountParsed);
   } else {
-    // Fallback: local file (for development on your computer)
+    // Local development fallback
     const localKeyPath = path.join(__dirname, 'serviceAccountKey.json');
     if (fs.existsSync(localKeyPath)) {
       const raw = fs.readFileSync(localKeyPath, 'utf8');
@@ -179,96 +166,37 @@ async function ensureFirebaseAdminInit() {
       credential = firebaseAdmin.credential.cert(serviceAccountParsed);
     } else {
       throw new Error(
-        'No Firebase service account credentials found. ' +
+        'No Firebase credentials found. ' +
         'Set the environment variable "serviceAccountKey" (or FIREBASE_SERVICE_ACCOUNT_JSON) ' +
-        'with the full contents of your service account JSON, ' +
-        'or place serviceAccountKey.json in the project root.'
+        'with the full service account JSON, or place serviceAccountKey.json in the project root.'
       );
     }
   }
 
-  function extractProjectIdFromServiceAccount(serviceAccountObj) {
-    if (!serviceAccountObj || typeof serviceAccountObj !== 'object') return null;
-    return serviceAccountObj.project_id || serviceAccountObj.projectId || null;
-  }
-
-  const projectIdFromEnv = process.env.FIREBASE_PROJECT_ID || null;
-  const projectIdFromSa = extractProjectIdFromServiceAccount(serviceAccountParsed);
-  const projectId = projectIdFromEnv || projectIdFromSa;
+  // Get project ID
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID ||
+    (serviceAccountParsed && (serviceAccountParsed.project_id || serviceAccountParsed.projectId)) ||
+    null;
 
   if (!projectId) {
     throw new Error(
-      'Firebase Admin init failed: could not determine project ID. ' +
-      'Set FIREBASE_PROJECT_ID=urungano-chat-50d62 or make sure the service account JSON contains "project_id".'
+      'Could not determine Firebase project ID. ' +
+      'Set FIREBASE_PROJECT_ID=urungano-chat-50d62 in Vercel environment variables.'
     );
   }
 
-  // Avoid double-initialize
+  if (!credential) {
+    throw new Error('Firebase credential could not be created.');
+  }
+
+  // Initialize only once
   if (!firebaseAdmin.apps || firebaseAdmin.apps.length === 0) {
     firebaseAdmin.initializeApp({ credential, projectId });
   }
 
   firebaseInitialized = true;
 }
-
-
-  function extractProjectIdFromServiceAccount(serviceAccountObj) {
-    if (!serviceAccountObj || typeof serviceAccountObj !== 'object') return null;
-    // service account JSON uses `project_id` (snake_case) in most exports.
-    return serviceAccountObj.project_id || serviceAccountObj.projectId || null;
-  }
-
-  // Provide projectId explicitly.
-  // 1) Prefer env var FIREBASE_PROJECT_ID
-  // 2) If we have service account JSON inline, extract project_id
-  // 3) If GOOGLE_APPLICATION_CREDENTIALS is a *path*, read the JSON and extract project_id
-  // 4) Otherwise throw a clear error (avoids the opaque "Unable to detect a Project Id" message)
-
-  const projectIdFromEnv = process.env.FIREBASE_PROJECT_ID || null;
-
-  // If GOOGLE_APPLICATION_CREDENTIALS is a path (common), parse the file to extract project_id.
-  // This is specifically to avoid relying on firebase-admin internal heuristics.
-  let serviceAccountParsed = null;
-  try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-      serviceAccountParsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-      if (typeof gac === 'string' && gac.trim().startsWith('{')) {
-        // inline json
-        serviceAccountParsed = JSON.parse(gac);
-      } else {
-        // path to json file
-        const absPath = path.isAbsolute(gac) ? gac : path.join(process.cwd(), gac);
-        const raw = fs.readFileSync(absPath, 'utf8');
-        serviceAccountParsed = JSON.parse(raw);
-      }
-    }
-  } catch (e) {
-    // keep null; we’ll surface clearer error below
-  }
-
-  const projectIdFromSa = extractProjectIdFromServiceAccount(serviceAccountParsed);
-  const projectId = projectIdFromEnv || projectIdFromSa;
-
-  if (!projectId) {
-    throw new Error(
-      'Firebase Admin init failed: missing FIREBASE_PROJECT_ID and could not extract project id. ' +
-      'Set FIREBASE_PROJECT_ID and ensure GOOGLE_APPLICATION_CREDENTIALS points to a service account JSON file. '
-    );
-  }
-
-  // Avoid double-initialize issues in hot reload / repeated calls
-  if (!firebaseAdmin.apps || firebaseAdmin.apps.length === 0) {
-    firebaseAdmin.initializeApp({ credential, projectId });
-  }
-
-
-
-
-
-  firebaseInitialized = true;
-
 
 
 async function verifyFirebaseUser(req) {
