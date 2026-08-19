@@ -574,7 +574,7 @@
         document.getElementById('question-view').classList.add('hidden');
         document.getElementById('result-view').classList.remove('hidden');
 
-        let title, desc, icon = "🌟";
+        let title, desc, icon = "🌟", severity = 'good';
         
         const resultTexts = {
             good: {
@@ -592,12 +592,14 @@
         };
 
         if (score >= 15 || urgent) {
+            severity = 'urgent';
             const t = resultTexts.urgent[lang];
             title = t.title;
             desc = t.desc;
             icon = "🚨";
             document.getElementById('emergency-action').classList.remove('hidden');
         } else if (score >= 10) {
+            severity = 'moderate';
             const t = resultTexts.moderate[lang];
             title = t.title;
             desc = t.desc;
@@ -612,6 +614,7 @@
         document.getElementById('result-icon').innerText = icon;
         document.getElementById('result-title').innerText = title;
         document.getElementById('result-desc').innerText = desc;
+        window.dispatchEvent(new CustomEvent('urungano:quiz-result', { detail: { quizType: currentQuiz, score, severity } }));
     }
 
     function resetQuiz() {
@@ -634,5 +637,6 @@
         }
     }
 </script>
+  <script type="module" src="institution-tracker.js"></script>
 </body>
 </html>
