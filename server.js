@@ -121,33 +121,95 @@ async function ensureFirebaseAdminInit() {
   if (firebaseInitialized) return;
   if (!firebaseAdmin) throw new Error('firebase-admin is not installed.');
 
-  // Preferred for local dev: use a service account JSON file path via GOOGLE_APPLICATION_CREDENTIALS.
-  // Fallback: allow passing service account JSON via env var FIREBASE_SERVICE_ACCOUNT_JSON.
-  let credential;
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    // Preferred: inline JSON via env var (no file path issues)
-    const parsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    credential = firebaseAdmin.credential.cert(parsed);
-  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    // GOOGLE_APPLICATION_CREDENTIALS may point to a JSON key file OR be the JSON contents.
-    // If it looks like JSON, parse it; otherwise treat it as a path.
-    const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-    if (typeof gac === 'string' && gac.trim().startsWith('{')) {
-      credential = firebaseAdmin.credential.cert(JSON.parse(gac));
-    } else {
-      credential = firebaseAdmin.credential.cert(gac);
+  // Support multiple possible env var names for the service account JSON:
+  // 1. serviceAccountKey          ← the name you set on Vercel
+  // 2. FIREBASE_SERVICE_ACCOUNT_JSON
+  // 3. GOOGLE_APPLICATION_CREDENTIALS (can be JSON string or file path)
+  // 4. Fallback to local serviceAccountKey.json file
+
+  function getServiceAccountJsonString() {
+    // Highest priority: the exact name you used on Vercel
+    if (process.env.serviceAccountKey) {
+      return process.env.serviceAccountKey;
     }
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      return process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    }
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      // If it looks like JSON content, return it; otherwise treat as path later
+      if (typeof gac === 'string' && gac.trim().startsWith('{')) {
+        return gac;
+      }
+    }
+    return null;
+  }
+
+  let credential;
+  let serviceAccountParsed = null;
+
+  const jsonString = getServiceAccountJsonString();
+
+  if (jsonString) {
+    try {
+      serviceAccountParsed = JSON.parse(jsonString);
+      credential = firebaseAdmin.credential.cert(serviceAccountParsed);
+    } catch (e) {
+      throw new Error(
+        'Failed to parse service account JSON from environment variable. ' +
+        'Make sure the full JSON content is pasted correctly (including the private_key).'
+      );
+    }
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    // Path to a JSON file
+    const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    const absPath = path.isAbsolute(gac) ? gac : path.join(process.cwd(), gac);
+    if (!fs.existsSync(absPath)) {
+      throw new Error(`GOOGLE_APPLICATION_CREDENTIALS file not found: ${absPath}`);
+    }
+    const raw = fs.readFileSync(absPath, 'utf8');
+    serviceAccountParsed = JSON.parse(raw);
+    credential = firebaseAdmin.credential.cert(serviceAccountParsed);
   } else {
-    // Fallback: try the local serviceAccountKey.json file
+    // Fallback: local file (for development on your computer)
     const localKeyPath = path.join(__dirname, 'serviceAccountKey.json');
     if (fs.existsSync(localKeyPath)) {
-      const parsed = JSON.parse(fs.readFileSync(localKeyPath, 'utf8'));
-      credential = firebaseAdmin.credential.cert(parsed);
+      const raw = fs.readFileSync(localKeyPath, 'utf8');
+      serviceAccountParsed = JSON.parse(raw);
+      credential = firebaseAdmin.credential.cert(serviceAccountParsed);
     } else {
-      // Last resort (will throw the same Project Id detection error in many local setups)
-      credential = firebaseAdmin.credential.applicationDefault();
+      throw new Error(
+        'No Firebase service account credentials found. ' +
+        'Set the environment variable "serviceAccountKey" (or FIREBASE_SERVICE_ACCOUNT_JSON) ' +
+        'with the full contents of your service account JSON, ' +
+        'or place serviceAccountKey.json in the project root.'
+      );
     }
   }
+
+  function extractProjectIdFromServiceAccount(serviceAccountObj) {
+    if (!serviceAccountObj || typeof serviceAccountObj !== 'object') return null;
+    return serviceAccountObj.project_id || serviceAccountObj.projectId || null;
+  }
+
+  const projectIdFromEnv = process.env.FIREBASE_PROJECT_ID || null;
+  const projectIdFromSa = extractProjectIdFromServiceAccount(serviceAccountParsed);
+  const projectId = projectIdFromEnv || projectIdFromSa;
+
+  if (!projectId) {
+    throw new Error(
+      'Firebase Admin init failed: could not determine project ID. ' +
+      'Set FIREBASE_PROJECT_ID=urungano-chat-50d62 or make sure the service account JSON contains "project_id".'
+    );
+  }
+
+  // Avoid double-initialize
+  if (!firebaseAdmin.apps || firebaseAdmin.apps.length === 0) {
+    firebaseAdmin.initializeApp({ credential, projectId });
+  }
+
+  firebaseInitialized = true;
+}
 
 
   function extractProjectIdFromServiceAccount(serviceAccountObj) {
@@ -207,7 +269,7 @@ async function ensureFirebaseAdminInit() {
 
   firebaseInitialized = true;
 
-}
+
 
 async function verifyFirebaseUser(req) {
   const authHeader = req.headers.authorization || '';
