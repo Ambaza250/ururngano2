@@ -537,24 +537,21 @@ app.post('/api/periods/save', async (req, res) => {
   }
 });
 
-// ===== Static files (local development only) =====
-// On Vercel, static files are served by Vercel itself.
-// Running express.static on Vercel is a common cause of FUNCTION_INVOCATION_FAILED.
-if (!process.env.VERCEL) {
-  app.use(express.static(__dirname));
+// ===== Serve static files (HTML, images, CSS, etc.) =====
+app.use(express.static(__dirname));
 
-  app.get('/', (_req, res) => {
-    if (fs.existsSync(path.join(__dirname, 'index.html'))) {
-      return res.sendFile(path.join(__dirname, 'index.html'));
-    }
-    return res.redirect('/urungano.html');
-  });
-}
+// Homepage
+app.get('/', (_req, res) => {
+  if (fs.existsSync(path.join(__dirname, 'index.html'))) {
+    return res.sendFile(path.join(__dirname, 'index.html'));
+  }
+  return res.redirect('/urungano.html');
+});
 
-// ===== ALWAYS export the app for Vercel =====
+// Always export for Vercel
 module.exports = app;
 
-// ===== Listen only when running on your own computer =====
+// Listen only when running on your computer
 if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
