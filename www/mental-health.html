@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuzima bwo mu Mutwe - Urungano Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Banner */
+        .hero-banner {
+            min-height: 260px;
+            height: 40vw;
+            max-height: 480px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.75));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        /* Language button */
+        .lang-btn { transition: all 0.3s ease; }
+        .lang-btn.active {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
+        /* Accordion */
+        .accordion-btn { transition: all 0.3s ease; }
+.accordion-content {
+            max-height: none;
+            overflow: visible;
+            transition: none;
+        }
+        .accordion-content.open { max-height: none; }
+        .icon { transition: transform 0.3s ease; }
+
+        .voice-note {
+            margin-top: 1.25rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+        .voice-note-label {
+            width: fit-content;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            color: #1d4ed8;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-align: left;
+        }
+        .voice-note audio {
+            width: 100%;
+        }
+
+        /* Mobile menu */
+        #mobile-menu { display: none; }
+        #mobile-menu.open { display: flex; }
+
+        /* Urungano AI Sign Language Avatar - same design as home page */
+        #ai-avatar {
+            bottom: 1rem;
+            right: 1rem;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar { bottom: 2rem; right: 2rem; }
+        }
+        #ai-avatar .avatar-img-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
+        }
+        #ai-avatar .tooltip {
+            width: 220px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .tooltip { width: 288px; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50" data-lang="rw">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+            <div class="flex justify-between items-center gap-2">
+
+                <!-- Logo + Title -->
+                <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                         class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+                    <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
+                </div>
+
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+                    <button onclick="switchLanguage('rw')" id="btn-rw"
+                            class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en"
+                            class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop nav links -->
+                <div class="hidden md:flex gap-6 text-sm font-medium">
+                    <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                    <a href="srh.html" class="hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="text-blue-600 font-semibold" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()"
+                        class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
+                <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                <a href="srh.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="block py-2.5 px-2 rounded-xl text-blue-600 font-semibold bg-blue-50" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <img src="mental-illness-banner.png" alt="Ubuzima bwo mu Mutwe">
+        <div class="banner-overlay">
+            <div class="px-4">
+                <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-2 md:mb-4"
+                    data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">
+                    Ubuzima bwo mu Mutwe
+                </h1>
+                <p class="text-white text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto"
+                   data-en="Learn, understand, and take care of your mental well-being"
+                   data-rw="Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe">
+                    Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-3 py-6 md:px-6 md:py-12">
+
+        <!-- Page heading -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 id="page-title" class="text-2xl md:text-4xl font-bold text-slate-800"
+                data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">
+                Ubuzima bwo mu Mutwe
+            </h2>
+            <p id="page-subtitle" class="text-slate-600 text-base md:text-lg mt-2 md:mt-3"
+               data-en="Learn, understand, and take care of your mental well-being"
+               data-rw="Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe">
+                Menya, gusobanukirwa no kwita ku buzima bwawe bwo mu mutwe
+            </p>
+        </div>
+
+        <!-- Lesson 1 -->
+        <div class="mb-5 md:mb-8">
+            <div class="w-full bg-white border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left text-base md:text-xl font-semibold">
+                <span data-en="Lesson 1: Understanding Mental Illness" data-rw="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe">
+                    Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe
+                </span>
+            </div>
+            <div id="lesson1" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <img src="lesson thumbnails/mental health lesson 1.jpg" alt="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 1: Understanding Mental Illness" data-rw="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe">Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="1"></audio>
+                </div>
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="A person may experience sadness, fear, isolation, or stress as part of normal life, but when these feelings stay for a long time and begin to disturb daily life and normal functioning, they may be signs of mental illness. Mental illness refers to unusual emotional, behavioral, or thinking patterns that make it hard for someone to cope with normal challenges or solve ordinary life problems."
+                   data-rw="Umuntu ashobora kugira agahinda, ubwoba, kwigunga cyangwa guhangayika nk'igice cy'ubuzima busanzwe, ariko iyo ibyo bimara igihe kirekire bikatangira kubangamira imibereho n'imikorere ye ya buri munsi, bishobora kuba ibimenyetso by'uburwayi bwo mu mutwe. Uburwayi bwo mu mutwe ni imyitwarire, amarangamutima cyangwa imitekerereze idasanzwe bituma umuntu atabasha guhangana n'ibibazo bisanzwe by'ubuzima cyangwa kubikemura neza.">
+                    Umuntu ashobora kugira agahinda, ubwoba, kwigunga cyangwa guhangayika nk'igice cy'ubuzima busanzwe, ariko iyo ibyo bimara igihe kirekire bikatangira kubangamira imibereho n'imikorere ye ya buri munsi, bishobora kuba ibimenyetso by'uburwayi bwo mu mutwe. Uburwayi bwo mu mutwe ni imyitwarire, amarangamutima cyangwa imitekerereze idasanzwe bituma umuntu atabasha guhangana n'ibibazo bisanzwe by'ubuzima cyangwa kubikemura neza.
+                </p>
+                <p class="mt-3 md:mt-4 text-slate-700 text-sm md:text-base"
+                   data-en="Some common mental health conditions include depression, trauma-related stress, anxiety disorders, schizophrenia, bipolar disorder, developmental disorders, epilepsy, substance-related disorders, and other mental conditions that affect thoughts, feelings, and behavior."
+                   data-rw="Bimwe mu bibazo bikunze kugaragara mu buzima bwo mu mutwe harimo indwara y'agahinda gakabije, ihungabana, indwara z'umuhangayiko, schizophrenia, bipolar disorder, ibibazo byo mu mikurire, igicuri, ibibazo bifitanye isano n'ibiyobyabwenge n'izindi ndwara zihindura uko umuntu atekereza, yiyumva cyangwa yitwara.">
+                    Bimwe mu bibazo bikunze kugaragara mu buzima bwo mu mutwe harimo indwara y'agahinda gakabije, ihungabana, indwara z'umuhangayiko, schizophrenia, bipolar disorder, ibibazo byo mu mikurire, igicuri, ibibazo bifitanye isano n'ibiyobyabwenge n'izindi ndwara zihindura uko umuntu atekereza, yiyumva cyangwa yitwara.
+                </p>
+            </div>
+        </div>
+
+        <!-- Lesson 2 -->
+        <div class="mb-5 md:mb-8">
+            <div class="w-full bg-white border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left text-base md:text-xl font-semibold">
+                <span data-en="Lesson 2: What Can Cause Mental Illness?" data-rw="Isomo rya 2: Ni Iki Gishobora Gutera Uburwayi bwo mu Mutwe?">
+                    Isomo rya 2: Ni Iki Gishobora Gutera Uburwayi bwo mu Mutwe?
+                </span>
+            </div>
+            <div id="lesson2" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 2: What Can Cause Mental Illness?" data-rw="Isomo rya 2: Ni Iki Gishobora Gutera Uburwayi bwo mu Mutwe?">Isomo rya 2: Ni Iki Gishobora Gutera Uburwayi bwo mu Mutwe?</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="2"></audio>
+                </div>
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="Mental illness can be caused by many different factors. These may include inherited family patterns, difficult living conditions such as poverty, conflict, violence or displacement, painful life changes such as losing someone you love, chronic physical illness, family conflict, abuse, and substance use. Early painful experiences such as neglect, abandonment, sexual violence, parental separation, early pregnancy with rejection, and other emotional wounds can also increase the risk."
+                   data-rw="Uburwayi bwo mu mutwe bushobora guterwa n'impamvu nyinshi zitandukanye. Harimo imiterere y'umuryango cyangwa uruhurirane rw'indwara, ubukene, intambara, ihohoterwa, kwimurwa, kubura ab'agaciro, uburwayi bw'umubiri budakira, amakimbirane yo mu muryango, guhohoterwa n'ikoreshwa ry'ibiyobyabwenge. Hari kandi ibikomere byo mu bwana nko gutabwa, kutitabwaho, gufatwa ku ngufu, gutandukana kw'ababyeyi, gutwara inda ukiri muto ugatereranwa n'ibindi bikomeretsa amarangamutima bishobora kongera ibyago.">
+                    Uburwayi bwo mu mutwe bushobora guterwa n'impamvu nyinshi zitandukanye. Harimo imiterere y'umuryango cyangwa uruhurirane rw'indwara, ubukene, intambara, ihohoterwa, kwimurwa, kubura ab'agaciro, uburwayi bw'umubiri budakira, amakimbirane yo mu muryango, guhohoterwa n'ikoreshwa ry'ibiyobyabwenge. Hari kandi ibikomere byo mu bwana nko gutabwa, kutitabwaho, gufatwa ku ngufu, gutandukana kw'ababyeyi, gutwara inda ukiri muto ugatereranwa n'ibindi bikomeretsa amarangamutima bishobora kongera ibyago.
+                </p>
+            </div>
+        </div>
+
+        <!-- Lesson 3 -->
+        <div class="mb-5 md:mb-8">
+            <div class="w-full bg-white border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left text-base md:text-xl font-semibold">
+                <span data-en="Lesson 3: Signs and Symptoms to Notice" data-rw="Isomo rya 3: Ibimenyetso Wakwitaho">
+                    Isomo rya 3: Ibimenyetso Wakwitaho
+                </span>
+            </div>
+            <div id="lesson3" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <img src="lesson thumbnails/mental health lesson 3.jpg" alt="Isomo rya 3: Ibimenyetso Wakwitaho" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 3: Signs and Symptoms to Notice" data-rw="Isomo rya 3: Ibimenyetso Wakwitaho">Isomo rya 3: Ibimenyetso Wakwitaho</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="3"></audio>
+                </div>
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="Mental illness can show up in the body, emotions, thoughts, or behavior. Physical signs may include pain, constant tiredness even after rest, frequent headaches, poor sleep, or sleeping too much. Emotional signs may include deep sadness, severe worry, fear, or hopelessness. Behavioral signs may include anger, withdrawing from others, isolating yourself, or trying to harm yourself. Some people may also hear voices, see things others do not see, feel watched, or struggle to think clearly and make decisions."
+                   data-rw="Uburwayi bwo mu mutwe bushobora kugaragarira ku mubiri, mu marangamutima, mu bitekerezo cyangwa mu myitwarire. Ibimenyetso byo ku mubiri bishobora kuba uburibwe, umunaniro uhoraho nubwo umuntu yaba yararuhutse, kurwara umutwe kenshi, kubura ibitotsi cyangwa gusinzira cyane. Mu marangamutima hashobora kubamo agahinda gakabije, guhangayika, ubwoba cyangwa kwiheba. Mu myitwarire hashobora kugaragara uburakari, kwiheza, kwigunga cyangwa kugerageza kwiyangiza. Hari n'abashobora kumva amajwi, kubona ibyo abandi batabona, kumva bakurikiranywe cyangwa kunanirwa gutekereza neza no gufata imyanzuro.">
+                    Uburwayi bwo mu mutwe bushobora kugaragarira ku mubiri, mu marangamutima, mu bitekerezo cyangwa mu myitwarire. Ibimenyetso byo ku mubiri bishobora kuba uburibwe, umunaniro uhoraho nubwo umuntu yaba yararuhutse, kurwara umutwe kenshi, kubura ibitotsi cyangwa gusinzira cyane. Mu marangamutima hashobora kubamo agahinda gakabije, guhangayika, ubwoba cyangwa kwiheba. Mu myitwarire hashobora kugaragara uburakari, kwiheza, kwigunga cyangwa kugerageza kwiyangiza. Hari n'abashobora kumva amajwi, kubona ibyo abandi batabona, kumva bakurikiranywe cyangwa kunanirwa gutekereza neza no gufata imyanzuro.
+                </p>
+                <p class="mt-5 md:mt-6 font-medium text-blue-600 text-sm md:text-base"
+                   data-en="Knowing these signs early can help you seek help for yourself or support someone else before the problem becomes more dangerous."
+                   data-rw="Kumenya ibi bimenyetso hakiri kare bifasha umuntu kwihutira gushaka ubufasha cyangwa gufasha undi mbere y'uko ikibazo kirushaho gukomera.">
+                    Kumenya ibi bimenyetso hakiri kare bifasha umuntu kwihutira gushaka ubufasha cyangwa gufasha undi mbere y'uko ikibazo kirushaho gukomera.
+                </p>
+            </div>
+        </div>
+
+        <!-- Lesson 4 -->
+        <div class="mb-5 md:mb-8">
+            <div class="w-full bg-white border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left text-base md:text-xl font-semibold">
+                <span data-en="Lesson 4: Warning Signs of Suicide" data-rw="Isomo rya 4: Ibimenyetso by'Umuntu Ushaka Kwiyahura">
+                    Isomo rya 4: Ibimenyetso by'Umuntu Ushaka Kwiyahura
+                </span>
+            </div>
+            <div id="lesson4" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 4: Warning Signs of Suicide" data-rw="Isomo rya 4: Ibimenyetso by'Umuntu Ushaka Kwiyahura">Isomo rya 4: Ibimenyetso by'Umuntu Ushaka Kwiyahura</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="4"></audio>
+                </div>
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="It is not always easy to know when someone is thinking about suicide, because many people hide what they are feeling. Still, some warning signs are common: feeling intense emotional pain, becoming very restless, isolating from others, saying life has no value, speaking or writing about death, having attempted suicide before, drinking or using substances excessively, taking dangerous risks, saying people will miss them, or feeling like a burden to others."
+                   data-rw="Ntibyoroshye buri gihe kumenya ko umuntu atekereza kwiyahura kuko akenshi ahisha ibiri muri we. Ariko hari ibimenyetso bikunze kugaragara: kumva ababaye cyane, kudatuza, kwigunga, kubona ubuzima nta gaciro bufite, kuvuga cyangwa kwandika ku rupfu, kuba yarigeze kugerageza kwiyahura, kunywa ibisindisha cyane, gukora ibintu bishyira ubuzima mu kaga, kuvuga ko azagenda bakamubura cyangwa kumva ari umutwaro ku bandi.">
+                    Ntibyoroshye buri gihe kumenya ko umuntu atekereza kwiyahura kuko akenshi ahisha ibiri muri we. Ariko hari ibimenyetso bikunze kugaragara: kumva ababaye cyane, kudatuza, kwigunga, kubona ubuzima nta gaciro bufite, kuvuga cyangwa kwandika ku rupfu, kuba yarigeze kugerageza kwiyahura, kunywa ibisindisha cyane, gukora ibintu bishyira ubuzima mu kaga, kuvuga ko azagenda bakamubura cyangwa kumva ari umutwaro ku bandi.
+                </p>
+                <p class="mt-3 md:mt-4 text-slate-700 text-sm md:text-base"
+                   data-en="If you notice these signs in yourself or in a friend, do not ignore them. Talk to a trusted person immediately and seek help from a nearby health facility or a trained professional."
+                   data-rw="Niba wibonyeho ibi bimenyetso cyangwa ukabibona ku nshuti yawe, ntubyirengagize. Vugana n'umuntu wizewe ako kanya kandi mushake ubufasha ku ivuriro rikwegereye cyangwa ku muntu wabihuguriwe.">
+                    Niba wibonyeho ibi bimenyetso cyangwa ukabibona ku nshuti yawe, ntubyirengagize. Vugana n'umuntu wizewe ako kanya kandi mushake ubufasha ku ivuriro rikwegereye cyangwa ku muntu wabihuguriwe.
+                </p>
+            </div>
+        </div>
+
+        <!-- Lesson 5 -->
+        <div class="mb-8 md:mb-12">
+            <div class="w-full bg-white border border-slate-200 rounded-2xl md:rounded-3xl px-5 py-5 md:px-8 md:py-7 text-left text-base md:text-xl font-semibold">
+                <span data-en="Lesson 5: How to Listen and Support Well" data-rw="Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza">
+                    Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza
+                </span>
+            </div>
+            <div id="lesson5" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+                <img src="lesson thumbnails/mental health lesson 5.jpg" alt="Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
+                <div class="voice-note">
+                    <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 5: How to Listen and Support Well" data-rw="Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza">Isomo rya 5: Uburyo bwo Gutega Amatwi no Gufasha Neza</button>
+                    <audio controls preload="none" data-topic="mental health" data-lesson="5"></audio>
+                </div>
+                <p class="mt-5 md:mt-6 text-slate-700 text-sm md:text-base"
+                   data-en="When you support someone with signs of mental illness, start by listening carefully. Choose a quiet, private place, welcome them kindly, give them enough time, and keep their story confidential. Good listening can help someone feel safe and understood."
+                   data-rw="Iyo ufashe umuntu ugaragaza ibimenyetso by'uburwayi bwo mu mutwe, tangira umutege amatwi neza. Muganirire ahantu hatuje kandi hihereye, umukirane urugwiro, umuhe umwanya uhagije kandi ugire ibanga ku byo akubwiye. Gutega amatwi neza bifasha umuntu kumva atekanye kandi yumviswe.">
+                    Iyo ufashe umuntu ugaragaza ibimenyetso by'uburwayi bwo mu mutwe, tangira umutege amatwi neza. Muganirire ahantu hatuje kandi hihereye, umukirane urugwiro, umuhe umwanya uhagije kandi ugire ibanga ku byo akubwiye. Gutega amatwi neza bifasha umuntu kumva atekanye kandi yumviswe.
+                </p>
+                <p class="mt-3 md:mt-4 text-slate-700 text-sm md:text-base"
+                   data-en="While listening, avoid rushing to give advice or solutions, avoid frightening or judging them, do not force them to discuss personal details they do not want to share, and do not distract yourself with your phone or by walking away. Early support and referral for proper care can help a person recover or improve and continue living a meaningful life."
+                   data-rw="Mu gihe umuteze amatwi, wirinde kwihutira gutanga inama n'ibisubizo, wirinde kumutera ubwoba cyangwa kumucira urubanza, ntumuhatire kuvuga ibyo adashaka kuvuga, kandi ntukarangare ukoresha telefoni cyangwa ngo usohoke hagati mu kiganiro. Ubufasha bw'ihuse no kumuhuza n'ubuvuzi bukwiye bishobora gutuma akira cyangwa akoroherwa agakomereza ubuzima bwe mu gaciro.">
+                    Mu gihe umuteze amatwi, wirinde kwihutira gutanga inama n'ibisubizo, wirinde kumutera ubwoba cyangwa kumucira urubanza, ntumuhatire kuvuga ibyo adashaka kuvuga, kandi ntukarangare ukoresha telefoni cyangwa ngo usohoke hagati mu kiganiro. Ubufasha bw'ihuse no kumuhuza n'ubuvuzi bukwiye bishobora gutuma akira cyangwa akoroherwa agakomereza ubuzima bwe mu gaciro.
+                </p>
+                <p class="mt-5 md:mt-6 font-medium text-blue-600 text-sm md:text-base"
+                   data-en="If you or someone you know needs urgent support, mental health services are available at health centers, hospitals, and through the 114 helpline."
+                   data-rw="Niba wowe cyangwa undi muntu mukeneye ubufasha bwihuse, serivisi z'ubuzima bwo mu mutwe ziboneka ku bigo nderabuzima, mu bitaro no kuri nimero 114.">
+                    Niba wowe cyangwa undi muntu mukeneye ubufasha bwihuse, serivisi z'ubuzima bwo mu mutwe ziboneka ku bigo nderabuzima, mu bitaro no kuri nimero 114.
+                </p>
+            </div>
+        </div>
+        <!-- Mental Health Screening Tool -->
+        <div class="mb-12">
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
+                    <h3 class="text-2xl font-bold mb-1" 
+                        data-en="Mental Health Screening" 
+                        data-rw="Isuzuma ry'Ubuzima bwo mu Mutwe">Isuzuma ry'Ubuzima bwo mu Mutwe</h3>
+                    <p class="text-blue-100 text-sm" 
+                       data-en="PHQ-A &amp; GAD-7 • Quick &amp; Confidential" 
+                       data-rw="PHQ-A &amp; GAD-7 • Byihuse kandi ni Ibanga">PHQ-A &amp; GAD-7 • Byihuse kandi ni Ibanga</p>
+                </div>
+
+                <div id="quiz-container" class="p-6 md:p-8">
+                    <!-- Selection View -->
+                    <div id="selection-view" class="flex flex-col md:flex-row gap-4 justify-center py-8">
+                        <button onclick="startQuiz('PHQA')" 
+                                class="flex-1 max-w-xs bg-white border-2 border-blue-600 text-blue-700 hover:bg-blue-50 px-8 py-6 rounded-3xl font-semibold transition-all active:scale-95">
+                            <span class="block text-lg" data-en="PHQ-A" data-rw="PHQ-A">PHQ-A</span>
+                            <span class="text-sm opacity-75 block mt-1" data-en="Depression Screening (Ages 12-18)" data-rw="Kwisuzuma Agahinda Gakabije">Kwisuzuma Agahinda Gakabije</span>
+                        </button>
+                        
+                        <button onclick="startQuiz('GAD7')" 
+                                class="flex-1 max-w-xs bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 px-8 py-6 rounded-3xl font-semibold transition-all active:scale-95">
+                            <span class="block text-lg" data-en="GAD-7" data-rw="GAD-7">GAD-7</span>
+                            <span class="text-sm opacity-75 block mt-1" data-en="Anxiety Screening" data-rw="Kwisuzuma Umuhangayiko">Kwisuzuma Umuhangayiko</span>
+                        </button>
+                    </div>
+
+                    <!-- Question View -->
+                    <div id="question-view" class="hidden">
+                        <div class="text-center mb-8">
+                            <p id="progress" class="text-blue-600 font-bold text-sm tracking-widest"></p>
+                            <h4 id="question-text" class="text-xl md:text-2xl font-semibold text-slate-800 mt-3 leading-tight px-2"></h4>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3 max-w-md mx-auto">
+                            <button onclick="recordAnswer(0)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="Not at all" data-rw="Hoya">Hoya</button>
+                            <button onclick="recordAnswer(1)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="Several days" data-rw="Iminsi mike">Iminsi mike</button>
+                            <button onclick="recordAnswer(2)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="More than half the days" data-rw="Igihe kirekire">Igihe kirekire</button>
+                            <button onclick="recordAnswer(3)" class="answer-btn bg-slate-100 hover:bg-blue-600 hover:text-white p-5 rounded-2xl text-left transition-all" data-en="Nearly every day" data-rw="Buri munsi">Buri munsi</button>
+                        </div>
+                    </div>
+
+                    <!-- Result View -->
+                    <div id="result-view" class="hidden text-center py-10">
+                        <div id="result-icon" class="text-6xl mb-6"></div>
+                        <h3 id="result-title" class="text-3xl font-bold mb-3"></h3>
+                        <p id="result-desc" class="text-slate-600 max-w-md mx-auto leading-relaxed"></p>
+                        
+                        <div id="emergency-action" class="hidden mt-8">
+                            <a href="tel:3530" 
+                               class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-lg transition"
+                               data-en="📞 Call 3530 Now!" data-rw="📞 Hamagara 3530 Ubu!">
+                                📞 Hamagara 3530 Ubu!
+                            </a>
+                        </div>
+
+                        <button onclick="resetQuiz()" 
+                                class="mt-10 text-blue-600 hover:text-blue-700 font-semibold underline"
+                                data-en="Start again" data-rw="Ongera utangire">
+                            Ongera utangire
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Back Button -->
+        <div class="text-center">
+            <a href="urungano.html"
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3.5 md:px-10 md:py-4 rounded-2xl transition text-sm md:text-base"
+               data-en="← Back to Home" data-rw="← Subira ku rupapuro rw'ibanze">
+                ← Subira ku rupapuro rw'ibanze
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-12">
+        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+                <div class="space-y-3 text-sm">
+                    <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+                    <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
+                    <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+                <div class="flex flex-col space-y-3 text-sm">
+                    <a href="chat.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                    <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+                    <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+                    <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
+                </div>
+            </div>
+            <div class="text-sm opacity-75">
+                <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
+                <div class="mt-4 space-y-2">
+                    <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+                    <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+                </div>
+                <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('open');
+        }
+
+        function toggleSection(section) {
+            const content = document.getElementById(section);
+            const icon = document.getElementById('icon' + section);
+            content.classList.toggle('open');
+            icon.textContent = content.classList.contains('open') ? '−' : '+';
+        }
+
+        function switchLanguage(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.body.setAttribute('data-lang', lang);
+
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+            });
+
+            updateVoiceNotes(lang);
+            updateQuizLanguage(lang);
+
+            document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        }
+
+        function updateVoiceNotes(lang) {
+            const languageName = lang === 'en' ? 'english' : 'kinyarwanda';
+            const sourceTypes = {
+                mpeg: 'audio/mpeg',
+                aac: 'audio/aac',
+                mp3: 'audio/mpeg'
+            };
+
+            document.querySelectorAll('audio[data-topic][data-lesson]').forEach(audio => {
+                const wasPlaying = !audio.paused;
+                const basePath = `voice notes/${audio.dataset.topic} lesson ${audio.dataset.lesson} ${languageName}`;
+
+                audio.innerHTML = '';
+                Object.entries(sourceTypes).forEach(([extension, type]) => {
+                    const source = document.createElement('source');
+                    source.src = `${basePath}.${extension}`;
+                    source.type = type;
+                    audio.appendChild(source);
+                });
+
+                audio.load();
+                if (wasPlaying) {
+                    audio.play().catch(() => {});
+                }
+            });
+        }
+
+        function playVoiceNote(button) {
+            const audio = button.closest('.voice-note').querySelector('audio');
+            document.querySelectorAll('audio[data-topic][data-lesson]').forEach(otherAudio => {
+                if (otherAudio !== audio) otherAudio.pause();
+            });
+            audio.play().catch(() => {});
+        }
+
+        window.onload = () => switchLanguage('rw');
+    </script>
+
+    <!-- Urungano AI Sign Language Avatar -->
+    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
+        <div class="relative">
+            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
+                <img src="mental health.gif"
+                     alt="Urungano AI Signing for Mental Health"
+                     class="w-full h-full object-cover"
+                     onerror="this.onerror=null; this.src='signs.gif';">
+            </div>
+
+
+        </div>
+
+        <!-- Hover Tooltip -->
+        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
+            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
+                <span data-en="Mental Health Sign Language Lesson" data-rw="Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso">Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso</span>
+            </p>
+            <p class="text-slate-600 text-xs leading-relaxed"
+               data-en="Lessons on mental health. They include understanding and caring for your mental health. There is also a mental health assessment."
+               data-rw="Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.">
+                Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.
+            </p>
+        </div>
+    </div>
+
+<script>
+    const questions = {
+        PHQA: [
+            { rw: "Kuba ufite agahinda, cyangwa kwiheba?", en: "Feeling sad, depressed, or irritable?" },
+            { rw: "Kuba utakishimira ibintu wahoze ukunda?", en: "Little interest or pleasure in doing things?" },
+            { rw: "Kugira ikibazo cyo gusinzira cyangwa gusinzira cyane?", en: "Trouble falling or staying asleep, or sleeping too much?" },
+            { rw: "Kuba wumva unaniwe cyangwa udafite imbaraga?", en: "Feeling tired or having little energy?" },
+            { rw: "Kuba utumva ushaka kurya cyangwa urya birenze urugero?", en: "Poor appetite or overeating?" },
+            { rw: "Kuba wumva utiyizeye cyangwa wumva uri ikigwari?", en: "Feeling bad about yourself — or that you are a failure?" },
+            { rw: "Kugira ikibazo cyo kwerekeza imitekerereze ku kintu kimwe?", en: "Trouble concentrating on things?" },
+            { rw: "Kugenda buhoro cyangwa kuvuga buhoro cyane?", en: "Moving or speaking so slowly that others could have noticed?" },
+            { rw: "Kugira ibitekerezo byo kwigirira nabi cyangwa kwiyambura ubuzima?", en: "Thoughts that you would be better off dead or of hurting yourself?" }
+        ],
+        GAD7: [
+            { rw: "Kuba wumva ufite ubwoba cyangwa uhangayitse cyane?", en: "Feeling nervous, anxious, or on edge?" },
+            { rw: "Kuba udashobora guhagarika kwibaza ibibazo?", en: "Not being able to stop or control worrying?" },
+            { rw: "Kuba uhangayikishwa n'ibintu bitandukanye?", en: "Worrying too much about different things?" },
+            { rw: "Kugira ikibazo cyo kuruhuka?", en: "Trouble relaxing?" },
+            { rw: "Kuba wumva ufite imihangayiko ituma udicara hamwe?", en: "Being so restless that it's hard to sit still?" },
+            { rw: "Kuba urakazwa n'ubusa cyangwa urasirwa vuba?", en: "Becoming easily annoyed or irritable?" },
+            { rw: "Kuba wumva hari ikintu kibi kigiye kubaho?", en: "Feeling afraid as if something awful might happen?" }
+        ]
+    };
+
+    let currentQuiz = '', currentStep = 0, score = 0, urgent = false;
+
+    function getCurrentLang() {
+        return document.documentElement.getAttribute('lang') || 'rw';
+    }
+
+    function startQuiz(type) {
+        currentQuiz = type;
+        currentStep = 0;
+        score = 0;
+        urgent = false;
+        document.getElementById('selection-view').classList.add('hidden');
+        document.getElementById('question-view').classList.remove('hidden');
+        updateQuestion();
+    }
+
+    function updateQuestion() {
+        const lang = getCurrentLang();
+        const qList = questions[currentQuiz];
+        const currentQ = qList[currentStep];
+        document.getElementById('progress').innerText = 
+            lang === 'en' 
+                ? `Question ${currentStep + 1} of ${qList.length}`
+                : `Ikibazo ${currentStep + 1} kuri ${qList.length}`;
+        document.getElementById('question-text').innerText = currentQ[lang];
+    }
+
+    function recordAnswer(points) {
+        score += points;
+        if (currentQuiz === 'PHQA' && currentStep === 8 && points > 0) urgent = true;
+
+        currentStep++;
+        if (currentStep < questions[currentQuiz].length) {
+            updateQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        const lang = getCurrentLang();
+        document.getElementById('question-view').classList.add('hidden');
+        document.getElementById('result-view').classList.remove('hidden');
+
+        let title, desc, icon = "🌟", severity = 'good';
+        
+        const resultTexts = {
+            good: {
+                rw: { title: "Umeze neza 🎉", desc: "Ibisubizo byanyu bigaragaza ko nta kibazo gikomeye ufite. Komeza kwita ku buzima bwawe!" },
+                en: { title: "You're doing well 🎉", desc: "Your results show no major concerns. Keep taking care of yourself!" }
+            },
+            moderate: {
+                rw: { title: "Ibimenyetso biringaniye ⚖️", desc: "Wumva ufite ibimenyetso biringaniye. Byaba byiza uganiriye n'umujyanama cyangwa inshuti wizeye." },
+                en: { title: "Moderate symptoms ⚖️", desc: "You may have moderate symptoms. Consider talking to a counselor or a trusted person." }
+            },
+            urgent: {
+                rw: { title: "Ukeneye Ubufasha bwihuse ⚠️", desc: "Isuzumwa ryerekanye ibimenyetso bikomeye. Turakwinginga guhamagara 3530 cyangwa ugane Isange One Stop Centre ikwegereye." },
+                en: { title: "Urgent Help Needed ⚠️", desc: "Your screening shows serious symptoms. We urge you to call 3530 or visit the nearest Isange One Stop Centre." }
+            }
+        };
+
+        if (score >= 15 || urgent) {
+            severity = 'urgent';
+            const t = resultTexts.urgent[lang];
+            title = t.title;
+            desc = t.desc;
+            icon = "🚨";
+            document.getElementById('emergency-action').classList.remove('hidden');
+        } else if (score >= 10) {
+            severity = 'moderate';
+            const t = resultTexts.moderate[lang];
+            title = t.title;
+            desc = t.desc;
+            icon = "⚖️";
+        } else {
+            const t = resultTexts.good[lang];
+            title = t.title;
+            desc = t.desc;
+            icon = "🌟";
+        }
+
+        document.getElementById('result-icon').innerText = icon;
+        document.getElementById('result-title').innerText = title;
+        document.getElementById('result-desc').innerText = desc;
+        window.dispatchEvent(new CustomEvent('urungano:quiz-result', { detail: { quizType: currentQuiz, score, severity } }));
+    }
+
+    function resetQuiz() {
+        document.getElementById('result-view').classList.add('hidden');
+        document.getElementById('emergency-action').classList.add('hidden');
+        document.getElementById('selection-view').classList.remove('hidden');
+    }
+
+    function updateQuizLanguage(lang) {
+        // If currently viewing a question, refresh the question text
+        if (currentQuiz && !document.getElementById('question-view').classList.contains('hidden')) {
+            updateQuestion();
+        }
+        // If currently viewing results, refresh the result text
+        if (!document.getElementById('result-view').classList.contains('hidden')) {
+            // Store current state and re-show results
+            const tempScore = score;
+            const tempUrgent = urgent;
+            showResults();
+        }
+    }
+</script>
+  <script type="module" src="institution-tracker.js"></script>
+</body>
+</html>

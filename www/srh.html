@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuzima Bw'Imyororokere - Urungano Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Poppins:wght@400;500;600&amp;display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Banner - exactly congruent with mental-health.html */
+        .hero-banner {
+            min-height: 260px;
+            height: 40vw;
+            max-height: 480px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.75));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        /* Language button - exactly congruent */
+        .lang-btn { transition: all 0.3s ease; }
+        .lang-btn.active {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
+        /* Accordion - always expanded (toggle removed) */
+        .accordion-content {
+            max-height: none;
+            overflow: visible;
+            transition: none;
+        }
+        .accordion-content.open { max-height: none; }
+
+        .voice-note {
+            margin-top: 1.25rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+        .voice-note-label {
+            width: fit-content;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            color: #db2777;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-align: left;
+        }
+        .voice-note audio {
+            width: 100%;
+        }
+
+        /* Mobile menu - exactly congruent */
+        #mobile-menu { display: none; }
+        #mobile-menu.open { display: flex; }
+
+        /* Urungano AI Sign Language Avatar - same design as home page */
+        #ai-avatar {
+            bottom: 1rem;
+            right: 1rem;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar { bottom: 2rem; right: 2rem; }
+        }
+        #ai-avatar .avatar-img-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
+        }
+        #ai-avatar .tooltip {
+            width: 220px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .tooltip { width: 288px; }
+        }
+
+        /* Calculator styles */
+        .ct-wrap {
+            padding: 20px 10px;
+        }
+        .ct-card {
+            background: #fff7fb;
+            border: 1px solid #fbcfe8;
+            border-radius: 28px;
+            box-shadow: 0 18px 36px rgba(219, 39, 119, 0.12);
+            overflow: hidden;
+        }
+        .ct-header {
+            background: linear-gradient(135deg, #f472b6, #db2777);
+            color: white;
+            text-align: center;
+            padding: 22px 20px;
+        }
+        .ct-header h3 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .ct-header p {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+        .ct-form {
+            padding: 26px 20px 20px;
+            display: grid;
+            gap: 18px;
+        }
+        .ct-input-group {
+            display: grid;
+            gap: 10px;
+        }
+        .ct-input-group label {
+            display: block;
+            text-align: center;
+            color: #be185d;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+        .ct-input {
+            width: 100%;
+            background: white;
+            border: 2px solid #f9a8d4;
+            border-radius: 0;
+            padding: 14px 16px;
+            font-size: 1rem;
+            color: #4a044e;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .ct-input:focus {
+            border-color: #db2777;
+            box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.12);
+        }
+        .ct-toggle-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 16px;
+            background: #fce7f3;
+            border: 1px solid #f9a8d4;
+            padding: 14px 16px;
+        }
+        .ct-toggle-text {
+            color: #be185d;
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .ct-switch {
+            position: relative;
+            width: 84px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+        .ct-switch-track {
+            width: 100%;
+            height: 100%;
+            background: #fbcfe8;
+            border-radius: 999px;
+            transition: background 0.25s ease;
+        }
+        .ct-switch-thumb {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 999px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: transform 0.25s ease;
+        }
+        #pregnant-mode:checked + .ct-toggle-label .ct-switch-track {
+            background: #22c55e;
+        }
+        #pregnant-mode:checked + .ct-toggle-label .ct-switch-thumb {
+            transform: translateX(50px);
+        }
+        .ct-btn {
+            width: 100%;
+            border: 0;
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: white;
+            padding: 15px 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .ct-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(219, 39, 119, 0.2);
+        }
+        .ct-error {
+            color: #dc2626;
+            text-align: center;
+            margin: 2px 0 0;
+            font-size: 0.92rem;
+            min-height: 22px;
+        }
+        .ct-results {
+            padding: 0 20px 20px;
+        }
+        .ct-results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .ct-result-card {
+            background: white;
+            border: 1px solid #f9a8d4;
+            border-radius: 18px;
+            padding: 16px;
+            text-align: center;
+        }
+        .ct-result-icon { font-size: 26px; margin-bottom: 8px; }
+        .ct-result-label {
+            color: #be185d;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .ct-result-value {
+            color: #4a044e;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+        .ct-tip {
+            margin-top: 14px;
+            background: #fff1f7;
+            border: 1px solid #fbcfe8;
+            border-radius: 18px;
+            padding: 14px 16px;
+            color: #9d174d;
+            font-size: 0.94rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .ct-disclaimer {
+            padding: 0 20px 22px;
+            color: #6b7280;
+            font-size: 0.76rem;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .ct-reset-btn {
+            width: 100%;
+            margin-top: 12px;
+            background: transparent;
+            color: #db2777;
+            border: 0;
+            font-weight: 700;
+            padding: 12px 0 4px;
+            cursor: pointer;
+        }
+        @media (min-width: 768px) {
+            .ct-form,
+            .ct-results,
+            .ct-disclaimer {
+                padding-left: 28px;
+                padding-right: 28px;
+            }
+            .ct-results-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        /* Lesson cards */
+        .lesson-card { transition: all 0.3s ease; }
+        .lesson-card:hover {
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.12);
+            transform: translateY(-2px);
+        }
+        .lesson-header { font-size: 1.1rem; }
+        .lesson-content {
+            border-top: 1px solid #f3e8ff;
+            background: #fdf4ff;
+        }
+        
+    </style>
+</head>
+<body class="bg-slate-50" data-lang="rw">
+
+    <!-- Navigation - EXACTLY congruent with mental-health.html (only active link changed) -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-5">
+            <div class="flex justify-between items-center gap-2">
+
+                <!-- Logo + Title -->
+                <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo"
+                         class="w-9 h-9 md:w-12 md:h-12 object-cover rounded-2xl flex-shrink-0">
+                    <h1 class="text-lg md:text-2xl font-bold text-blue-600 truncate">Urungano</h1>
+                </div>
+
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-1 bg-white rounded-3xl p-1 shadow flex-shrink-0">
+                    <button onclick="switchLanguage('rw')" id="btn-rw"
+                            class="lang-btn active px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en"
+                            class="lang-btn px-3 py-1.5 rounded-3xl text-xs md:px-5 md:py-2 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop nav links -->
+                <div class="hidden md:flex gap-6 text-sm font-medium items-center">
+                    <a href="urungano.html" class="hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                    <a href="srh.html" class="text-blue-600 font-semibold" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                                    
+                </div>
+                
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()"
+                        class="md:hidden bg-slate-100 text-slate-700 rounded-xl p-2 focus:outline-none flex-shrink-0" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-1 mt-3 md:hidden text-sm font-medium border-t border-slate-100 pt-3">
+                <a href="urungano.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+                <a href="srh.html" class="block py-2.5 px-2 rounded-xl text-blue-600 font-semibold bg-blue-50" data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="block py-2.5 px-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition" data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner - congruent design, SRH specific content & image -->
+    <div class="hero-banner">
+        <img src="SRH-banner.png" alt="Ubuzima Bw'Imyororokere">
+        <div class="banner-overlay">
+            <div class="px-4">
+                <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-2 md:mb-4"
+                    data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">
+                    Ubuzima Bw' Imyororokere
+                </h1>
+                <p class="text-white text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto"
+                   data-en="Safe, trusted, youth-friendly information on sexual and reproductive health"
+                   data-rw="Amakuru yizewe kandi yizewe ku buzima bw'imyororokere n'ubuzima bw'urubyiruko">
+                    Amakuru yizewe kandi yizewe ku buzima bw'imyororokere n'ubuzima bw'urubyiruko
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-3 py-6 md:px-6 md:py-12">
+
+        <!-- Page heading -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 id="page-title" class="text-2xl md:text-4xl font-bold text-slate-800"
+                data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">
+                Ubuzima Bw' Imyororokere
+            </h2>
+            <p id="page-subtitle" class="text-slate-600 text-base md:text-lg mt-2 md:mt-3"
+               data-en="Learn, understand, and take care of your sexual and reproductive health"
+               data-rw="Menya, gusobanukirwa no kwita ku buzima bwawe bw'imyororokere">
+                Menya, gusobanukirwa no kwita ku buzima bwawe bw'imyororokere
+            </p>
+        </div>
+
+        <!-- ALL LESSONS (6 complete lessons with full bilingual information) -->
+        <div class="space-y-6">
+
+            <!-- Lesson 1 -->
+            <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-seedling text-emerald-500"></i>
+                        <span data-en="Lesson 1: Understanding Menstruation" data-rw="Isomo 1: Gusobanukirwa Imihango">Isomo 1: Gusobanukirwa Imihango</span>
+                    </span>
+                </div>
+                <div id="lesson1" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
+                    <img src="lesson thumbnails/srh lesson 1.jpg" alt="Isomo 1: Gusobanukirwa Imihango" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
+                    <div class="voice-note">
+                        <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 1: Understanding Menstruation" data-rw="Isomo 1: Gusobanukirwa Imihango">Isomo 1: Gusobanukirwa Imihango</button>
+                        <audio controls preload="none" data-topic="srh" data-lesson="1"></audio>
+                    </div>
+                    <div data-en="Menstruation is a normal sign that a girl's body is growing well and moving from childhood toward adulthood. It happens when the uterus had prepared for a possible pregnancy, but no pregnancy occurs, so the lining breaks down and comes out as blood through the vagina. Menstrual bleeding usually lasts about 3 to 5 days, although for some girls or women it may be shorter or longer. If bleeding goes beyond 7 days, it is important to seek help from a health worker." data-rw="Imihango ni ikimenyetso gisanzwe kigaragaza ko umubiri w'umukobwa uri gukura neza kandi uva mu bwana ujya mu bukuru. Ibaho iyo nyababyeyi iba yakoze imyiteguro yo kwakira inda ariko ntihaboneke gusama, bityo icyo cyari cyateguwe kigasenuka kikava mu mubiri mu ishusho y'amaraso anyura mu gitsina. Ubusanzwe imihango imara hagati y'iminsi 3 na 5, nubwo hari abakobwa cyangwa abagore bayigira igihe gito cyangwa kirekire kurushaho. Iyo imihango irengeje iminsi 7, ni byiza kwihutira kugana umukozi w'ubuzima.">
+                        Imihango ni ikimenyetso gisanzwe kigaragaza ko umubiri w'umukobwa uri gukura neza kandi uva mu bwana ujya mu bukuru. Ibaho iyo nyababyeyi iba yakoze imyiteguro yo kwakira inda ariko ntihaboneke gusama, bityo icyo cyari cyateguwe kigasenuka kikava mu mubiri mu ishusho y'amaraso anyura mu gitsina. Ubusanzwe imihango imara hagati y'iminsi 3 na 5, nubwo hari abakobwa cyangwa abagore bayigira igihe gito cyangwa kirekire kurushaho. Iyo imihango irengeje iminsi 7, ni byiza kwihutira kugana umukozi w'ubuzima.
+                    </div>
+                    <div class="mt-4 text-sm text-emerald-600 font-medium" data-en="Key facts: Menstruation is not a disease. Some girls start as early as age 9 or 10, others later around age 16. Tracking your cycle helps you prepare and understand your body. A girl who has started menstruating can become pregnant if she has unprotected sex" data-rw="Ibintu by'ingenzi: Imihango si uburwayi. Hari abakobwa bayitangira ku myaka 9 cyangwa 10, abandi bakayibona nyuma nko ku myaka 16. Gukurikira ukwezi kwawe bigufasha kwitegura no gusobanukirwa umubiri wawe. Umukobwa watangiye kujya mu mihango ashobora gusama akoze imibonano mpuzabitsina idakingiye">Ibintu by'ingenzi: Imihango si uburwayi. Hari abakobwa bayitangira ku myaka 9 cyangwa 10, abandi bakayibona nyuma nko ku myaka 16. Gukurikira ukwezi kwawe bigufasha kwitegura no gusobanukirwa umubiri wawe. Umukobwa watangiye kujya mu mihango ashobora gusama akoze imibonano mpuzabitsina idakingiye</div>
+                </div>
+            </div>
+
+            <!-- Lesson 2 -->
+            <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-tint text-pink-500"></i>
+                        <span data-en="Lesson 2: Signs Before Menstruation" data-rw="Isomo 2: Ibimenyetso Bibanziriza Imihango">Isomo 2: Ibimenyetso Bibanziriza Imihango</span>
+                    </span>
+                </div>
+                <div id="lesson2" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
+                    <div class="voice-note">
+                        <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 2: Signs Before Menstruation" data-rw="Isomo 2: Ibimenyetso Bibanziriza Imihango">Isomo 2: Ibimenyetso Bibanziriza Imihango</button>
+                        <audio controls preload="none" data-topic="srh" data-lesson="2"></audio>
+                    </div>
+                    <div data-en="Many girls and women notice body changes and emotional changes before their period starts. These signs can begin one or two weeks before menstruation and may continue for a few days after bleeding begins. A person may experience headaches, lower abdominal pain, tender or swollen breasts, tiredness, bloating, acne, appetite changes, sadness, irritability, trouble sleeping, or changes in sexual feelings. These signs are common and do not usually mean illness unless they become unusually severe and disturb daily life." data-rw="Abakobwa n'abagore benshi bagira impinduka z'umubiri n'iz'amarangamutima mbere y'uko imihango itangira. Ibi bimenyetso bishobora gutangira icyumweru kimwe cyangwa bibiri mbere y'imihango, bikanakomeza mu minsi mike nyuma y'uko itangiye. Umuntu ashobora kugira umutwe, kubabara mu kiziba cy'inda, kubyimba cyangwa kuribwa amabere, umunaniro, gutura umubi, ibiheri, impinduka mu mirire, agahinda, kurakara, kubura ibitotsi cyangwa impinduka mu byiyumviro bijyanye n'imibonano mpuzabitsina. Ibi bimenyetso ni ibisanzwe kandi akenshi ntibisobanura uburwayi keretse bibaye bikabije bikabangamira ubuzima bwa buri munsi.">
+                        Abakobwa n'abagore benshi bagira impinduka z'umubiri n'iz'amarangamutima mbere y'uko imihango itangira. Ibi bimenyetso bishobora gutangira icyumweru kimwe cyangwa bibiri mbere y'imihango, bikanakomeza mu minsi mike nyuma y'uko itangiye. Umuntu ashobora kugira umutwe, kubabara mu kiziba cy'inda, kubyimba cyangwa kuribwa amabere, umunaniro, gutura umubi, ibiheri, impinduka mu mirire, agahinda, kurakara, kubura ibitotsi cyangwa impinduka mu byiyumviro bijyanye n'imibonano mpuzabitsina. Ibi bimenyetso ni ibisanzwe kandi akenshi ntibisobanura uburwayi keretse bibaye bikabije bikabangamira ubuzima bwa buri munsi.
+                    </div>
+                    <div class="mt-4 text-sm text-pink-600 font-medium" data-en="Key facts:Symptoms differ from one person to another. Light exercise, nutritious food, rest, and stress reduction can help. If symptoms become extreme or disrupt normal life, visit a health provider" data-rw="Ibintu by'ingenzi: Ibimenyetso biratandukana bitewe n'umuntu. Imyitozo yoroheje, indyo yuzuye, kuruhuka no kugabanya stress birafasha. Niba ibi bimenyetso bikabije cyangwa bikabangamira ubuzima bwawe, jya kwa muganga">Ibintu by'ingenzi:Ibimenyetso biratandukana bitewe n'umuntu. Imyitozo yoroheje, indyo yuzuye, kuruhuka no kugabanya stress birafasha. Niba ibi bimenyetso bikabije cyangwa bikabangamira ubuzima bwawe, jya kwa muganga</div>
+                </div>
+            </div>
+
+            <!-- Lesson 3 -->
+            <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-shield-alt text-amber-500"></i>
+                        <span data-en="Lesson 3: Managing Menstrual Pain" data-rw="Isomo 3: Kugabanya Ububabare bwo mu Mihango">Isomo 3: Kugabanya Ububabare bwo mu Mihango</span>
+                    </span>
+                </div>
+                <div id="lesson3" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
+                    <img src="lesson thumbnails/srh lesson 3.jpg" alt="Isomo 3: Kugabanya Ububabare bwo mu Mihango" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
+                    <div class="voice-note">
+                        <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 3: Managing Menstrual Pain" data-rw="Isomo 3: Kugabanya Ububabare bwo mu Mihango">Isomo 3: Kugabanya Ububabare bwo mu Mihango</button>
+                        <audio controls preload="none" data-topic="srh" data-lesson="3"></audio>
+                    </div>
+                    <div data-en="Pain during menstruation can be normal, but if it becomes so severe that it stops you from doing your daily responsibilities, you should seek medical help. Simple ways to reduce pain include placing safe warmth on the lower abdomen, bathing with warm water, doing gentle exercise such as walking or stretching, drinking enough water, eating balanced meals, resting well, and practicing calming activities like deep breathing or meditation. A gentle massage around the lower back or lower abdomen may also help some people." data-rw="Kubabara mu gihe cy'imihango bishobora kuba ibisanzwe, ariko iyo ububabare bukabije kugeza aho butuma udakora inshingano zawe za buri munsi, ni ngombwa gushaka ubufasha kwa muganga. Uburyo bworoshye bwo kugabanya ububabare harimo gushyira ubushyuhe butekanye ku kiziba cy'inda, koga amazi ashyushye, gukora imyitozo yoroheje nko kugenda cyangwa kwiyorora, kunywa amazi ahagije, kurya indyo yuzuye, kuruhuka bihagije no gukora ibikorwa bituma utuza nko guhumeka cyane cyangwa meditation. Hari n'abafashwa no gukanda buhoro ahagana mu mugongo wo hasi cyangwa ku kiziba cy'inda.">
+                        Kubabara mu gihe cy'imihango bishobora kuba ibisanzwe, ariko iyo ububabare bukabije kugeza aho butuma udakora inshingano zawe za buri munsi, ni ngombwa gushaka ubufasha kwa muganga. Uburyo bworoshye bwo kugabanya ububabare harimo gushyira ubushyuhe butekanye ku kiziba cy'inda, koga amazi ashyushye, gukora imyitozo yoroheje nko kugenda cyangwa kwiyorora, kunywa amazi ahagije, kurya indyo yuzuye, kuruhuka bihagije no gukora ibikorwa bituma utuza nko guhumeka cyane cyangwa meditation. Hari n'abafashwa no gukanda buhoro ahagana mu mugongo wo hasi cyangwa ku kiziba cy'inda.
+                    </div>
+                    <div class="mt-4 text-sm text-amber-600 font-medium" data-en="Key facts: Heavy caffeine, too much sugar, or salty drinks may worsen discomfort for some people. There is no single solution that works for everyone. If pain becomes too strong, do not stay silent; ask for help early" data-rw="Ibintu by'ingenzi:Ikawa nyinshi, isukari nyinshi cyangwa ibinyobwa birimo umunyu bishobora kongera uburibwe ku bantu bamwe. Nta buryo bumwe bukorera buri wese. Niba ububabare bukabije, ntuceceke; saba ubufasha hakiri kare">Ibintu by'ingenzi:Ikawa nyinshi, isukari nyinshi cyangwa ibinyobwa birimo umunyu bishobora kongera uburibwe ku bantu bamwe. Nta buryo bumwe bukorera buri wese. Niba ububabare bukabije, ntuceceke; saba ubufasha hakiri kare</div>
+                </div>
+            </div>
+
+            <!-- Lesson 4 -->
+            <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-virus text-red-500"></i>
+                        <span data-en="Lesson 4: Fertility and the Menstrual Cycle" data-rw="Isomo 4: Uburumbuke n'Ukwezi k'Umugore">Isomo 4: Uburumbuke n'Ukwezi k'Umugore</span>
+                    </span>
+                </div>
+                <div id="lesson4" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
+                    <div class="voice-note">
+                        <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 4: Fertility and the Menstrual Cycle" data-rw="Isomo 4: Uburumbuke n'Ukwezi k'Umugore">Isomo 4: Uburumbuke n'Ukwezi k'Umugore</button>
+                        <audio controls preload="none" data-topic="srh" data-lesson="4"></audio>
+                    </div>
+                    <div data-en="A girl or woman has the highest chance of becoming pregnant during the fertile window. This is the time when an egg is released from the ovary and can meet sperm. In many menstrual cycles, ovulation happens around 14 days before the next period, although cycles are not the same for everyone. For people with regular cycles, the fertile window is often estimated at about 7 days. There is no completely safe day from pregnancy if unprotected sex happens, because bodies and cycles differ from person to person." data-rw="Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama mu gihe cy'uburumbuke. Icyo ni igihe intangangore iba irekuwe iva mu ibere ry'intanga kandi ishobora guhura n'intangangabo. Mu kwezi kwa benshi, kurekurwa kw'igi kuba hafi y'iminsi 14 mbere y'imihango ikurikira, nubwo ukwezi kudasa ku bantu bose. Ku bafite ukwezi kudahindagurika, igihe cy'uburumbuke gikunze kubarwa nk'iminsi igera kuri 7. Nta munsi ushobora gufatwa nk'umutekano wuzuye ku kutazisama igihe habaye imibonano mpuzabitsina idakingiye, kuko imibiri n'ukwezi bitandukana.">
+                        Umukobwa cyangwa umugore aba afite amahirwe menshi yo gusama mu gihe cy'uburumbuke. Icyo ni igihe intangangore iba irekuwe iva mu ibere ry'intanga kandi ishobora guhura n'intangangabo. Mu kwezi kwa benshi, kurekurwa kw'igi kuba hafi y'iminsi 14 mbere y'imihango ikurikira, nubwo ukwezi kudasa ku bantu bose. Ku bafite ukwezi kudahindagurika, igihe cy'uburumbuke gikunze kubarwa nk'iminsi igera kuri 7. Nta munsi ushobora gufatwa nk'umutekano wuzuye ku kutazisama igihe habaye imibonano mpuzabitsina idakingiye, kuko imibiri n'ukwezi bitandukana.
+                    </div>
+                    <div class="mt-4 text-sm text-red-600 font-medium" data-en="Key facts:Fertility depends on both the egg and sperm. Ovulation timing can shift, especially in irregular cycles. Tracking your periods helps you better understand your fertile days" data-rw="Ibintu by'ingenzi:Gusama bisaba uruhare rw'intangangore n'intangangabo. Igihe cyo kurekura igi gishobora guhinduka cyane cyane ku bafite ukwezi guhindagurika. Gukurikira imihango yawe bigufasha gusobanukirwa neza iminsi y'uburumbuke">Ibintu by'ingenzi:Gusama bisaba uruhare rw'intangangore n'intangangabo. Igihe cyo kurekura igi gishobora guhinduka cyane cyane ku bafite ukwezi guhindagurika. Gukurikira imihango yawe bigufasha gusobanukirwa neza iminsi y'uburumbuke</div>
+                </div>
+            </div>
+
+            <!-- Lesson 5 -->
+            <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-heart text-rose-500"></i>
+                        <span data-en="Lesson 5: HIV Basics and Transmission" data-rw="Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura">Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura</span>
+                    </span>
+                </div>
+                <div id="lesson5" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
+                    <img src="lesson thumbnails/srh lesson 5.jpg" alt="Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
+                    <div class="voice-note">
+                        <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 5: HIV Basics and Transmission" data-rw="Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura">Isomo 5: Iby'Ibanze kuri VIH n'Uko Yandura</button>
+                        <audio controls preload="none" data-topic="srh" data-lesson="5"></audio>
+                    </div>
+                    <div data-en="HIV is the virus that attacks the body's defense cells, especially CD4 cells, and weakens the immune system. If it is not treated, it can lead to AIDS. HIV can be transmitted through unprotected sex, sharing sharp objects that have infected blood, receiving infected blood, or from a mother to her baby during pregnancy, birth, or breastfeeding. HIV is not spread by greeting, sharing food, or casual contact." data-rw="VIH ni virusi yibasira uturemangingo turinda umubiri cyane cyane utwa CD4, igatuma ubudahangarwa bw'umubiri bugabanuka. Iyo itavuwe ishobora gutera SIDA. VIH ishobora kwandurira mu mibonano mpuzabitsina idakingiye, gusangira ibikoresho bikomeretsa byanduye amaraso, kwakira amaraso yanduye, cyangwa ikava ku mubyeyi ikajya ku mwana igihe atwite, abyara cyangwa yonsa. VIH ntandurira mu gusuhuzanya, gusangira amafunguro cyangwa mu busabane busanzwe.">
+                        VIH ni virusi yibasira uturemangingo turinda umubiri cyane cyane utwa CD4, igatuma ubudahangarwa bw'umubiri bugabanuka. Iyo itavuwe ishobora gutera SIDA. VIH ishobora kwandurira mu mibonano mpuzabitsina idakingiye, gusangira ibikoresho bikomeretsa byanduye amaraso, kwakira amaraso yanduye, cyangwa ikava ku mubyeyi ikajya ku mwana igihe atwite, abyara cyangwa yonsa. VIH ntandurira mu gusuhuzanya, gusangira amafunguro cyangwa mu busabane busanzwe.
+                    </div>
+                    <div class="mt-4 text-sm text-rose-600 font-medium" data-en="Key facts:HIV can seriously weaken the body if untreated. Common effects include frequent illness, tiredness, weight loss, persistent fever, and skin problems. Correct information helps young people protect themselves" data-rw="Ibintu by'ingenzi: Iyo itavuwe, VIH ishobora guca intege umubiri cyane. Ingaruka zayo zishobora kuba indwara zihoraho, umunaniro, kugabanuka ibiro, umuriro no kugira ibibazo by'uruhu. Amakuru y'ukuri afasha urubyiruko kwirinda">Ibintu by'ingenzi:Iyo itavuwe, VIH ishobora guca intege umubiri cyane. Ingaruka zayo zishobora kuba indwara zihoraho, umunaniro, kugabanuka ibiro, umuriro no kugira ibibazo by'uruhu. Amakuru y'ukuri afasha urubyiruko kwirinda</div>
+                </div>
+            </div>
+
+            <!-- Lesson 6 -->
+            <div class="lesson-card bg-white border border-slate-200 rounded-3xl overflow-hidden">
+                <div class="w-full px-6 py-6 text-left text-lg font-semibold">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-baby text-purple-500"></i>
+                        <span data-en="Lesson 6: HIV Prevention and Youth Guidance" data-rw="Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko">Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko</span>
+                    </span>
+                </div>
+                <div id="lesson6" class="accordion-content px-6 pb-6 text-slate-700 leading-relaxed">
+                    <img src="lesson thumbnails/srh lesson 6.jpg" alt="Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
+                    <div class="voice-note">
+                        <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 6: HIV Prevention and Youth Guidance" data-rw="Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko">Isomo 6: Kwirinda VIH n'Inama ku Rubyiruko</button>
+                        <audio controls preload="none" data-topic="srh" data-lesson="6"></audio>
+                    </div>
+                    <div data-en="Young people can protect themselves from HIV by choosing safer behaviors such as abstinence, faithfulness, avoiding unprotected sex, using condoms correctly, not sharing sharp objects, and getting tested regularly to know their status. It is also important to avoid harmful peer pressure, focus on education and positive goals, seek trusted information, and refuse stigma or discrimination against people living with HIV. HIV prevention starts with informed and respectful choices." data-rw="Urubyiruko rwakwihagararaho mu kwirinda VIH ruhitamo imyitwarire irinda ubuzima nko kwifata, ubudahemuka, kwirinda imibonano mpuzabitsina idakingiye, gukoresha agakingirizo neza, kutagabana ibikoresho bikomeretsa no kwipimisha kenshi kugira ngo rumenye uko ruhagaze. Ni ingenzi kandi kwirinda igitutu cy'urungano, kwibanda ku masomo n'intego nziza, gushaka amakuru yizewe no kwanga ivangura rikorerwa ababana na VIH. Kwirinda VIH bitangirira ku byemezo bifite amakuru no kubaha ubuzima bwawe n'ubw'abandi.">
+                        Urubyiruko rwakwihagararaho mu kwirinda VIH ruhitamo imyitwarire irinda ubuzima nko kwifata, ubudahemuka, kwirinda imibonano mpuzabitsina idakingiye, gukoresha agakingirizo neza, kutagabana ibikoresho bikomeretsa no kwipimisha kenshi kugira ngo rumenye uko ruhagaze. Ni ingenzi kandi kwirinda igitutu cy'urungano, kwibanda ku masomo n'intego nziza, gushaka amakuru yizewe no kwanga ivangura rikorerwa ababana na VIH. Kwirinda VIH bitangirira ku byemezo bifite amakuru no kubaha ubuzima bwawe n'ubw'abandi.
+                    </div>
+                    <div class="mt-4 text-sm text-purple-600 font-medium" data-en="Key facts:Regular HIV testing helps you know your health status early. Do not let peer pressure push you into risky choices. Young people should seek trusted experts when they need accurate sexual and reproductive health information" data-rw="Ibintu by'ingenzi:Kwipimisha VIH kenshi bigufasha kumenya uko ubuzima bwawe buhagaze hakiri kare. Ntukemere ko igitutu cy'urungano kigushyira mu byemezo bishobora kukugirira nabi. Urubyiruko rukwiye kugana abizewe n'inzobere igihe rukeneye amakuru nyayo ku buzima bw'imyororokere">Ibintu by'ingenzi:Kwipimisha VIH kenshi bigufasha kumenya uko ubuzima bwawe buhagaze hakiri kare. Ntukemere ko igitutu cy'urungano kigushyira mu byemezo bishobora kukugirira nabi. Urubyiruko rukwiye kugana abizewe n'inzobere igihe rukeneye amakuru nyayo ku buzima bw'imyororokere</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculator Section (full language switching + original logic preserved) -->
+        <div class="ct-wrap mt-16">
+
+            <!-- Period reminder (visible only when logged in) -->
+            <div id="period-reminder" class="hidden mb-6 mx-auto max-w-2xl rounded-2xl bg-blue-50 border border-blue-100 px-5 py-4 text-slate-700">
+            </div>
+            <div class="ct-card max-w-2xl mx-auto">
+                <div class="ct-header">
+                    <h3 data-en="Menstrual Cycle Calculator" data-rw="Bara ukwezi kwawe">Bara ukwezi kwawe</h3>
+                    <p data-en="Use your dates to estimate your next period, fertile days, and due date" data-rw="Koresha amatariki yawe ubare igihe cy'imihango ikurikira, iminsi y'uburumbuke n'itariki y'igihe">Koresha amatariki yawe ubare igihe cy'imihango ikurikira, iminsi y'uburumbuke n'itariki y'igihe</p>
+                </div>
+
+                <div class="ct-form">
+                    <div class="ct-input-group">
+                        <label for="lmp" data-en="Date your last period started" data-rw="Itariki ya nyuma uherukira kubona imihango">Itariki ya nyuma uherukira kubona imihango</label>
+                        <input type="date" id="lmp" class="ct-input" value="2026-04-01">
+                    </div>
+
+                    <div class="ct-input-group">
+                        <label for="cycle-length" data-en="How many days your cycle lasts" data-rw="Iminsi ukwezi kwawe kumara.">Iminsi ukwezi kwawe kumara</label>
+                        <input type="number" id="cycle-length" class="ct-input" value="28" min="21" max="35">
+                    </div>
+
+                    <div class="ct-toggle-row">
+                        <span class="ct-toggle-text" data-en="My cycle is irregular" data-rw="Imihango yange irahindagurika">Imihango yange irahindagurika</span>
+                        <input type="checkbox" id="pregnant-mode" class="hidden" onchange="togglePregnantMode()">
+                        <label for="pregnant-mode" class="ct-toggle-label cursor-pointer">
+                            <span class="ct-switch">
+                                <span class="ct-switch-track"></span>
+                                <span class="ct-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button onclick="calculateCycle()" class="ct-btn">
+                        <span data-en="Calculate Your Period Now" data-rw="Bara imihango yawe ubu">Bara imihango yawe ubu</span>
+                    </button>
+
+                    <div id="calc-error" class="ct-error"></div>
+                </div>
+
+                <div id="results" class="ct-results hidden">
+                    <div class="ct-results-grid">
+                        <div class="ct-result-card">
+                            <i class="fas fa-calendar-day ct-result-icon text-pink-500"></i>
+                            <div class="ct-result-label" data-en="Next Period" data-rw="Imihango ikurikira">Imihango ikurikira</div>
+                            <div id="next-period" class="ct-result-value">?</div>
+                        </div>
+                        <div class="ct-result-card">
+                            <i class="fas fa-egg ct-result-icon text-amber-500"></i>
+                            <div class="ct-result-label" data-en="Fertile Window" data-rw="Igihe cy'uburumbuke">Igihe cy'uburumbuke</div>
+                            <div id="fertile-window" class="ct-result-value">?</div>
+                        </div>
+                        <div class="ct-result-card">
+                            <i class="fas fa-baby ct-result-icon text-purple-500"></i>
+                            <div class="ct-result-label" data-en="Estimated Due Date" data-rw="Itariki y'igihe">Itariki y'igihe</div>
+                            <div id="due-date" class="ct-result-value">?</div>
+                        </div>
+                    </div>
+
+                    <div id="calc-tip" class="ct-tip">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <span id="tip-text" data-en="Remember: This is an estimate. Always consult a health professional for personal advice." data-rw="Icyo wibuka: Iki ni igisubizo gisanzwe. Vugana n'umukozi w'ubuzima kugira inama yawe bwite.">
+                            Icyo wibuka: Iki ni igisubizo gisanzwe. Vugana n'umukozi w'ubuzima kugira inama yawe bwite.
+                        </span>
+                    </div>
+
+                    <button onclick="resetCalculator()" class="ct-reset-btn">
+                        <span data-en="Calculate Again" data-rw="Bara nanone">Bara nanone</span>
+                    </button>
+                </div>
+
+                <div class="ct-disclaimer">
+                    <span data-en="This tool is for information only. It is not a substitute for professional medical advice." data-rw="Iki gikoresho ni icyo kumenya gusa. Ntigikurikiza inama y'umuganga.">
+                        Iki gikoresho ni icyo kumenya gusa. Ntigikurikiza inama y'umuganga.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer - congruent with mental-health.html style (emergency helplines + links) -->
+    <footer class="bg-slate-900 text-white py-12">
+        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+                <div class="space-y-3 text-sm">
+                    <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+                    <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
+                    <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+                <div class="flex flex-col space-y-3 text-sm">
+                    <a href="chat.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                    <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+                    <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+                    <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
+                </div>
+            </div>
+            <div class="text-sm opacity-75">
+                <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
+                <div class="mt-4 space-y-2">
+                    <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+                    <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+                </div>
+                <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tailwind script already loaded in head
+
+        // ===================== AUTH + FIRESTORE (dynamic imports to keep calculator non-broken) =====================
+        // (Auth+Firestore initialization is defined later in the file; keep calculator JS functional)
+
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+            authDomain: "urungano-chat-50d62.firebaseapp.com",
+            projectId: "urungano-chat-50d62",
+            storageBucket: "urungano-chat-50d62.firebasestorage.app",
+            messagingSenderId: "730372170670",
+            appId: "1:730372170670:web:91300da03f18f488afde3f"
+        };
+
+        // Import Firebase modules (needed for initializeApp/getAuth/getFirestore)
+        // No top-level await: initialize inside IIFE.
+        let auth;
+        let db;
+
+        // Promise that resolves once Firebase Auth + Firestore are fully initialized,
+        // and Firestore modular functions are available.
+        const firestoreExportsReady = (async () => {
+            const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+            const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+            const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+
+            const appInstance = appMod.initializeApp(firebaseConfig);
+            auth = authMod.getAuth(appInstance);
+            db = fsMod.getFirestore(appInstance);
+
+            return {
+                getDoc: fsMod.getDoc,
+                doc: fsMod.doc,
+                setDoc: fsMod.setDoc,
+                serverTimestamp: fsMod.serverTimestamp
+            };
+        })();
+
+
+        let currentUser = null;
+        let currentUserProfile = null;
+
+
+        // Ensure the header button always works even if Firebase init fails
+        function goToAuth() {
+            try { window.location.href = 'auth.html'; } catch (e) { console.log('goToAuth failed', e); }
+        }
+
+
+        // Used by the header: onclick="logout()"
+        // Ensures SRH matches urungano.html behavior (button toggles onAuthStateChanged)
+window.logout = async () => {
+            try {
+                const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+                await authMod.signOut(auth);
+            } catch (e) {
+                console.log('Logout failed', e);
+            }
+        };
+
+
+        async function ensureUserProfile(user) {
+            const fs = await firestoreExportsReady;
+            const snap = await fs.getDoc(fs.doc(db, 'users', user.uid));
+            if (!snap.exists()) {
+                await fs.setDoc(fs.doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    email: user.email || '',
+                    username: user.displayName || user.email?.split('@')[0] || 'User',
+                    createdAt: fs.serverTimestamp()
+                }, { merge: true });
+            }
+        }
+
+        function setAuthUI({ loggedIn, username = '' }) {
+            const loginBtn = document.getElementById('login-btn');
+            const loginText = document.getElementById('login-btn-text');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (!loginBtn || !loginText || !logoutBtn) return;
+
+            if (loggedIn) {
+                console.log('[SRH] setAuthUI loggedIn=true username=', username);
+                loginText.textContent = username || (document.body.getAttribute('data-lang') === 'en' ? 'Account' : 'Konti');
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-flex';
+            } else {
+                loginText.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Login' : 'Kwinjira';
+                loginBtn.style.display = 'inline-flex';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        // ===================== PERIOD TRACKING =====================
+        const PERIOD_DOC = 'periods'; // top-level collection under users/{uid}/periods/{doc}
+        let savedPeriod = null;
+        let authReady = false;
+
+        function getLang() {
+            return document.body.getAttribute('data-lang') === 'en' ? 'en' : 'rw';
+        }
+
+        function formatDate(date) {
+            try { return date.toLocaleDateString('en-GB'); } catch { return ''; }
+        }
+
+        function getCycleStage({ lmpISO, cycleLength }) {
+            const lmp = new Date(lmpISO);
+            if (Number.isNaN(lmp.getTime())) return null;
+
+            const today = new Date();
+            const msPerDay = 24 * 60 * 60 * 1000;
+            const dayIndex = Math.floor((today.setHours(0,0,0,0) - lmp.setHours(0,0,0,0)) / msPerDay);
+
+            // Approx: fertile window days 10-16 (inclusive) from LMP, period phase day 0-4
+            // This matches existing calculator logic (fertile ~10-16)
+            const fertileStart = 10;
+            const fertileEnd = 16;
+
+            if (dayIndex < 0) return { labelKey: 'upcoming', dayIndex };
+
+            // Normalize cycle length to day within cycle
+            const within = ((dayIndex % cycleLength) + cycleLength) % cycleLength;
+
+            if (within >= 0 && within <= 4) return { labelKey: 'menstruation', dayIndex: within };
+            if (within >= fertileStart && within <= fertileEnd) return { labelKey: 'fertile', dayIndex: within };
+            if (within > fertileEnd && within <=  cycleLength - 1) return { labelKey: 'luteal', dayIndex: within };
+
+            return { labelKey: 'unknown', dayIndex: within };
+        }
+
+        function stageText(stage, lang) {
+            const copy = {
+                en: {
+                    menstruation: 'You are in your period phase.',
+                    fertile: 'You are in your fertile window.',
+                    luteal: 'You are in the post-fertile (luteal) phase.',
+                    upcoming: 'Your next cycle is coming soon.',
+                    unknown: 'Cycle stage: unavailable.'
+                },
+                rw: {
+                    menstruation: 'Uri mu gihe cy’imihango.',
+                    fertile: 'Uri mu gihe cy’uburumbuke.',
+                    luteal: 'Uri mu gihe gikurikira (luteal).',
+                    upcoming: 'Ukwezi kwawe kwegereje.',
+                    unknown: 'Icyiciro cy’ukwezi kirabura.'
+                }
+            };
+            return (copy[lang][stage] || copy[lang].unknown);
+        }
+
+        async function loadSavedPeriod() {
+            if (!currentUser) return;
+            const fs = await firestoreExportsReady;
+            const docRef = fs.doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
+            const snap = await fs.getDoc(docRef);
+            if (snap.exists()) {
+                savedPeriod = snap.data();
+            } else {
+                savedPeriod = null;
+            }
+        }
+
+        async function savePeriodFromCalculator({ lmpISO, cycleLength }) {
+            // Guard against script execution order issues (currentUser may not be initialized yet)
+            try {
+                if (typeof currentUser === 'undefined' || !currentUser) return;
+            } catch {
+                return;
+            }
+
+            // Always use the already-loaded Firestore module exports.
+            // This avoids "Firestore modular imports not ready" races.
+            const fs = await firestoreExportsReady;
+
+            const docRef = fs.doc(db, 'users', currentUser.uid, PERIOD_DOC, 'latest');
+
+            const payload = {
+                lmpISO,
+                cycleLength,
+                updatedAt: fs.serverTimestamp()
+            };
+
+            await fs.setDoc(docRef, payload, { merge: true });
+            console.log('[SRH] setDoc completed for', docRef.path);
+            savedPeriod = { ...payload };
+        }
+
+        function calculateNextPeriodFromSavedPeriod({ lmpISO, cycleLength }) {
+            const lmp = new Date(lmpISO);
+            if (Number.isNaN(lmp.getTime())) return null;
+            const now = new Date();
+            const today0 = new Date(now);
+            today0.setHours(0,0,0,0);
+
+            let next = new Date(lmp);
+            next.setHours(0,0,0,0);
+
+            // Move forward by whole cycles until next >= today
+            // (Avoiding off-by-one due to timezones by using date-only midnight.)
+            while (next < today0) {
+                next.setDate(next.getDate() + cycleLength);
+                if (cycleLength <= 0) break;
+            }
+
+            // Fertile window is approx days 10-16 from LMP of the upcoming cycle
+            const fertileStart = new Date(next);
+            fertileStart.setDate(fertileStart.getDate() - cycleLength + 10);
+
+            const fertileEnd = new Date(next);
+            fertileEnd.setDate(fertileEnd.getDate() - cycleLength + 16);
+
+            return {
+                nextPeriod: next,
+                fertileStart,
+                fertileEnd
+            };
+        }
+
+        function showPeriodPopup({ nextPeriod, fertileStart, fertileEnd, stageLabelKey }) {
+            const lang = getLang();
+            const title = lang === 'en' ? 'Your menstrual cycle info' : 'Amakuru y’imihango yawe';
+            const nextText = lang === 'en' ? 'Next period (estimated):' : 'Imihango ikurikira (biteganijwe):';
+            const fertileText = lang === 'en' ? 'Fertile window (estimated):' : 'Igihe cy’uburumbuke (biteganijwe):';
+            const stageTextLabel = lang === 'en' ? 'Current phase:' : 'Icyiciro uriho:';
+
+            const fertileRange = `${fertileStart.toLocaleDateString('en-GB')} - ${fertileEnd.toLocaleDateString('en-GB')}`;
+            const phaseText = stageLabelKey ? stageText(stageLabelKey, lang) : (lang === 'en' ? 'Unavailable' : 'Bitaraboneka');
+
+            const message = `${nextText} ${nextPeriod.toLocaleDateString('en-GB')}\n` +
+                `${fertileText} ${fertileRange}\n` +
+                `${stageTextLabel} ${phaseText}`;
+
+            // Immediate popup
+            alert(`${title}\n\n${message}`);
+        }
+
+        function renderPeriodReminder() {
+
+            // Guard against execution order issues (currentUser may not be initialized yet)
+            try {
+                if (typeof currentUser === 'undefined') return;
+            } catch {
+                return;
+            }
+
+            const reminderEl = document.getElementById('period-reminder');
+
+            if (!reminderEl) return;
+
+            if (!currentUser || !savedPeriod?.lmpISO || !savedPeriod?.cycleLength) {
+                reminderEl.classList.add('hidden');
+                return;
+            }
+
+            const stage = getCycleStage({ lmpISO: savedPeriod.lmpISO, cycleLength: savedPeriod.cycleLength });
+            if (!stage) {
+                reminderEl.classList.add('hidden');
+                return;
+            }
+
+            const lang = getLang();
+            const lmp = new Date(savedPeriod.lmpISO);
+
+            const prefix = lang === 'en' ? 'Period reminder:' : 'Kwibutsa ku mihango:';
+            reminderEl.innerHTML = `
+                <i class="fas fa-clock text-blue-600 mr-2"></i>
+                <strong>${prefix}</strong> ${stageText(stage.labelKey, lang)}
+                <div class="text-xs opacity-80 mt-1">${lang === 'en' ? 'Last period start:' : 'Itariki y’imihango iheruka:'} ${formatDate(lmp)}</div>
+            `;
+            reminderEl.classList.remove('hidden');
+        }
+
+        function hydrateLoginAndPeriodUI() {
+            setAuthUI({ loggedIn: !!currentUser, username: currentUserProfile?.username || '' });
+            renderPeriodReminder();
+        }
+
+        firestoreExportsReady.then(async () => {
+            const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+            // Firestore modular functions used below (getDoc/doc/setDoc/serverTimestamp)
+            const fsMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js");
+            const { getDoc, doc, setDoc, serverTimestamp } = fsMod;
+
+            // (authReady is already declared; keep listener structure stable)
+
+
+            // Fallback: if user is already signed in, hydrate UI immediately.
+            // This helps when the auth callback is delayed.
+            try {
+                const immediateUser = auth.currentUser;
+                if (immediateUser) {
+                    console.log('[SRH] immediate auth.currentUser found:', immediateUser.email);
+                    currentUser = immediateUser;
+                }
+            } catch (e) {
+                console.log('[SRH] immediate currentUser read failed', e);
+            }
+
+            authMod.onAuthStateChanged(auth, async (user) => {
+                console.log('[SRH] onAuthStateChanged fired:', !!user, 'email=', user?.email);
+                currentUser = user;
+
+                authReady = true;
+
+                if (user) {
+                    // Flush any pending save that happened before auth finished initializing
+                    if (pendingPeriodSave) {
+                        console.log('[SRH] Flushing pending save on auth ready', pendingPeriodSave);
+                        const { lmpISO, cycleLength } = pendingPeriodSave;
+                        pendingPeriodSave = null;
+                        if (typeof savePeriodFromCalculator === 'function') {
+                            await savePeriodFromCalculator({ lmpISO, cycleLength });
+                            console.log('[SRH] Pending setDoc completed');
+                            renderPeriodReminder();
+                        }
+                    }
+
+                    await ensureUserProfile(user);
+                    // For username, read from users doc quickly
+                    const snap = await getDoc(doc(db, 'users', user.uid));
+                    currentUserProfile = snap.exists() ? snap.data() : { username: user.displayName || user.email?.split('@')[0] || 'User' };
+                    await loadSavedPeriod();
+                    hydrateLoginAndPeriodUI();
+
+                    // Immediately show popup based on saved period data (next period + fertile window)
+                    if (savedPeriod?.lmpISO && savedPeriod?.cycleLength) {
+                        const computed = calculateNextPeriodFromSavedPeriod({
+                            lmpISO: savedPeriod.lmpISO,
+                            cycleLength: savedPeriod.cycleLength
+                        });
+                        if (computed) {
+                            const stage = getCycleStage({ lmpISO: savedPeriod.lmpISO, cycleLength: savedPeriod.cycleLength });
+                            showPeriodPopup({
+                                nextPeriod: computed.nextPeriod,
+                                fertileStart: computed.fertileStart,
+                                fertileEnd: computed.fertileEnd,
+                                stageLabelKey: stage?.labelKey
+                            });
+                        }
+                    }
+
+                } else {
+                    currentUserProfile = null;
+                    savedPeriod = null;
+                    setAuthUI({ loggedIn: false });
+                    renderPeriodReminder();
+                }
+            });
+        });
+
+        // Language switching - works for ALL text on the page
+        function switchLanguage(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.body.setAttribute('data-lang', lang);
+            
+            // Update every translatable element
+            document.querySelectorAll('[data-en]').forEach(el => {
+                if (lang === 'en') {
+                    el.textContent = el.getAttribute('data-en');
+                } else {
+                    el.textContent = el.getAttribute('data-rw');
+                }
+            });
+
+            updateVoiceNotes(lang);
+
+            // Update active language button
+            const btnRw = document.getElementById('btn-rw');
+            const btnEn = document.getElementById('btn-en');
+            if (btnRw && btnEn) {
+                btnRw.classList.toggle('active', lang === 'rw');
+                btnEn.classList.toggle('active', lang === 'en');
+            }
+
+            // Re-render calculator results if visible (language update)
+            const results = document.getElementById('results');
+            if (results && !results.classList.contains('hidden')) {
+                calculateCycle(); // refresh results in new language
+            }
+        }
+
+        function updateVoiceNotes(lang) {
+            const languageName = lang === 'en' ? 'english' : 'kinyarwanda';
+            const sourceTypes = {
+                mpeg: 'audio/mpeg',
+                aac: 'audio/aac',
+                mp3: 'audio/mpeg'
+            };
+
+            document.querySelectorAll('audio[data-topic][data-lesson]').forEach(audio => {
+                const wasPlaying = !audio.paused;
+                const basePath = `voice notes/${audio.dataset.topic} lesson ${audio.dataset.lesson} ${languageName}`;
+
+                audio.innerHTML = '';
+                Object.entries(sourceTypes).forEach(([extension, type]) => {
+                    const source = document.createElement('source');
+                    source.src = `${basePath}.${extension}`;
+                    source.type = type;
+                    audio.appendChild(source);
+                });
+
+                audio.load();
+                if (wasPlaying) {
+                    audio.play().catch(() => {});
+                }
+            });
+        }
+
+        function playVoiceNote(button) {
+            const audio = button.closest('.voice-note').querySelector('audio');
+            document.querySelectorAll('audio[data-topic][data-lesson]').forEach(otherAudio => {
+                if (otherAudio !== audio) otherAudio.pause();
+            });
+            audio.play().catch(() => {});
+        }
+
+        // Mobile menu - congruent with mental-health.html
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('open');
+        }
+
+        // Calculator logic
+        // NOTE: keep isPregnantMode declared with var (not let/const) to avoid TDZ when calculateCycle is called
+        // before this line runs due to script execution order.
+        var isPregnantMode = false;
+
+
+        function togglePregnantMode() {
+            isPregnantMode = !isPregnantMode;
+        }
+
+        // Save to Firestore when logged in
+        // (Use var to avoid TDZ issues if calculateCycle fires before this line is executed.)
+        var pendingPeriodSave = null;
+
+
+        async function maybeSavePeriodToAccount({ lmpISO, cycleLength }) {
+            console.log('[SRH] Auth currentUser at maybeSavePeriodToAccount:', currentUser);
+
+            // Debug visibility for save issues
+            try {
+                console.log('[SRH] maybeSavePeriodToAccount called', { lmpISO, cycleLength });
+
+                // If auth isn't ready yet, defer the write until onAuthStateChanged sets currentUser.
+                // Avoid touching `currentUser` directly if it is still in TDZ.
+                let userSnapshot = null;
+                try {
+                    userSnapshot = currentUser;
+                } catch (e) {
+                    userSnapshot = null;
+                }
+
+                if (!userSnapshot) {
+                    pendingPeriodSave = { lmpISO, cycleLength };
+                    console.log('[SRH] Deferring save until auth ready', pendingPeriodSave);
+                    return;
+                }
+
+                pendingPeriodSave = null;
+
+
+                if (typeof savePeriodFromCalculator === 'function') {
+                    await savePeriodFromCalculator({ lmpISO, cycleLength });
+                    console.log('[SRH] savePeriodFromCalculator finished');
+                    renderPeriodReminder();
+                } else {
+                    console.log('[SRH] savePeriodFromCalculator is not a function');
+                }
+            } catch (e) {
+                console.log('Period save failed', e);
+            }
+        }
+
+
+
+        function calculateCycle() {
+            const lmpInput = document.getElementById('lmp').value;
+            const cycleLength = parseInt(document.getElementById('cycle-length').value) || 28;
+            const errorEl = document.getElementById('calc-error');
+            const resultsEl = document.getElementById('results');
+
+            errorEl.textContent = '';
+
+            if (!lmpInput) {
+                errorEl.textContent = document.body.getAttribute('data-lang') === 'en'
+                    ? 'Please enter the first day of your last period'
+                    : 'Andika itariki ya mbere y’imyanya yawe ya nyuma';
+                return;
+            }
+
+            // Validate date
+            const lmp = new Date(lmpInput);
+            if (Number.isNaN(lmp.getTime())) {
+                errorEl.textContent = document.body.getAttribute('data-lang') === 'en'
+                    ? 'Please enter a valid date'
+                    : 'Andika itariki ikwiye';
+                return;
+            }
+
+            const nextPeriod = new Date(lmp);
+            nextPeriod.setDate(nextPeriod.getDate() + cycleLength);
+
+            // Fertile window (approx days 10-16 of cycle)
+            const fertileStart = new Date(lmp);
+            fertileStart.setDate(fertileStart.getDate() + 10);
+            const fertileEnd = new Date(lmp);
+            fertileEnd.setDate(fertileEnd.getDate() + 16);
+
+            // Due date if pregnant mode (280 days from LMP)
+            let dueDate = null;
+            if (isPregnantMode) {
+                dueDate = new Date(lmp);
+                dueDate.setDate(dueDate.getDate() + 280);
+            }
+
+            // Fill results (original-srh.html behavior)
+            document.getElementById('next-period').textContent = nextPeriod.toLocaleDateString('en-GB');
+            document.getElementById('fertile-window').innerHTML =
+                `${fertileStart.toLocaleDateString('en-GB')} - ${fertileEnd.toLocaleDateString('en-GB')}`;
+
+            const dueEl = document.getElementById('due-date');
+            if (dueDate) {
+                dueEl.textContent = dueDate.toLocaleDateString('en-GB');
+                // show due-date card value area
+                if (dueEl.parentElement) dueEl.parentElement.style.display = 'block';
+            } else {
+                dueEl.textContent = document.body.getAttribute('data-lang') === 'en' ? 'Not applicable' : 'Ntibikwiye';
+                // hide due-date card value area (keeps UI clean)
+                if (dueEl.parentElement) dueEl.parentElement.style.display = 'block';
+            }
+
+            resultsEl.classList.remove('hidden');
+
+            // If logged in, save period tracking (for reminder on reload)
+            if (typeof maybeSavePeriodToAccount === 'function') {
+                maybeSavePeriodToAccount({ lmpISO: lmpInput, cycleLength });
+            }
+        }
+
+        function resetCalculator() {
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('calc-error').textContent = '';
+        }
+
+        // Initialize everything
+        function initializePage() {
+            // Ensure language is set
+            if (!document.body.getAttribute('data-lang')) {
+                document.body.setAttribute('data-lang', 'rw');
+            }
+
+            // Make sure active button is correct on load
+            const currentLang = document.body.getAttribute('data-lang');
+            updateVoiceNotes(currentLang);
+            const btnRw = document.getElementById('btn-rw');
+            const btnEn = document.getElementById('btn-en');
+            if (btnRw && btnEn) {
+                btnRw.classList.toggle('active', currentLang === 'rw');
+                btnEn.classList.toggle('active', currentLang === 'en');
+            }
+
+            console.log('%c✅ srh.html fully loaded', 'color:#db2777; font-weight:600');
+            console.log('[SRH] initializePage sees currentUser=', currentUser);
+
+            // Render auth UI using currentUser immediately if already available
+            try {
+                setAuthUI({ loggedIn: !!currentUser, username: currentUserProfile?.username || '' });
+            } catch (e) {
+                console.log('[SRH] setAuthUI on initializePage failed', e);
+            }
+        }
+
+
+        // Run on load
+        window.onload = initializePage;
+    </script>
+
+    <!-- Urungano AI Sign Language Avatar -->
+    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
+        <div class="relative">
+            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
+                <img src="srh.gif"
+                     alt="Urungano AI Signing for SRH"
+                     class="w-full h-full object-cover"
+                     onerror="this.onerror=null; this.src='signs.gif';">
+            </div>
+
+            
+        </div>
+
+        <!-- Hover Tooltip -->
+        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
+            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
+                <span data-en="SRH Sign Language Lesson" data-rw="Isomo ry'Imyororokere mu Rurimi rw'Ibimenyetso">Isomo ry'Imyororokere mu Rurimi rw'Ibimenyetso</span>
+            </p>
+            <p class="text-slate-600 text-xs leading-relaxed"
+               data-en="Lessons on reproductive health. They include understanding the menstrual cycle and behaviors during menstruation and fertility. They also include understanding HIV, how it is transmitted, and how to prevent it."
+               data-rw="Amasomo k'ubuzima bw'imyororokerere. Harimo gusobanukirwa ukwezi k'umugore n'imyitwarire mubihe by'imihango n'uburumbuke. Harimo Kandi gusobanukirwa Virusi itera sida, uburyo yanduramo no kuyirinda.">
+                Amasomo k'ubuzima bw'imyororokerere. Harimo gusobanukirwa ukwezi k'umugore n'imyitwarire mubihe by'imihango n'uburumbuke. Harimo Kandi gusobanukirwa Virusi itera sida, uburyo yanduramo no kuyirinda.
+            </p>
+        </div>
+    </div>
+  <script type="module" src="institution-tracker.js"></script>
+</body>
+</html>

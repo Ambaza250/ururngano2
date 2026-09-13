@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urungano - Ubuzima bw’Imyororokere n’Ubuzima bwo mu Mutwe | Ubufasha mu Kinyarwanda</title>
+
+<meta name="description" content="Urungano ni urubuga rwizewe rutanga amakuru n’ubufasha ku buzima bw’imyororokere n’ubuzima bwo mu mutwe mu Kinyarwanda. AI Assistant, emerigensi, n’aho wahita ujya. Ibanga.">
+
+<meta name="robots" content="index, follow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<html lang="rw">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Urungano - Ubuzima bw’Imyororokere n’Ubuzima bwo mu Mutwe">
+<meta property="og:description" content="Ubufasha n’amakuru ku buzima bw’imyororokere n’ubuzima bwo mu mutwe mu Kinyarwanda. AI Assistant, emerigensi 24/7. Ni ibanga.">
+<meta property="og:url" content="https://urunganoai.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Urungano">
+<meta property="og:image" content="https://urunganoai.vercel.app/og-image.jpg">
+<meta property="og:locale" content="rw_RW">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Urungano - Ubuzima bw’Imyororokere n’Ubuzima bwo mu Mutwe">
+<meta name="twitter:description" content="Ubufasha n’amakuru ku buzima bw’imyororokere n’ubuzima bwo mu mutwe mu Kinyarwanda. AI Assistant, emerigensi 24/7. Ni ibanga.">
+<meta name="twitter:image" content="https://urunganoai.vercel.app/og-image.jpg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            transition: all 0.3s ease;
+        }
+        .banner {
+            background-image: url('banner-image.png');
+            background-size: cover;
+            background-position: center;
+            min-height: 320px;
+            position: relative;
+        }
+        @media (min-width: 768px) {
+            .banner { min-height: 520px; }
+        }
+        .banner-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+            position: absolute;
+            inset: 0;
+        }
+        .logo-img {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) {
+            .logo-img { width: 72px; height: 72px; border-radius: 18px; }
+        }
+        .lang-btn {
+            transition: all 0.3s ease;
+        }
+        .lang-btn.active {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+        .voice-btn {
+            transition: all 0.3s ease;
+        }
+        .voice-btn.listening {
+            background-color: #ef4444;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Mobile nav drawer */
+        #mobile-menu {
+            display: none;
+        }
+        #mobile-menu.open {
+            display: flex;
+        }
+
+        /* Chat section responsive height */
+        .chat-container {
+            height: 78vh;
+            min-height: 500px;
+        }
+        @media (max-width: 640px) {
+            .chat-container {
+                height: 80vh;
+                min-height: 420px;
+                border-radius: 1.25rem;
+            }
+        }
+
+        /* Avatar responsive */
+        #ai-avatar {
+            bottom: 1rem;
+            right: 1rem;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar { bottom: 2rem; right: 2rem; }
+        }
+        #ai-avatar .avatar-img-wrap {
+            width: 64px;
+            height: 64px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .avatar-img-wrap { width: 96px; height: 96px; }
+        }
+        #ai-avatar .tooltip {
+            width: 220px;
+        }
+        @media (min-width: 640px) {
+            #ai-avatar .tooltip { width: 288px; }
+        }
+
+        .helpline-section {
+      background: #fef3f2;
+      padding: 60px 5%;
+      text-align: center;
+    }
+    .helpline-card {
+      background: white;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .helpline-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #ef4444;
+      color: white;
+      padding: 18px 30px;
+      margin: 12px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: 0.3s;
+      min-width: 280px;
+      justify-content: center;
+    }
+    .helpline-btn:hover {
+      background: #dc2626;
+      transform: translateY(-3px);
+    }
+    .pc-instruction {
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: #666;
+      display: none;
+    }
+    </style>
+
+    <!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Geocoder UI (we will override its behavior; actual search will use Geoapify) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    
+</head>
+
+
+    <script>
+    let map;
+
+    // ====== Current location + markers state ======
+    let userLatLng = null;
+    let userMarker = null;
+
+    // We’ll keep references so we can clear old results/routes.
+    let resultsLayer = null;
+    let routeLine = null;
+
+    function initMap() {
+        map = L.map('map', { zoomControl: true }).setView([-1.9441, 30.0619], 12);
+
+        // Geoapify base tiles (raster)
+        const geoapifyKey = '6ca1c4e580ca4b89adb10ce089fb466e';
+        // Using "osm-bright" style for good readability (you can switch styles later)
+        const geoapifyTilesUrl = `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${encodeURIComponent(geoapifyKey)}`;
+        L.tileLayer(geoapifyTilesUrl, {
+            attribution: '&copy; Geoapify',
+            maxZoom: 20
+        }).addTo(map);
+
+
+        resultsLayer = L.layerGroup().addTo(map);
+
+        // ====== Search control (we will override its behavior) ======
+        const geocoderControl = L.Control.geocoder({
+            position: 'topleft',
+            placeholder: 'Search Police, Hospital, Isange, Kigali...',
+            geocoder: L.Control.Geocoder.nominatim({
+                geocodingQueryParams: { countrycodes: 'rw' }
+            })
+        }).addTo(map);
+
+        // Bias results by current location (distance sort), and render clickable candidates.
+        geocoderControl.on('markgeocode', (e) => {
+            // Use the user typed value as the text for Geoapify search.
+            // Then we bias/score the returned places using `userLatLng`.
+            try {
+                const input = geocoderControl._input && geocoderControl._input.value;
+                const rawQuery = (input || '').trim();
+
+                // If userLatLng unknown, we can’t bias results.
+                if (!userLatLng) return;
+                if (!rawQuery) return;
+
+                // Clear Leaflet’s default marker and render our distance-sorted candidates.
+                e.layer && e.layer.remove && e.layer.remove();
+                geocodeNearby(rawQuery);
+            } catch (err) {
+                console.log('geocoder markgeocode override error', err);
+            }
+        });
+
+
+        // Force map to redraw after 300ms (fixes most blank map issues)
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+    }
+
+    async function geocodeNearby(query) {
+        if (!query || !userLatLng) return;
+
+        const geoapifyKey = '6ca1c4e580ca4b89adb10ce089fb466e';
+        const [uLat, uLng] = userLatLng;
+
+        // Geoapify Places search around user (radius gives locality bias)
+        const radiusKm = 25; // ~25km-ish (keeps your previous behavior close)
+
+        // Prevent slow searches stacking up.
+        if (!geocodeNearby._inflight) geocodeNearby._inflight = 0;
+        const token = ++geocodeNearby._inflight;
+
+        const url = new URL('https://api.geoapify.com/v1/geocode/search');
+        url.searchParams.set('text', query);
+        url.searchParams.set('apiKey', geoapifyKey);
+        url.searchParams.set('limit', '8');
+        url.searchParams.set('country', 'RW');
+        url.searchParams.set('type', 'places');
+        // Geoapify supports both proximity bias and bounding circle.
+        // Use both to strongly localize results around the user.
+        url.searchParams.set('bias', `proximity:${uLng},${uLat}`);
+        url.searchParams.set('radius', `${radiusKm}`);
+        // Also pass location explicitly (some Geoapify setups honor it better).
+        url.searchParams.set('lon', `${uLng}`);
+        url.searchParams.set('lat', `${uLat}`);
+
+
+        let data;
+        try {
+            const controller = new AbortController();
+            const t = setTimeout(() => controller.abort(), 5000);
+
+            const res = await fetch(url.toString(), {
+                headers: { 'Accept': 'application/json' },
+                signal: controller.signal
+            });
+
+            clearTimeout(t);
+            data = await res.json();
+
+            // If a newer search started, ignore this result.
+            if (token !== geocodeNearby._inflight) return;
+        } catch (e) {
+            clearTimeout && clearTimeout(t);
+            if (e && e.name === 'AbortError') return;
+            console.log('Geoapify fetch failed', e);
+            return;
+        }
+
+        const features = data?.features;
+        if (!Array.isArray(features) || features.length === 0) return;
+
+        const normalized = features.map((f) => {
+            const lat = f?.properties?.lat ?? f?.geometry?.coordinates?.[1];
+            const lon = f?.properties?.lon ?? f?.geometry?.coordinates?.[0];
+            const display_name = f?.properties?.name || f?.properties?.formatted || 'Location';
+
+            return {
+                lat: String(lat),
+                lon: String(lon),
+                display_name
+            };
+        }).filter((x) => Number.isFinite(parseFloat(x.lat)) && Number.isFinite(parseFloat(x.lon)));
+
+        // Sort by distance from user.
+        normalized.sort((a, b) => {
+            const aLat = parseFloat(a.lat);
+            const aLng = parseFloat(a.lon);
+            const bLat = parseFloat(b.lat);
+            const bLng = parseFloat(b.lon);
+            return haversineKm(userLatLng[0], userLatLng[1], aLat, aLng) -
+                   haversineKm(userLatLng[0], userLatLng[1], bLat, bLng);
+        });
+
+        renderResults(normalized.slice(0, 6));
+    }
+
+
+    function renderResults(items) {
+        // Clear old markers
+        resultsLayer.clearLayers();
+
+        // Also clear old route when user searches again.
+        clearRoute();
+
+        const [uLat, uLng] = userLatLng || [null, null];
+
+        items.forEach((item, idx) => {
+            const latlng = [parseFloat(item.lat), parseFloat(item.lon)];
+            const title = item.display_name || item.name || 'Location';
+
+            const m = L.marker(latlng, { title })
+                .addTo(resultsLayer)
+                .bindPopup(`${idx === 0 ? '<b>Closest</b><br/>' : ''}${title}`);
+
+            // Click marker => draw route from user (or map center)
+            m.on('click', () => {
+                const start = userLatLng ? userLatLng : map.getCenter().toArray();
+                const dest = latlng;
+                drawRoute(start, dest);
+            });
+        });
+    }
+
+    function clearRoute() {
+        if (routeLine) {
+            map.removeLayer(routeLine);
+            routeLine = null;
+        }
+    }
+
+    // Haversine distance in km
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // Draw driving route using OSRM public demo router.
+    async function drawRoute(startLatLng, destLatLng) {
+        if (!startLatLng || !destLatLng) return;
+
+        clearRoute();
+
+        // OSRM expects [lon,lat]
+        const [sLat, sLng] = startLatLng;
+        const [dLat, dLng] = destLatLng;
+
+        const url = `https://router.project-osrm.org/route/v1/driving/${encodeURIComponent(sLng)},${encodeURIComponent(sLat)};${encodeURIComponent(dLng)},${encodeURIComponent(dLat)}?overview=full&geometries=geojson&steps=false`;
+
+        let data = null;
+        try {
+            const res = await fetch(url);
+            data = await res.json();
+        } catch (e) {
+            console.log('Routing failed', e);
+            alert('Routing failed. Please try again.');
+            return;
+        }
+
+        if (!data || !data.routes || !data.routes[0] || !data.routes[0].geometry) {
+            alert('No route found between these locations.');
+            return;
+        }
+
+        const coords = data.routes[0].geometry.coordinates; // [lon,lat]
+        const latlngs = coords.map(c => [c[1], c[0]]);
+
+        routeLine = L.polyline(latlngs, { color: '#ef4444', weight: 6, opacity: 0.85 }).addTo(map);
+
+        // Fit bounds
+        const bounds = routeLine.getBounds();
+        map.fitBounds(bounds, { padding: [30, 30] });
+
+        // Add start/end markers
+        L.marker([sLat, sLng]).addTo(map).bindPopup('<b>Start</b>').openPopup();
+        L.marker([dLat, dLng]).addTo(map).bindPopup('<b>Destination</b>').openPopup();
+    }
+
+    function locateUser() {
+        if (!navigator.geolocation) return;
+
+        // Ask for more accurate location when possible.
+        // Also retry once: sometimes the first fix is a coarse network estimate.
+        const opts = {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        };
+
+        const applyFix = (pos) => {
+            const accuracyM = pos.coords.accuracy;
+            const latlng = [pos.coords.latitude, pos.coords.longitude];
+
+            // If accuracy is poor, avoid using it (this prevents wrong jumps like defaulting to Kigali).
+            // You can tune this threshold.
+            // If accuracy is poor, still store it for search bias,
+            // but don't move the map (prevents wrong jumps).
+            if (Number.isFinite(accuracyM) && accuracyM > 2000) {
+                userLatLng = latlng;
+                if (userMarker) userMarker.remove();
+                userMarker = L.marker(latlng).addTo(map)
+                    .bindPopup("<b>You are here</b>")
+                    .openPopup();
+                return;
+            }
+
+            userLatLng = latlng;
+            map.flyTo(latlng, 15, { duration: 2 });
+
+
+            if (userMarker) userMarker.remove();
+            userMarker = L.marker(latlng).addTo(map)
+                .bindPopup("<b>You are here</b>")
+                .openPopup();
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                applyFix(pos);
+
+                // If first fix looks inaccurate, try once more.
+                if (Number.isFinite(pos.coords.accuracy) && pos.coords.accuracy > 2000) {
+                    navigator.geolocation.getCurrentPosition(
+                        applyFix,
+                        () => {},
+                        opts
+                    );
+                }
+            },
+            () => alert("Please allow location access."),
+            opts
+        );
+    }
+
+    // Initialize
+    window.addEventListener('load', initMap);
+</script>
+
+    
+<body class="bg-slate-50" data-lang="rw">
+
+    <!-- Banner -->
+    <div class="banner">
+        <div class="banner-overlay"></div>
+        
+        <!-- NAV -->
+        <nav class="relative z-50 px-4 py-4 md:px-8 md:py-6">
+            <div class="flex items-center justify-between gap-2">
+                <!-- Logo -->
+                <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo-img">
+
+                <!-- Language Switcher (always visible) -->
+                <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-3xl p-1 shadow-md">
+                    <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">Kinyarwanda</button>
+                    <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">English</button>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex gap-3">
+                    <a href="srh.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                    <a href="mental-health.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                    <a href="about-us.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                    <a href="chat.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
+                       data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
+                    <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
+                        <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
+                    </button>
+                <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:inline-flex;">
+                    <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
+                </button>
+                    <button id="logout-btn" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
+                        <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
+                    </button>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden bg-white/90 text-slate-800 rounded-xl p-2.5 shadow-md focus:outline-none" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mobile menu dropdown -->
+            <div id="mobile-menu" class="flex-col gap-2 mt-3 md:hidden">
+                <a href="srh.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
+                <a href="mental-health.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
+                <a href="about-us.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
+                <a href="chat.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
+                   data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
+
+<!-- Auth CTA buttons (mobile variants, controlled by same auth logic) -->
+                <button id="login-btn-mobile" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
+                    <span id="login-btn-text-mobile" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
+                </button>
+
+                <button id="therapy-cta-btn-mobile" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
+                    <span id="therapy-cta-text-mobile" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
+                </button>
+
+                <button id="logout-btn-mobile" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
+                    <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Welcome Text -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-white px-4 w-full max-w-4xl md:bottom-20">
+            <h1 id="welcome-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 md:mb-6"
+                data-en="Welcome to Urungano Platform" data-rw="Murakaza neza kuri Urungano Platform">
+                Murakaza neza kuri Urungano Platform
+            </h1>
+            <p id="welcome-subtitle" class="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-3xl mx-auto"
+               data-en="Your inclusive, Kinyarwanda-native home for stigma-free support in Sexual and Reproductive Health and Mental Health."
+               data-rw="Urubuga rwanyu rwimakaza ubudasa,mu gutanga ubufasha n’amakuru mu rurimi rw’ikinyarwanda k’ubuzima bw’imyororokere n’ubuzima bwo mu mutwe.">
+                Urubuga rwanyu rwimakaza ubudasa,mu gutanga ubufasha n’amakuru mu rurimi rw’ikinyarwanda k’ubuzima bw’imyororokere n’ubuzima bwo mu mutwe.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Chat Section -->
+    <div class="max-w-6xl mx-auto px-3 py-6 md:px-6 md:py-12">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden chat-container">
+            
+            <!-- Chat Header -->
+            <div class="bg-blue-600 px-4 py-4 md:px-8 md:py-6 text-white flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-10 h-10 md:w-14 md:h-14 object-cover rounded-2xl flex-shrink-0">
+                    <div class="min-w-0">
+                        <h2 id="chat-title" class="text-base md:text-2xl font-bold truncate"
+                            data-en="Urungano AI Assistant" data-rw="Urungano AI Assistant">
+                            Urungano AI Assistant
+                        </h2>
+                        <p id="chat-subtitle" class="text-blue-100 text-xs md:text-sm truncate"
+                           data-en="Anonymous • Secure • Real-time Support" data-rw="Ni Ibanga • Irizewe • Ubufasha Buhoraho">
+                            Ni Ibanga • Irizewe • Ubufasha Buhoraho
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Voice Button -->
+                
+            </div>
+
+            <!-- Udify Chatbot -->
+            <div style="height: calc(100% - 80px);">
+                <iframe id="chatFrame"
+                    src="https://udify.app/chat/4c3chgpwFrrgfL4d"
+                    style="width: 100%; height: 100%;"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+<!-- Emergency Contacts Section -->
+<section class="emergency-section py-12 bg-red-50 border-t-4 border-red-500">
+    <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center mb-8 text-red-700" 
+            data-en="Emergency Contacts" 
+            data-rw="Imirongo itangirwaho ubufasha">
+            Emergency Contacts
+        </h2>
+        
+        <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto" 
+           data-en="If you are in immediate danger or need urgent help, call these numbers right away. Help is available 24/7." 
+           data-rw="Koresha izi nomero mu gihe cy’ibanze cyangwa ubufasha bwihutirwa. Ubufasha burahari amasaha yose 24/7">
+            If you are in immediate danger or need urgent help, call these numbers right away. Help is available 24/7.
+        </p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Phone 1 -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-all">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-3xl">🆘</div>
+                    <div>
+                        <h3 class="font-semibold text-lg" data-en="Mental Health Helpline" data-rw="Ubufasha bw'Ubuzima bwo mu Mutwe">Mental Health Helpline</h3>
+                        <p class="text-red-600 font-bold text-xl">114</p>
+                    </div>
+                </div>
+                <a href="tel:114" 
+                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-xl transition-all">
+                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
+                </a>
+            </div>
+
+            <!-- Phone 2 -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-all">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-3xl">🏥</div>
+                    <div>
+                        <h3 class="font-semibold text-lg" data-en="Rwanda HDI" data-rw="Rwanda HDI">Rwanda HDI</h3>
+                        <p class="text-red-600 font-bold text-xl">3530</p>
+                    </div>
+                </div>
+                <a href="tel:3550" 
+                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-xl transition-all">
+                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
+                </a>
+            </div>
+
+            <!-- Phone 3 (Add more if you have) -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-all">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-3xl">🚨</div>
+                    <div>
+                        <h3 class="font-semibold text-lg" data-en="Police & General Emergency" data-rw="Polisi n'Ubufasha bw'Ihutirwa">Police & General Emergency</h3>
+                        <p class="text-red-600 font-bold text-xl">112</p>
+                    </div>
+                </div>
+                <a href="tel:112" 
+                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-xl transition-all">
+                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
+                </a>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-all">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-3xl">🚨</div>
+                    <div>
+                        <h3 class="font-semibold text-lg" data-en="Isange One Stop Center" data-rw="Isange One Stop Center">Isange One Stop Center</h3>
+                        <p class="text-red-600 font-bold text-xl">3029</p>
+                    </div>
+                </div>
+                <a href="tel:112" 
+                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-xl transition-all">
+                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- Find Help Near You -->
+<section class="nearby-help py-16 bg-gray-50" id="nearby-help">
+    <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center mb-4 text-red-700" 
+            data-en="Find Help Near You" 
+            data-rw="Shaka Ubufasha Buri Hafi Yawe">
+            Find Help Near You
+        </h2>
+        
+        <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" 
+           data-en="Search for Police Stations, Hospitals, or Isange One Stop Centers. Type your location for better results." 
+           data-rw="Shaka Amapolisi, Ibitaro, cyangwa Ibigo by'Isange. Andika aho uri kugira ubufasha bwiza.">
+            Search for Police Stations, Hospitals, or Isange One Stop Centers. Type your location for better results.
+        </p>
+
+        <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <!-- Map Container - Fixed Height -->
+            <div id="map" style="height: 520px; width: 100%; background: #f0f0f0;"></div>
+
+            <!-- Bottom Bar -->
+            <div class="p-5 bg-white border-t flex flex-wrap gap-4 justify-center items-center">
+                <button onclick="locateUser()" 
+                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-medium flex items-center gap-2 transition-all">
+                    📍 Use My Current Location
+                </button>
+                <div class="text-sm text-gray-500">
+                    💡 Tip: Search "Police Kigali", "Hospital Remera", or "Isange"
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Links Section - Footer Top -->
+<div class="quick-links bg-white border-b border-gray-100 py-8">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="mb-6 text-center md:text-left">
+            <h3 class="quick-links-title text-2xl text-center font-bold text-slate-900" data-en="Quick Links" data-rw="Aho Wahita Ujya">Aho Wahita Ujya</h3>
+            <p class="quick-links-subtitle text-center text-slate-500 mt-2" data-en="Explore the most-used sections of Urungano." data-rw="Sura ibice bikunze gukoreshwa kuri Urungano.">Sura ibice bikunze gukoreshwa kuri Urungano.</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <a href="srh.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-red-50 transition-all duration-300">
+                <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🌸</div>
+                <span class="font-medium text-gray-800 group-hover:text-red-600 transition-colors" data-en="Sexual & Reproductive Health" data-rw="Ubuzima bw'Imyororokere">Ubuzima bw'Imyororokere</span>
+            </a>
+
+            <a href="srh.html#calculator" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-pink-50 transition-all duration-300">
+                <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">📅</div>
+                <span class="font-medium text-gray-800 group-hover:text-pink-600 transition-colors" data-en="Period Tracker" data-rw="Kubara Ukwezi k'Umugore">Kubara Ukwezi k'Umugore</span>
+            </a>
+
+            <a href="mental-health.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-blue-50 transition-all duration-300">
+                <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🧠</div>
+                <span class="font-medium text-gray-800 group-hover:text-blue-600 transition-colors" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span>
+            </a>
+
+            <a href="chat.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-purple-50 transition-all duration-300">
+                <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">💬</div>
+                <span class="font-medium text-gray-800 group-hover:text-purple-600 transition-colors" data-en="Chat with your peers" data-rw="Ganira n'Urungano">Ganira n'Urungano</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-slate-900 text-white py-12">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+            <div class="space-y-3 text-sm">
+                <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+                <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
+                <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+            <div class="flex flex-col space-y-3 text-sm">
+                <a href="chat.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+                <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+                <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
+            </div>
+        </div>
+        <div class="text-sm opacity-75">
+            <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
+            <div class="mt-4 space-y-2">
+                <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+                <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+            </div>
+            <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script>
+        // ===================== AUTH + LOGIN BUTTON (SRH/Chat shared) =====================
+        // Note: only shows/hides Login/Logout here; period reminder is on srh.html.
+        // Uses the same Firebase config as chat.html.
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+            authDomain: "urungano-chat-50d62.firebaseapp.com",
+            projectId: "urungano-chat-50d62",
+            storageBucket: "urungano-chat-50d62.firebasestorage.app",
+            messagingSenderId: "730372170670",
+            appId: "1:730372170670:web:91300da03f18f488afde3f"
+        };
+
+        // Load Firebase in-module via dynamic import (works in non-module script)
+        let _auth = null;
+        let _currentUser = null;
+        let _unsubscribe = null;
+
+        window.goToAuth = () => window.location.href = 'auth.html';
+
+        window.logout = async () => {
+            if (!_auth) return;
+            try {
+                const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+                await authMod.signOut(_auth);
+            } catch (e) {
+                console.log('Logout failed', e);
+            }
+        };
+
+window.goToTherapyCta = () => {
+            const btn = document.getElementById('therapy-cta-btn') || document.getElementById('therapy-cta-btn-mobile');
+            if (!btn) return;
+            const dest = btn.dataset.therapyDest;
+            if (dest) {
+                window.location.href = dest;
+            } else {
+                window.location.href = 'booking.html';
+            }
+        };
+
+function setTherapyCtaUI({ show = false, label = 'Book a therapist', dest = 'booking.html' } = {}) {
+            console.log('[therapy-cta]', { show, label, dest, lang: document.body.getAttribute('data-lang') });
+
+            const btns = document.querySelectorAll('#therapy-cta-btn, #therapy-cta-btn-mobile');
+            const texts = document.querySelectorAll('#therapy-cta-text, #therapy-cta-text-mobile');
+            if (!btns.length) return;
+
+            btns.forEach((btn) => {
+                // Always set destination deterministically to avoid stale dataset.dest.
+                btn.dataset.therapyDest = dest;
+                // inline-flex matches Tailwind/desktop styling and avoids layout quirks.
+                btn.style.display = show ? 'inline-flex' : 'none';
+            });
+            console.log('[therapy-cta:apply]', { show });
+
+            texts.forEach((text) => {
+                text.textContent = label;
+
+                // Keep attributes aligned so switchLanguage() won’t overwrite our deterministic label.
+                if (label === 'Book a therapist' || label === 'Book a therapist ') {
+                    text.setAttribute('data-en', 'Book a therapist');
+                    text.setAttribute('data-rw', 'Tegura umujyanama');
+                } else if (label === 'Tegura umujyanama' || label === 'Tegura umujyanama ') {
+                    text.setAttribute('data-en', 'Book a therapist');
+                    text.setAttribute('data-rw', 'Tegura umujyanama');
+                } else if (label.toLowerCase().includes('chat')) {
+                    text.setAttribute('data-en', 'Chat with a therapist');
+                    text.setAttribute('data-rw', 'Ganira n\'umujyanama');
+                } else {
+                    text.setAttribute('data-en', label);
+                    text.setAttribute('data-rw', label);
+                }
+            });
+        }
+
+
+        function coerceFirestoreDateToJS(value) {
+            // Handles: Firestore Timestamp, JS Date, ISO strings, and {seconds,nanoseconds}.
+            if (!value) return null;
+            try {
+                if (value?.toDate && typeof value.toDate === 'function') {
+                    return value.toDate();
+                }
+                if (typeof value?.toMillis === 'function') {
+                    const ms = value.toMillis();
+                    const d = new Date(ms);
+                    return Number.isFinite(d.getTime()) ? d : null;
+                }
+                if (value instanceof Date) {
+                    return Number.isNaN(value.getTime()) ? null : value;
+                }
+                if (typeof value === 'string') {
+                    const d = new Date(value);
+                    return Number.isNaN(d.getTime()) ? null : d;
+                }
+                if (typeof value === 'object' && value.seconds != null) {
+                    const ms = Number(value.seconds) * 1000;
+                    const d = new Date(ms);
+                    return Number.isNaN(d.getTime()) ? null : d;
+                }
+
+                const d = new Date(value);
+                return Number.isNaN(d.getTime()) ? null : d;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function evaluateTherapyCtaForUser(user) {
+            // Defaults (safer): book a therapist
+            const bookingDest = 'booking.html';
+            const chatDest = 'therapychat.html';
+            const lang = document.body.getAttribute('data-lang') === 'en' ? 'en' : 'rw';
+            const labels = {
+                booking: lang === 'en' ? 'Book a therapist' : 'Tegura umujyanama',
+                chat: lang === 'en' ? 'Chat with a therapist' : 'Ganira n’umujyanama'
+            };
+
+            try {
+                const appMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js');
+                const fsMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js');
+
+                const app = appMod.initializeApp(firebaseConfig);
+                const db = fsMod.getFirestore(app);
+
+                const uid = user?.uid;
+                if (!uid) {
+                    return { show: false, dest: bookingDest, label: labels.booking };
+                }
+
+                const bookingsCol = fsMod.collection(db, 'users', uid, 'bookings');
+
+                let latest = null;
+
+                // Prefer server ordering, fallback to scanning a small set.
+                try {
+                    const q = fsMod.query(bookingsCol, fsMod.orderBy('createdAt', 'desc'), fsMod.limit(1));
+                    const snap = await fsMod.getDocs(q);
+                    if (!snap.empty) {
+                        const doc = snap.docs[0];
+                        latest = { id: doc.id, ...doc.data() };
+                    }
+                } catch (e) {
+                    // createdAt missing/unindexed
+                }
+
+                if (!latest) {
+                    const snap = await fsMod.getDocs(fsMod.query(bookingsCol, fsMod.limit(10)));
+                    let best = null;
+                    let bestCreatedAt = null;
+                    snap.forEach((doc) => {
+                        const data = doc.data() || {};
+                        const createdAtRaw = data.createdAt;
+                        const createdAtMs = createdAtRaw ? (createdAtRaw.toMillis ? createdAtRaw.toMillis() : new Date(createdAtRaw).getTime()) : null;
+
+                        const msValid = createdAtMs != null && Number.isFinite(createdAtMs);
+                        if (!best) {
+                            best = { id: doc.id, ...data };
+                            bestCreatedAt = msValid ? createdAtMs : null;
+                        } else {
+                            if (msValid && bestCreatedAt != null) {
+                                if (createdAtMs > bestCreatedAt) {
+                                    best = { id: doc.id, ...data };
+                                    bestCreatedAt = createdAtMs;
+                                }
+                            } else if (bestCreatedAt == null && msValid) {
+                                best = { id: doc.id, ...data };
+                                bestCreatedAt = createdAtMs;
+                            }
+                        }
+                    });
+                    latest = best;
+                }
+
+                if (!latest) {
+                    return { show: true, dest: bookingDest, label: labels.booking };
+                }
+
+                const latestStatus = latest?.status;
+                const payment = latest?.payment || {};
+                const confirmed = latestStatus === 'confirmed' || payment?.confirmed === true;
+
+                // expiryDate might be Firestore Timestamp or a different shape/key.
+                // Try multiple likely locations.
+                const rawExpiry =
+                    payment?.expiryDate ??
+                    payment?.expiry_date ??
+                    latest?.expiryDate ??
+                    latest?.expiry_date;
+
+                const expiryDate = coerceFirestoreDateToJS(rawExpiry);
+
+                const now = new Date();
+                const parsedValid = expiryDate instanceof Date && !Number.isNaN(expiryDate.getTime());
+
+                // Defensive: if booking is confirmed but expiry cannot be parsed,
+                // do NOT block chat (prevents the “confirmed but still booking” bug).
+                const expired = parsedValid ? expiryDate < now : false;
+
+                if (!confirmed || expired) {
+                    return { show: true, dest: bookingDest, label: labels.booking };
+                }
+
+
+                return { show: true, dest: chatDest, label: labels.chat };
+            } catch (e) {
+                console.log('Therapy CTA evaluation failed:', e);
+                return { show: true, dest: booking.html, label: labels.booking };
+            }
+        }
+
+
+
+function setAuthUI(loggedIn) {
+            const loginBtns = document.querySelectorAll('#login-btn, #login-btn-mobile');
+            const logoutBtns = document.querySelectorAll('#logout-btn, #logout-btn-mobile');
+            if (!loginBtns.length) return;
+            loginBtns.forEach((btn) => { btn.style.display = loggedIn ? 'none' : 'inline-flex'; });
+            logoutBtns.forEach((btn) => { btn.style.display = loggedIn ? 'inline-flex' : 'none'; });
+        }
+
+        (async function initAuthHeader() {
+            try {
+                const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
+                const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
+                const app = appMod.initializeApp(firebaseConfig);
+                _auth = authMod.getAuth(app);
+
+                _unsubscribe = authMod.onAuthStateChanged(_auth, async (user) => {
+                    _currentUser = user;
+                    setAuthUI(!!user);
+
+                    const btn = document.getElementById('therapy-cta-btn');
+                    if (!btn) return;
+
+                    if (!user) {
+                        setTherapyCtaUI({ show: false });
+                        return;
+                    }
+
+                    // Show immediately while we evaluate
+                    const lang = document.body.getAttribute('data-lang') === 'en' ? 'en' : 'rw';
+                    setTherapyCtaUI({
+                        show: true,
+                        dest: 'booking.html',
+                        label: lang === 'en' ? 'Book a therapist' : 'Tegura umujyanama'
+                    });
+
+
+
+                    const decision = await evaluateTherapyCtaForUser(user);
+                    setTherapyCtaUI(decision);
+                });
+            } catch (e) {
+                console.log('Auth header init failed', e);
+            }
+        })();
+
+        let recognition = null;
+        let isListening = false;
+        let chatFrame = null;
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('open');
+        }
+
+        function toggleVoiceInput() {
+            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+                alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+                return;
+            }
+
+            if (!recognition) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = document.body.getAttribute('data-lang') === 'rw' ? 'rw-RW' : 'en-US';
+                recognition.interimResults = false;
+
+                recognition.onresult = (event) => {
+                    const spokenText = event.results[0][0].transcript;
+                    console.log("Spoken:", spokenText);
+                    sendToChatbot(spokenText);
+                };
+
+                recognition.onerror = () => stopListening();
+                recognition.onend = () => stopListening();
+            }
+
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        function startListening() {
+            isListening = true;
+            const btn = document.getElementById('voiceBtn');
+            btn.classList.add('listening');
+            document.getElementById('voiceText').textContent = document.body.getAttribute('data-lang') === 'rw' ? 'Umva...' : 'Listening...';
+            recognition.start();
+        }
+
+        function stopListening() {
+            isListening = false;
+            const btn = document.getElementById('voiceBtn');
+            btn.classList.remove('listening');
+            document.getElementById('voiceText').textContent = document.body.getAttribute('data-lang') === 'rw' ? 'Vuga' : 'Speak';
+            if (recognition) recognition.stop();
+        }
+
+        function sendToChatbot(text) {
+            chatFrame = document.getElementById('chatFrame');
+            try {
+                const message = { type: "user_message", text: text };
+                chatFrame.contentWindow.postMessage(message, "*");
+            } catch (e) {
+                console.log("Direct injection limited. Showing spoken text.");
+            }
+            console.log("Sent to chatbot:", text);
+            speakResponse(document.body.getAttribute('data-lang') === 'rw' ? "Murakoze. Ndumva." : "Thank you. I heard you.");
+        }
+
+        function speakResponse(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = document.body.getAttribute('data-lang') === 'rw' ? 'rw-RW' : 'en-US';
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function switchLanguage(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.body.setAttribute('data-lang', lang);
+
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = (lang === 'en') ? el.getAttribute('data-en') : el.getAttribute('data-rw');
+            });
+
+
+
+            document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+            if (recognition) recognition.lang = lang === 'rw' ? 'rw-RW' : 'en-US';
+        }
+
+        function toggleContrast() { document.body.classList.toggle('high-contrast'); }
+        let currentSize = 16;
+        function changeFontSize(delta) {
+            currentSize += delta;
+            document.body.style.fontSize = currentSize + 'px';
+        }
+
+        window.onload = () => {
+            switchLanguage('rw');
+        };
+    </script>
+
+    <!-- Urungano AI Sign Language Avatar -->
+    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
+        <div class="relative">
+            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
+                <img src="main page.gif" 
+                     alt="Urungano AI Signing" 
+                     class="w-full h-full object-cover">
+            </div>
+            
+            
+        </div>
+        
+        <!-- Hover Tooltip -->
+        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
+            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
+                🖐️ Urungano Home
+            </p>
+            <p class="text-slate-600 text-xs leading-relaxed" 
+               data-en="Urungano is a reliable and safe digital platform that provides information and support on sexual and reproductive health and mental health, in Kinyarwanda and English." 
+               data-rw="Urungano ni Urubuga rw'ikoranabuhanga rwizewe kandi rudaheza rutanga amakuru n’inkunga ku buzima bw’imyororokere n’ubuzima bwo mu mutwe, mu Kinyarwanda n’Icyongereza.">
+Urungano ni Urubuga rw'ikoranabuhanga rwizewe kandi rudaheza rutanga amakuru n’inkunga ku buzima bw’imyororokere n’ubuzima bwo mu mutwe, mu Kinyarwanda n’Icyongereza.
+            </p>
+        </div>
+    </div>
+
+
+  <script type="module" src="institution-tracker.js"></script>
+</body>
+</html>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urungano Chat</title>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut,
+      updateProfile
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      query,
+      orderBy,
+      doc,
+      setDoc,
+      getDocs,
+      getDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4",
+      authDomain: "urungano-chat-50d62.firebaseapp.com",
+      projectId: "urungano-chat-50d62",
+      storageBucket: "urungano-chat-50d62.firebasestorage.app",
+      messagingSenderId: "730372170670",
+      appId: "1:730372170670:web:91300da03f18f488afde3f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentUserProfile = null;
+    let currentTarget = null;
+    let unsubscribeMessages = null;
+let isEnglish = false;
+    const userCache = {};
+    let groupsCache = [];
+
+    // Hardcoded translations for known group names (fallback if Firestore data lacks nameRw/nameEn)
+    const groupNameTranslations = {
+      "mental health": { rw: "Ubuzima Bwo mu Mutwe", en: "Mental Health" },
+      "ubuzima bwo mu mutwe": { rw: "Ubuzima Bwo mu Mutwe", en: "Mental Health" },
+      "srh": { rw: "Imirire n'Ubuzima", en: "SRH" },
+      "imirire": { rw: "Imirire n'Ubuzima", en: "SRH" },
+      "sexuelle": { rw: "Imirire n'Ubuzima", en: "SRH" },
+      "générale": { rw: "Rusange", en: "General" },
+      "rusange": { rw: "Rusange", en: "General" }
+    };
+
+    function getTranslatedGroupName(group) {
+      // If Firestore has separate nameEn/nameRw fields, use them directly
+      if (isEnglish) {
+        if (group.nameEn) return group.nameEn;
+      } else {
+        if (group.nameRw) return group.nameRw;
+      }
+      // Fallback: try the other language field
+      if (isEnglish && group.nameRw) return group.nameRw;
+      if (!isEnglish && group.nameEn) return group.nameEn;
+      // Fallback to hardcoded translations based on the name field
+      const name = (group.name || group.nameEn || group.nameRw || "").toLowerCase().trim();
+      for (const key of Object.keys(groupNameTranslations)) {
+        if (name.includes(key)) {
+          return isEnglish ? groupNameTranslations[key].en : groupNameTranslations[key].rw;
+        }
+      }
+      // Last resort: return whatever name is available
+      return group.name || group.nameEn || group.nameRw || "Group";
+    }
+
+    function t(rw, en) {
+      return isEnglish ? en : rw;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text ?? "";
+      return div.innerHTML;
+    }
+
+    function showSection(section) {
+      document.getElementById("auth-section").style.display = section === "auth" ? "flex" : "none";
+      document.getElementById("chat-section").style.display = section === "chat" ? "flex" : "none";
+    }
+
+    function isMobileViewport() {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
+
+    function setMobileModeChatListOnly(active) {
+      const chatArea = document.querySelector(".chat-area");
+      if (!chatArea) return;
+
+      if (active) {
+        chatArea.style.display = "none";
+      } else {
+        chatArea.style.display = "flex";
+      }
+    }
+
+    function updateMobileViews() {
+      if (!isMobileViewport()) return;
+      // Mobile: show sidebar only by default; when a chat is selected, show chat.
+      if (currentTarget) {
+        enterChatView();
+      } else {
+        enterChatListView();
+      }
+    }
+
+
+    function enterChatView() {
+      if (!isMobileViewport()) return;
+      // In mobile, hide chat list (sidebar) only after user picks a chat.
+      // WhatsApp-like flow: sidebar -> chat -> back to sidebar.
+      const sidebar = document.querySelector(".sidebar");
+      const chatArea = document.querySelector(".chat-area");
+      if (sidebar) sidebar.style.display = "none";
+      if (chatArea) chatArea.style.display = "flex";
+
+      // Ensure a mobile back button exists.
+      const header = document.getElementById("chat-header");
+      if (header) {
+        const html = header.innerHTML;
+        if (!html.includes('id="mobile-back-btn"')) {
+          // Prepend a back button.
+          header.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; justify-content:flex-start;">
+              <button id="mobile-back-btn" onclick="window.mobileBackToList()" style="background:#0f766e; padding:10px 16px; border-radius:30px; font-weight:700; border:none; cursor:pointer;">← ${t("Garuka", "Back")}</button>
+              <span id="chat-header-title">${header.textContent}</span>
+            </div>
+          `;
+        }
+      }
+
+      // Keep header title updated for the selected chat.
+      const titleEl = document.getElementById("chat-header-title");
+      if (titleEl) {
+        titleEl.textContent = header.textContent.replace('← ' + t("Garuka", "Back"), '').trim();
+      }
+    }
+
+
+
+    function enterChatListView() {
+      if (!isMobileViewport()) return;
+      const sidebar = document.querySelector(".sidebar");
+      const chatArea = document.querySelector(".chat-area");
+      if (sidebar) sidebar.style.display = "block";
+      if (chatArea) chatArea.style.display = "none";
+
+      // Ensure header looks like a list and remove any mobile back button UI.
+      const header = document.getElementById("chat-header");
+      if (header) {
+        header.innerHTML = t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo", "Select a chat");
+      }
+    }
+
+
+    function handleResponsiveMobileMode() {
+      if (!isMobileViewport()) {
+        // Desktop/tablet: show both.
+        const sidebar = document.querySelector(".sidebar");
+        if (sidebar) sidebar.style.display = "block";
+        const chatArea = document.querySelector(".chat-area");
+        if (chatArea) chatArea.style.display = "flex";
+        return;
+      }
+
+      // Mobile: default to list-only view unless a target is already selected.
+      if (currentTarget) {
+        enterChatView();
+      } else {
+        enterChatListView();
+      }
+    }
+
+
+    async function saveUserProfile(user, username = "") {
+      const finalUsername = username || user.displayName || user.email?.split("@")[0] || "User";
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email || "",
+        username: finalUsername,
+        createdAt: serverTimestamp()
+      }, { merge: true });
+      currentUserProfile = { uid: user.uid, username: finalUsername };
+      userCache[user.uid] = currentUserProfile;
+    }
+
+    async function loadCurrentUserProfile(user) {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (snap.exists()) {
+        currentUserProfile = snap.data();
+        userCache[user.uid] = currentUserProfile;
+      } else {
+        await saveUserProfile(user);
+      }
+    }
+
+    // ===================== AUTH =====================
+    window.signUp = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const username = document.getElementById("username").value.trim();
+      const status = document.getElementById("status");
+
+      if (!username || !email || !password) {
+        status.innerHTML = `<span style="color:red;">${t("Nyuza amakuru yose", "Please fill all fields")}</span>`;
+        return;
+      }
+      status.textContent = t("Tegereza...", "Please wait...");
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(cred.user, { displayName: username });
+        await saveUserProfile(cred.user, username);
+        status.innerHTML = `<span style="color:green;">${t("Iyandikishwa ryagenze neza!", "Sign up successful!")}</span>`;
+      } catch (e) {
+        status.innerHTML = `<span style="color:red;">${escapeHtml(e.message)}</span>`;
+      }
+    };
+
+    window.logIn = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const status = document.getElementById("status");
+      if (!email || !password) {
+        status.innerHTML = `<span style="color:red;">${t("Nyuza email n'ijambo ry'ibanga", "Enter email and password")}</span>`;
+        return;
+      }
+      status.textContent = t("Tegereza...", "Please wait...");
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (e) {
+        status.innerHTML = `<span style="color:red;">${escapeHtml(e.message)}</span>`;
+      }
+    };
+
+    // ===================== LOAD DATA =====================
+    async function loadGroups() {
+      const list = document.getElementById("groups-list");
+      list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+      const snapshot = await getDocs(collection(db, "groups"));
+      groupsCache = [];
+      snapshot.forEach(docSnap => {
+        const g = docSnap.data();
+        if (!g.id) return;
+        groupsCache.push(g);
+      });
+      renderGroups();
+    }
+
+    function getGroupIcon(group) {
+      const name = (group.nameRw || group.nameEn || "").toLowerCase();
+      if (name.includes("mental") || name.includes("ubuzima") || name.includes("psychologique")) return "🧠";
+      if (name.includes("srh") || name.includes("imirire") || name.includes("sexuelle")) return "🛡️";
+      if (name.includes("générale") || name.includes("rusange")) return "💬";
+      return "💬";
+    }
+
+    function renderGroups() {
+      const list = document.getElementById("groups-list");
+      list.innerHTML = "";
+      groupsCache.forEach(g => {
+        const div = document.createElement("div");
+        div.className = "group-item sidebar-item";
+        div.dataset.type = "group";
+        div.dataset.id = g.id;
+        const icon = getGroupIcon(g);
+        const displayName = getTranslatedGroupName(g);
+        div.innerHTML = `<span class="item-icon">${icon}</span><strong>${escapeHtml(displayName)}</strong>`;
+        div.onclick = () => openGroup(g);
+        list.appendChild(div);
+      });
+    }
+
+    async function loadUsers() {
+      const list = document.getElementById("users-list");
+      list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+      const snapshot = await getDocs(collection(db, "users"));
+      list.innerHTML = "";
+      const users = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.uid && data.uid !== currentUser?.uid) {
+          userCache[data.uid] = data;
+          users.push(data);
+        }
+      });
+      users.sort((a,b) => (a.username||"").localeCompare(b.username||""));
+      users.forEach(user => {
+        const div = document.createElement("div");
+        div.className = "user-item sidebar-item";
+        div.dataset.type = "user";
+        div.dataset.id = user.uid;
+        div.innerHTML = `<span class="item-icon">👤</span><strong>${escapeHtml(user.username || "User")}</strong>`;
+        div.onclick = () => openPrivateChat(user);
+        list.appendChild(div);
+      });
+    }
+
+    function markActiveItem(type, id) {
+      document.querySelectorAll(".sidebar-item").forEach(el => {
+        el.classList.toggle("active", el.dataset.type === type && el.dataset.id === id);
+      });
+    }
+
+    function clearMessages() {
+      document.getElementById("messages").innerHTML = "";
+      if (unsubscribeMessages) unsubscribeMessages();
+    }
+
+    function openGroup(group) {
+      currentTarget = { type: "group", data: group };
+      markActiveItem("group", group.id);
+      refreshHeader();
+      clearMessages();
+      const q = query(collection(db, "groups", group.id, "messages"), orderBy("createdAt"));
+      unsubscribeMessages = onSnapshot(q, renderMessages);
+
+      // WhatsApp-like mobile navigation: go to chat view.
+      updateMobileViews();
+    }
+
+
+    function openPrivateChat(user) {
+      currentTarget = { type: "private", data: user };
+      markActiveItem("user", user.uid);
+      refreshHeader();
+      clearMessages();
+      const chatId = [currentUser.uid, user.uid].sort().join("_");
+      const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
+      unsubscribeMessages = onSnapshot(q, renderMessages);
+
+      // WhatsApp-like mobile navigation: go to chat view.
+      updateMobileViews();
+    }
+
+
+function refreshHeader() {
+      if (!currentTarget) return;
+      const header = document.getElementById("chat-header");
+      if (currentTarget.type === "group") {
+        const groupName = getTranslatedGroupName(currentTarget.data);
+        header.textContent = isEnglish 
+          ? `Group: ${groupName}`
+          : `Itsinda: ${groupName}`;
+      } else {
+        header.textContent = isEnglish 
+          ? `Chatting with ${currentTarget.data.username}`
+          : `Kuganira na ${currentTarget.data.username}`;
+      }
+    }
+
+    function renderMessages(snapshot) {
+      const container = document.getElementById("messages");
+      container.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const msg = docSnap.data();
+        const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "";
+
+        const div = document.createElement("div");
+        div.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
+
+        div.innerHTML = `
+          ${msg.senderId !== currentUser.uid ? `<span class="sender-name">${escapeHtml(userCache[msg.senderId]?.username || "User")}</span>` : ''}
+          <div>${escapeHtml(msg.text)}</div>
+          <small>${time}</small>
+        `;
+        container.appendChild(div);
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    window.sendMessage = async () => {
+      const input = document.getElementById("message-input");
+      const text = input.value.trim();
+      if (!text || !currentTarget) return;
+
+      const messageData = {
+        text,
+        senderId: currentUser.uid,
+        senderName: currentUserProfile?.username || "User",
+        createdAt: serverTimestamp()
+      };
+
+      if (currentTarget.type === "group") {
+        await addDoc(collection(db, "groups", currentTarget.data.id, "messages"), messageData);
+      } else if (currentTarget.type === "private") {
+        const chatId = [currentUser.uid, currentTarget.data.uid].sort().join("_");
+        await addDoc(collection(db, "chats", chatId, "messages"), messageData);
+      }
+      input.value = "";
+    };
+
+    window.logout = () => signOut(auth);
+
+    window.mobileBackToList = () => {
+      currentTarget = null;
+      markActiveItem("group", "");
+      markActiveItem("user", "");
+      clearMessages();
+      // Ensure mobile UI shows sidebar only.
+      enterChatListView();
+    };
+
+    function refreshLanguage() {
+
+      // Translate static elements
+      document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
+      document.getElementById("users-title").textContent = t("Abandi bakoresha", "Other Users");
+      document.getElementById("send-btn").textContent = t("Ohereza", "Send");
+      document.getElementById("message-input").placeholder = t("Andika message hano...", "Type your message here...");
+      // Update segmented language toggle
+      const langEl = document.getElementById("lang-toggle");
+      if (langEl) {
+langEl.innerHTML = isEnglish
+          ? `<span class="lang-option active">English</span><span class="lang-option">Kinyarwanda</span>`
+          : `<span class="lang-option">English</span><span class="lang-option active">Kinyarwanda</span>`;
+      }
+      document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
+      document.querySelectorAll(".back-btn").forEach(el => el.textContent = t("← Ahabanza", "← Back"));
+
+      // Translate the chat header (when no chat selected)
+      if (!currentTarget) {
+        const header = document.getElementById("chat-header");
+        if (header) {
+          header.textContent = t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo", "Select a chat");
+        }
+      }
+
+      // Translate empty chat state
+      const emptyTitle = document.getElementById("empty-chat-title");
+      const emptyDesc = document.getElementById("empty-chat-desc");
+      if (emptyTitle) {
+        emptyTitle.textContent = t("Hitamo ikiganiro", "Select a conversation");
+      }
+      if (emptyDesc) {
+        emptyDesc.textContent = t("Hitamo itsinda cyangwa umuntu wo here hose ugire ibyo uvuga", "Choose a group or person from the list to start chatting");
+      }
+
+      // Re-render groups to update their displayed names (nameRw / nameEn)
+      renderGroups();
+
+      if (currentTarget) refreshHeader();
+    }
+
+    window.toggleLanguage = () => {
+      isEnglish = !isEnglish;
+      refreshLanguage();
+    };
+
+    // ===================== INIT =====================
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await loadCurrentUserProfile(user);
+        showSection("chat");
+        await loadGroups();
+        await loadUsers();
+        refreshLanguage();
+
+        // Apply WhatsApp-like mobile view on load.
+        handleResponsiveMobileMode();
+
+        // Keep view in sync if user rotates/resizes.
+        window.addEventListener("resize", handleResponsiveMobileMode);
+      } else {
+        showSection("auth");
+      }
+    });
+
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      min-height: 100vh;
+      padding: 10px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+      height: 96vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header-bar { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 15px 20px; 
+      background: white; 
+      border-bottom: 1px solid #e2e8f0; 
+    }
+    .logo { height: 50px; }
+
+    #auth-section { display: none; flex: 1; align-items: center; justify-content: center; }
+    .auth-card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    #chat-section { 
+      flex: 1; 
+      display: none; 
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 340px;
+      background: #F8FAFC;
+      border-right: 1px solid #e2e8f0;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* Sidebar section titles */
+    .sidebar h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 14px;
+      margin-top: 8px;
+    }
+    .sidebar h3:first-of-type {
+      margin-top: 4px;
+    }
+    .sidebar h3 + div {
+      margin-bottom: 10px;
+    }
+
+    /* ===== CHAT AREA ===== */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .chat-header {
+      padding: 18px 25px;
+      background: linear-gradient(180deg, #0f766e 0%, #10b981 100%);
+      color: white;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    #messages {
+      flex: 1;
+      padding: 25px;
+      overflow-y: auto;
+      background-color: #f8fafc;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='0.8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Empty state styling */
+    #messages:empty::after {
+      content: '';
+      display: block;
+    }
+    .empty-chat-state {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      user-select: none;
+      max-width: 320px;
+    }
+    .empty-chat-state svg {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+    .empty-chat-state h3 {
+      color: #6b7280;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .empty-chat-state p {
+      color: #9ca3af;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 14px 18px;
+      border-radius: 20px;
+      font-size: 15.5px;
+    }
+    .sent { background: #10b981; color: white; align-self: flex-end; }
+    .received { background: white; color: #1f2937; align-self: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .sender-name { font-size: 12px; font-weight: 700; color: #0f766e; margin-bottom: 6px; display: block; }
+
+    /* ===== INPUT AREA ===== */
+    .input-area {
+      padding: 15px 20px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    #message-input {
+      flex: 1;
+      padding: 16px 22px;
+      border: 2px solid #e2e8f0;
+      border-radius: 50px;
+      outline: none;
+      font-size: 15px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #message-input:focus {
+      border-color: #10b981;
+      box-shadow: inset 0 2px 6px rgba(16,185,129,0.08), 0 0 0 3px rgba(16,185,129,0.12);
+    }
+
+    /* ===== BUTTONS ===== */
+    button {
+      padding: 14px 24px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+    button:hover {
+      background: #059669;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+
+    /* Primary back button */
+    .btn-primary-back {
+      background: #0f766e;
+      padding: 12px 22px;
+      border-radius: 50px;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(15,118,110,0.25);
+      border: 2px solid #0f766e;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary-back:hover {
+      background: #0b5e57;
+      box-shadow: 0 6px 14px rgba(15,118,110,0.35);
+    }
+
+    /* Send button prominent */
+    #send-btn {
+      padding: 16px 32px;
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(16,185,129,0.3);
+    }
+    #send-btn:hover {
+      box-shadow: 0 6px 14px rgba(16,185,129,0.4);
+    }
+
+    /* ===== SIDEBAR ITEMS ===== */
+    .group-item, .user-item {
+      padding: 16px 20px;
+      margin: 8px 0;
+      background: white;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .group-item:hover, .user-item:hover {
+      background: #f0fdf4;
+      border-color: #10b981;
+      box-shadow: 0 2px 8px rgba(16,185,129,0.08);
+    }
+    .group-item.active, .user-item.active {
+      background: #dcfce7;
+      border-color: #10b981;
+      border-left: 4px solid #10b981;
+      box-shadow: 0 2px 8px rgba(16,185,129,0.12);
+    }
+    .group-item .item-icon {
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0fdf4;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .user-item .item-icon {
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0fdf4;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .group-item strong, .user-item strong {
+      font-size: 15px;
+    }
+
+    /* ===== LANGUAGE TOGGLE (Segmented Control) ===== */
+    .lang-segmented {
+      display: inline-flex;
+      background: #e2e8f0;
+      border-radius: 50px;
+      padding: 3px;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid #d1d5db;
+    }
+    .lang-segmented .lang-option {
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      color: #6b7280;
+    }
+    .lang-segmented .lang-option.active {
+      background: #10b981;
+      color: white;
+      box-shadow: 0 2px 6px rgba(16,185,129,0.25);
+    }
+    .lang-segmented .lang-option:not(.active):hover {
+      color: #374151;
+    }
+
+    /* ===== LOGOUT BUTTON ===== */
+    #logout-btn {
+      margin-top: 30px;
+      width: 100%;
+      background: #ef4444;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    #logout-btn:hover {
+      background: #dc2626;
+    }
+
+    /* Secondary text lighter */
+    .text-muted {
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+@media (max-width: 900px) {
+      #chat-section { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; box-shadow: none; }
+
+      /* Ensure the send button stays fully visible on mobile */
+      .input-area {
+        padding: 10px 12px;
+        gap: 8px;
+        flex-wrap: nowrap;
+      }
+      #message-input {
+        min-width: 0; /* allow the input to shrink so the button fits */
+        padding: 14px 16px;
+      }
+      #send-btn {
+        padding: 14px 18px;
+        font-size: 14px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Auth Section -->
+    <div id="auth-section">
+      <div class="auth-card">
+        <img src="urungano-logo.jpeg" alt="Logo" class="logo" style="margin-bottom:20px;">
+        <h1>Urungano Chat</h1>
+        <p id="chat-subtitle">Kuganira mu bwiherezo</p>
+
+        <input id="username" type="text" placeholder="Username" style="width:100%; padding:14px; margin:10px 0; border:1px solid #cbd5e1; border-radius:12px;">
+        <input id="email" type="email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; border:1px solid #cbd5e1; border-radius:12px;">
+        <input id="password" type="password" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; border:1px solid #cbd5e1; border-radius:12px;">
+
+        <button onclick="signUp()" style="width:100%; padding:16px; margin:10px 0;">Iyandikishe</button>
+        <button onclick="logIn()" style="width:100%; padding:16px; background:#64748b; margin-top:8px;">Kwinjira</button>
+
+        <div id="status" style="margin:15px 0; min-height:40px;"></div>
+        <button class="back-btn" onclick="window.location.href='index.html'" style="width:100%; padding:14px;">← Ahabanza</button>
+      </div>
+    </div>
+
+    <!-- Chat Section -->
+    <div id="chat-section">
+      <div class="sidebar">
+        <div class="header-bar">
+          <img src="urungano-logo.jpeg" alt="Logo" class="logo">
+          <button class="back-btn btn-primary-back" onclick="window.location.href='index.html'" style="background:#0f766e;">← Ahabanza</button>
+        </div>
+
+        <div style="margin:15px 0; text-align:right;">
+          <span onclick="toggleLanguage()" id="lang-toggle" class="lang-segmented">
+            <span class="lang-option">English</span>
+            <span class="lang-option active">Kinyarwanda</span>
+          </span>
+        </div>
+
+        <h3 id="groups-title">Amatsinda</h3>
+        <div id="groups-list"></div>
+
+        <h3 id="users-title" style="margin-top:25px;">Abandi bakoresha</h3>
+        <div id="users-list"></div>
+
+        <button id="logout-btn" onclick="logout()" style="margin-top:30px; width:100%; background:#ef4444; padding:14px;">Sohoka</button>
+      </div>
+
+      <div class="chat-area">
+        <div class="chat-header" id="chat-header">Hitamo itsinda cyangwa umuntu ushaka kuganiramo</div>
+        <div id="messages">
+          <!-- Empty state (visible when no messages) -->
+          <div class="empty-chat-state">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="50" r="20" stroke="#10b981" stroke-width="2" fill="none" opacity="0.4"/>
+              <circle cx="54" cy="46" r="3" fill="#10b981" opacity="0.5"/>
+              <circle cx="66" cy="46" r="3" fill="#10b981" opacity="0.5"/>
+              <path d="M50 56 Q60 64 70 56" stroke="#10b981" stroke-width="2" fill="none" opacity="0.4"/>
+              <path d="M30 85 Q60 75 90 85" stroke="#10b981" stroke-width="2" fill="none" opacity="0.3"/>
+              <path d="M40 92 Q60 82 80 92" stroke="#10b981" stroke-width="1.5" fill="none" opacity="0.2"/>
+              <circle cx="30" cy="40" r="5" fill="#10b981" opacity="0.15"/>
+              <circle cx="90" cy="35" r="4" fill="#10b981" opacity="0.12"/>
+              <circle cx="20" cy="65" r="3" fill="#10b981" opacity="0.1"/>
+              <circle cx="100" cy="60" r="6" fill="#10b981" opacity="0.08"/>
+            </svg>
+            <h3 id="empty-chat-title">Hitamo ikiganiro</h3>
+            <p id="empty-chat-desc">Hitamo itsinda cyangwa umuntu wo here hose ugire ibyo uvuga</p>
+          </div>
+        </div>
+        
+        <div class="input-area">
+          <input id="message-input" placeholder="Andika message hano..." onkeypress="if(event.key==='Enter') sendMessage()">
+          <button onclick="sendMessage()" id="send-btn">Ohereza</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="institution-tracker.js"></script>
+</body>
+</html>
