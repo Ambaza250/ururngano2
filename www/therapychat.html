@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="rw">
 <head>
+    <link rel="stylesheet" href="app-shell.css">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Urungano Therapy Chat</title>
@@ -679,7 +680,7 @@
           showSection("auth");
         }
       } else {
-        showSection("auth");
+        window.location.replace('auth.html');
       }
     });
 
@@ -932,6 +933,7 @@
     })();
   </script>
   <script type="module" src="institution-tracker.js"></script>
+  <script src="app-shell.js"></script>
 </body>
 </html>
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="rw">
 <head>
+    <link rel="stylesheet" href="app-shell.css">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Urungano Chat</title>
@@ -480,7 +481,7 @@ langEl.innerHTML = isEnglish
         // Keep view in sync if user rotates/resizes.
         window.addEventListener("resize", handleResponsiveMobileMode);
       } else {
-        showSection("auth");
+        window.location.replace('auth.html');
       }
     });
 
@@ -887,6 +888,7 @@ langEl.innerHTML = isEnglish
       </div>
     </div>
   </div>
+  <script src="app-shell.js"></script>
   <script type="module" src="institution-tracker.js"></script>
 </body>
 </html>

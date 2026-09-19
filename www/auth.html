@@ -6,6 +6,7 @@
   <title>Urungano - Login / Register</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="app-shell.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap');
     body { font-family: 'Inter', sans-serif; }
@@ -59,7 +60,13 @@
     </div>
   </nav>
 
-  <div class="max-w-6xl mx-auto px-3 py-10 md:px-6 md:py-14 flex items-start justify-center">
+  <main class="max-w-5xl mx-auto px-4 py-8 md:px-6 md:py-12 grid gap-7 md:grid-cols-[1.1fr_.9fr] md:items-center">
+    <section class="rounded-3xl bg-gradient-to-br from-blue-700 via-blue-600 to-teal-600 text-white p-7 md:p-10 shadow-xl">
+      <p class="text-sm font-bold tracking-widest text-blue-100" data-en="SAFE • PRIVATE • HERE FOR YOU" data-rw="HIZEWE • NI IBANGA • TURI HANO">HIZEWE • NI IBANGA • TURI HANO</p>
+      <h2 class="mt-4 text-3xl md:text-5xl font-bold leading-tight" data-en="Health support that feels like a conversation." data-rw="Ubufasha ku buzima buganira nawe.">Ubufasha ku buzima buganira nawe.</h2>
+      <p class="mt-5 text-blue-50 leading-relaxed" data-en="Urungano brings trusted sexual and reproductive health information, mental-health support, peer conversations, and therapist chat together in Kinyarwanda and English." data-rw="Urungano ihuza amakuru yizewe ku buzima bw'imyororokere, ubufasha ku buzima bwo mu mutwe, ibiganiro n'urungano, n'ibiganiro n'umujyanama mu Kinyarwanda no mu Cyongereza.">Urungano ihuza amakuru yizewe ku buzima bw'imyororokere, ubufasha ku buzima bwo mu mutwe, ibiganiro n'urungano, n'ibiganiro n'umujyanama mu Kinyarwanda no mu Cyongereza.</p>
+      <div class="mt-7 grid grid-cols-2 gap-3 text-sm"><div class="rounded-2xl bg-white/15 p-4"><i class="fa-solid fa-heart-pulse text-xl"></i><p class="mt-2 font-semibold" data-en="Learn safely" data-rw="Menya neza">Menya neza</p></div><div class="rounded-2xl bg-white/15 p-4"><i class="fa-solid fa-comments text-xl"></i><p class="mt-2 font-semibold" data-en="Talk freely" data-rw="Ganira wisanzuye">Ganira wisanzuye</p></div></div>
+    </section>
     <div class="card">
       <div class="text-center">
         <img src="urungano-logo.jpeg" alt="Logo" class="w-16 h-16 object-cover mx-auto rounded-2xl mb-3">
@@ -119,7 +126,8 @@
         </div>
       </div>
     </div>
-  </div>
+    </div>
+  </main>
 
   <!-- Forgot Password Modal -->
   <div id="forgotModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden px-3">
@@ -320,7 +328,7 @@
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Registration successful!' : 'Iyandikishwa ryagenze neza!'}</span>`;
 
 setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'urungano.html';
         }, 600);
       } catch (e) {
         authFlowInProgress = false;
@@ -348,7 +356,7 @@ setTimeout(() => {
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Login successful!' : 'Kwinjira byagenze neza!'}</span>`;
 
 setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'urungano.html';
         }, 600);
       } catch (e) {
         authFlowInProgress = false;
@@ -370,7 +378,7 @@ setTimeout(() => {
         }
 const currentLang = document.body.getAttribute('data-lang') || 'rw';
         switchLanguage(currentLang);
-        window.location.href = 'index.html';
+        window.location.href = 'urungano.html';
       }
     });
 
@@ -461,6 +469,7 @@ const currentLang = document.body.getAttribute('data-lang') || 'rw';
       console.log('✅ auth.html ready');
     };
   </script>
+  <script src="app-shell.js"></script>
 </body>
 </html>
 

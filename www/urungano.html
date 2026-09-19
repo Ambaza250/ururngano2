@@ -27,6 +27,7 @@
 <meta name="twitter:description" content="Ubufasha n’amakuru ku buzima bw’imyororokere n’ubuzima bwo mu mutwe mu Kinyarwanda. AI Assistant, emerigensi 24/7. Ni ibanga.">
 <meta name="twitter:image" content="https://urunganoai.vercel.app/og-image.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="app-shell.css">
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
@@ -469,11 +470,11 @@
     
 <body class="bg-slate-50" data-lang="rw">
 
-    <!-- Banner -->
-    <div class="banner">
-        <div class="banner-overlay"></div>
+    <!-- App header is supplied by app-shell.js. -->
+    <div>
+        <div class="hidden"></div>
         
-        <!-- NAV -->
+        <!-- Legacy navigation is removed by app-shell.js. -->
         <nav class="relative z-50 px-4 py-4 md:px-8 md:py-6">
             <div class="flex items-center justify-between gap-2">
                 <!-- Logo -->
@@ -540,8 +541,8 @@
             </div>
         </nav>
 
-        <!-- Welcome Text -->
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-white px-4 w-full max-w-4xl md:bottom-20">
+        <!-- Welcome text is intentionally removed from the authenticated landing page. -->
+        <div class="hidden">
             <h1 id="welcome-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3 md:mb-6"
                 data-en="Welcome to Urungano Platform" data-rw="Murakaza neza kuri Urungano Platform">
                 Murakaza neza kuri Urungano Platform
@@ -1131,32 +1132,7 @@ function setAuthUI(loggedIn) {
         };
     </script>
 
-    <!-- Urungano AI Sign Language Avatar -->
-    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
-        <div class="relative">
-            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
-                <img src="main page.gif" 
-                     alt="Urungano AI Signing" 
-                     class="w-full h-full object-cover">
-            </div>
-            
-            
-        </div>
-        
-        <!-- Hover Tooltip -->
-        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
-            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
-                🖐️ Urungano Home
-            </p>
-            <p class="text-slate-600 text-xs leading-relaxed" 
-               data-en="Urungano is a reliable and safe digital platform that provides information and support on sexual and reproductive health and mental health, in Kinyarwanda and English." 
-               data-rw="Urungano ni Urubuga rw'ikoranabuhanga rwizewe kandi rudaheza rutanga amakuru n’inkunga ku buzima bw’imyororokere n’ubuzima bwo mu mutwe, mu Kinyarwanda n’Icyongereza.">
-Urungano ni Urubuga rw'ikoranabuhanga rwizewe kandi rudaheza rutanga amakuru n’inkunga ku buzima bw’imyororokere n’ubuzima bwo mu mutwe, mu Kinyarwanda n’Icyongereza.
-            </p>
-        </div>
-    </div>
-
-
+  <script src="app-shell.js"></script>
   <script type="module" src="institution-tracker.js"></script>
 </body>
 </html>
