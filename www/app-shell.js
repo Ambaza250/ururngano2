@@ -25,6 +25,48 @@
     renderLanguage(lang);
     window.dispatchEvent(new CustomEvent('urungano-language-change', { detail: { lang } }));
   };
+  const asDate = value => {
+    if (!value) return null;
+    if (typeof value.toDate === 'function') return value.toDate();
+    if (typeof value.toMillis === 'function') return new Date(value.toMillis());
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+  const openTherapistArea = async () => {
+    const bookingPage = 'booking.html';
+    try {
+      const [appMod, authMod, fsMod] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js'),
+        import('https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js')
+      ]);
+      const config = { apiKey: 'AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4', authDomain: 'urungano-chat-50d62.firebaseapp.com', projectId: 'urungano-chat-50d62', storageBucket: 'urungano-chat-50d62.firebasestorage.app' };
+      const app = appMod.getApps()[0] || appMod.initializeApp(config);
+      const user = authMod.getAuth(app).currentUser;
+      if (!user) return location.assign('auth.html');
+      const db = fsMod.getFirestore(app);
+      const bookings = fsMod.collection(db, 'users', user.uid, 'bookings');
+      let latest = null;
+      try {
+        const ordered = await fsMod.getDocs(fsMod.query(bookings, fsMod.orderBy('createdAt', 'desc'), fsMod.limit(1)));
+        if (!ordered.empty) latest = ordered.docs[0].data();
+      } catch (_) { /* Some older bookings have no sortable createdAt. */ }
+      if (!latest) {
+        const snapshot = await fsMod.getDocs(fsMod.query(bookings, fsMod.limit(10)));
+        snapshot.forEach(doc => {
+          const candidate = doc.data();
+          if (!latest || (asDate(candidate.createdAt)?.getTime() || 0) > (asDate(latest.createdAt)?.getTime() || 0)) latest = candidate;
+        });
+      }
+      const payment = latest?.payment || {};
+      const confirmed = latest?.status === 'confirmed' || payment.confirmed === true;
+      const expiry = asDate(payment.expiryDate ?? payment.expiry_date ?? latest?.expiryDate ?? latest?.expiry_date);
+      if (confirmed && (!expiry || expiry >= new Date())) return location.assign('therapychat.html');
+    } catch (error) {
+      console.warn('Could not check therapist booking; opening therapist selection.', error);
+    }
+    location.assign(bookingPage);
+  };
   const mount = () => {
     document.querySelectorAll('nav, footer, #ai-avatar').forEach(node => node.remove());
     const header = document.createElement('header');
@@ -35,6 +77,10 @@
     bottom.className = 'app-bottom-nav'; bottom.setAttribute('aria-label', 'Main navigation');
     bottom.innerHTML = Object.entries(labels).map(([key, item]) => `<a href="${item.href}" class="${key === active ? 'is-active' : ''}" data-nav="${key}"><span class="nav-icon" aria-hidden="true">${item.icon}</span><span data-en="${item.en}" data-rw="${item.rw}">${item.rw}</span></a>`).join('');
     document.body.append(bottom);
+    bottom.querySelector('[data-nav="therapist"]')?.addEventListener('click', event => {
+      event.preventDefault();
+      openTherapistArea();
+    });
     header.querySelectorAll('button').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.lang)));
     renderLanguage(getLanguage());
   };
