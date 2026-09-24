@@ -20,8 +20,10 @@
     </section>
     <section id="dashboard-view" class="hidden">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"><div><p class="text-blue-600 font-semibold text-sm">INSTITUTION ANALYTICS</p><h1 id="institution-title" class="text-3xl font-bold">Dashboard</h1><p class="text-slate-500 mt-1">Anonymous, cumulative activity only.</p></div><div class="flex gap-2"><button id="refresh" class="px-4 py-2 rounded-xl border bg-white font-semibold"><i class="fa-solid fa-rotate mr-2"></i>Refresh</button><button id="sign-out" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold">Sign out</button></div></div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-7">
         <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Accounts choosing you</p><p id="accounts-count" class="text-3xl font-bold mt-2">0</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Accounts who paid for therapists</p><p id="paid-users-count" class="text-3xl font-bold mt-2">0</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Therapist bookings made</p><p id="bookings-made-count" class="text-3xl font-bold mt-2">0</p></article>
         <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Total visits</p><p id="visits-count" class="text-3xl font-bold mt-2">0</p></article>
         <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Quiz results</p><p id="quiz-count" class="text-3xl font-bold mt-2">0</p></article>
         <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500">Average quiz score</p><p id="average-score" class="text-3xl font-bold mt-2">—</p></article>
@@ -47,6 +49,8 @@
       const { institution } = await res.json(), stats = institution.stats || {}, quiz = stats.quiz || {};
       document.getElementById('institution-title').textContent = institution.name;
       document.getElementById('accounts-count').textContent = format(stats.accountsCount);
+      document.getElementById('paid-users-count').textContent = format(stats.paidUsers);
+      document.getElementById('bookings-made-count').textContent = format(stats.bookingsMade);
       document.getElementById('visits-count').textContent = format(stats.totalVisits);
       document.getElementById('quiz-count').textContent = format(quiz.totalResults);
       document.getElementById('average-score').textContent = quiz.totalResults ? (Number(quiz.totalScore || 0) / quiz.totalResults).toFixed(1) : '—';

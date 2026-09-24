@@ -286,6 +286,17 @@
         </div>
       </div>
     </section>
+
+    <section id="admin-dashboard" class="hidden mt-10" aria-labelledby="admin-dashboard-title">
+      <div class="mb-5"><h2 id="admin-dashboard-title" class="text-2xl md:text-3xl font-bold text-slate-800"><i class="fa-solid fa-chart-line text-blue-600 mr-2"></i><span data-en="Site dashboard" data-rw="Imibare y'urubuga">Site dashboard</span></h2><p class="text-sm text-slate-600 mt-1" data-en="Overall activity across the site." data-rw="Imibare rusange y'ibikorwa ku rubuga.">Overall activity across the site.</p></div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500" data-en="Registered users" data-rw="Abiyandikishije">Registered users</p><p id="stat-registered-users" class="text-3xl font-bold mt-2">—</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500" data-en="Page visits" data-rw="Ubusuwe bw'amapaji">Page visits</p><p id="stat-page-views" class="text-3xl font-bold mt-2">—</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500" data-en="Therapist bookings" data-rw="Bookings z'abajyanama">Therapist bookings</p><p id="stat-bookings" class="text-3xl font-bold mt-2">—</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500" data-en="Therapists" data-rw="Abajyanama">Therapists</p><p id="stat-therapists" class="text-3xl font-bold mt-2">—</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200"><p class="text-sm text-slate-500" data-en="Users who booked" data-rw="Abakoresheje booking">Users who booked</p><p id="stat-users-booked" class="text-3xl font-bold mt-2">—</p></article>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -380,6 +391,7 @@
         await authMod.signOut(authMod.getAuth(appMod.initializeApp(firebaseConfig)));
       }).catch(() => {});
       document.getElementById('data-section').classList.add('hidden');
+      document.getElementById('admin-dashboard').classList.add('hidden');
       document.getElementById('therapist-section').classList.add('hidden');
       document.getElementById('institution-section').classList.add('hidden');
       document.getElementById('login-section').classList.remove('hidden');
@@ -552,6 +564,20 @@
       appId: "1:730372170670:web:91300da03f18f488afde3f"
     };
 
+    async function refreshPageViewCount(currentUser) {
+      try {
+        const response = await fetch('/api/admin/dashboard-stats', {
+          headers: { Authorization: 'Bearer ' + await currentUser.getIdToken() }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to load page visits.');
+        document.getElementById('stat-page-views').textContent = Number(data.stats?.pageViews || 0).toLocaleString();
+      } catch (error) {
+        // Keep the dashboard visible if the server analytics counter is unavailable.
+        console.error('Unable to load page visit count', error);
+      }
+    }
+
     async function refreshData() {
       const list = document.getElementById('paid-list');
       const loadingIndicator = document.getElementById('loading-indicator');
@@ -585,6 +611,14 @@
 
         const db = getFirestore(app);
         const usersSnap = await getDocs(collection(db, 'users'));
+        const therapistsSnap = await getDocs(collection(db, 'therapists'));
+        refreshPageViewCount(currentUser);
+        const dashboard = document.getElementById('admin-dashboard');
+        dashboard.classList.remove('hidden');
+        document.getElementById('stat-registered-users').textContent = usersSnap.size.toLocaleString();
+        document.getElementById('stat-therapists').textContent = therapistsSnap.size.toLocaleString();
+        let totalBookings = 0;
+        let usersWithBookings = 0;
 
         // For each user, read bookings and check payment.confirmed
         // Note: This is potentially heavy if you have many users.
@@ -597,6 +631,8 @@
 
           const bookingsColRef = fsMod.collection(db, 'users', uid, 'bookings');
           const bookingsSnap = await getDocs(bookingsColRef);
+          totalBookings += bookingsSnap.size;
+          if (!bookingsSnap.empty) usersWithBookings += 1;
 
           let paidCount = 0;
           let pendingCount = 0;
@@ -666,6 +702,9 @@
         }
 
         const paidUsers = Array.from(paidUsersMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        document.getElementById('stat-bookings').textContent = totalBookings.toLocaleString();
+        document.getElementById('stat-users-booked').textContent = usersWithBookings.toLocaleString();
 
         markEmptyIfNeeded(paidUsers);
 

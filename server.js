@@ -247,6 +247,32 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true });
 });
 
+// Aggregate anonymous page views for the admin dashboard.
+app.post('/api/analytics/page-view', async (_req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await firebaseAdmin.firestore().collection('analytics').doc('site').set({
+      totalPageViews: firebaseAdmin.firestore.FieldValue.increment(1)
+    }, { merge: true });
+    return res.json({ ok: true });
+  } catch (e) {
+    console.error('Unable to record page view', e);
+    return res.status(500).json({ error: 'Unable to record page view.' });
+  }
+});
+
+app.get('/api/admin/dashboard-stats', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const analytics = await firebaseAdmin.firestore().collection('analytics').doc('site').get();
+    return res.json({ stats: { pageViews: Number(analytics.data()?.totalPageViews || 0) } });
+  } catch (e) {
+    console.error('Unable to load admin dashboard stats', e);
+    return res.status(e.status || 500).json({ error: e.message || 'Unable to load dashboard statistics.' });
+  }
+});
+
 // ===== Therapist creation endpoint =====
 app.post('/api/admin/therapists/create', async (req, res) => {
   try {
@@ -457,6 +483,9 @@ app.post('/api/institutions/login', async (req, res) => {
     return res.json({ ok: true, session: createInstitutionSession(snap.id), institution: { id: snap.id, name: snap.data().name } });
   } catch (e) {
     console.error(e);
+    if (e?.code === 16 || e?.code === 'UNAUTHENTICATED') {
+      return res.status(503).json({ error: 'Institution sign-in is temporarily unavailable because Google rejected the server Firebase credentials. Replace the service-account key configured by GOOGLE_APPLICATION_CREDENTIALS, then restart the server.' });
+    }
     return res.status(500).json({ error: 'Unable to sign in.' });
   }
 });
@@ -469,8 +498,25 @@ app.get('/api/institutions/dashboard', async (req, res) => {
     const snap = await firebaseAdmin.firestore().collection('institutions').doc(session.institutionId).get();
     if (!snap.exists) return res.status(404).json({ error: 'Institution not found.' });
     const data = snap.data();
-    return res.json({ institution: { id: snap.id, name: data.name, stats: data.stats || {} } });
-  } catch (e) { return res.status(500).json({ error: 'Unable to load dashboard.' }); }
+    const db = firebaseAdmin.firestore();
+    const users = await db.collection('users').where('institutionId', '==', snap.id).get();
+    let paidUsers = 0;
+    let bookingsMade = 0;
+    for (const userDoc of users.docs) {
+      const bookings = await db.collection('users').doc(userDoc.id).collection('bookings').get();
+      bookingsMade += bookings.size;
+      if (bookings.docs.some(booking => booking.data()?.payment?.confirmed === true)) paidUsers += 1;
+    }
+    return res.json({ institution: { id: snap.id, name: data.name, stats: {
+      ...(data.stats || {}), accountsCount: users.size, paidUsers, bookingsMade
+    } } });
+  } catch (e) {
+    console.error('Unable to load institution dashboard', e);
+    if (e?.code === 16 || e?.code === 'UNAUTHENTICATED') {
+      return res.status(503).json({ error: 'Institution analytics are temporarily unavailable because Google rejected the server Firebase credentials. Replace the service-account key configured by GOOGLE_APPLICATION_CREDENTIALS, then restart the server.' });
+    }
+    return res.status(500).json({ error: 'Unable to load dashboard.' });
+  }
 });
 
 app.post('/api/institutions/password', async (req, res) => {
