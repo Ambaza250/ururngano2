@@ -1,6 +1,13 @@
 :root { --app-bottom-nav-height: 76px; }
 html { scroll-padding-bottom: calc(var(--app-bottom-nav-height) + 20px); }
 body { padding-bottom: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom) + 16px) !important; }
+/* Keep legacy page titles readable when an app screen displays its hero. */
+body #welcome-title, body #about-title {
+  color: #fff !important;
+  text-shadow: 0 2px 5px rgba(0,0,0,.68), 0 8px 28px rgba(0,0,0,.34) !important;
+}
+/* The app shell removes footers after mounting; preserve contrast during fallback rendering. */
+body footer h3 { color: #fff !important; }
 .app-header {
   position: sticky; top: 0; z-index: 1000; height: 64px; background: rgba(255,255,255,.96);
   backdrop-filter: blur(14px); border-bottom: 1px solid #e2e8f0; display: flex;
@@ -17,3 +24,9 @@ body { padding-bottom: calc(var(--app-bottom-nav-height) + env(safe-area-inset-b
 .app-bottom-nav a.is-active { color: #0f766e; }
 .app-bottom-nav a.is-active .nav-icon { background: #ccfbf1; }
 @media (min-width: 768px) { .app-header { padding-inline: max(28px, calc((100vw - 1100px) / 2)); } .app-bottom-nav { left: 50%; right: auto; width: min(560px, 100%); transform: translateX(-50%); border: 1px solid #e2e8f0; border-bottom: 0; border-radius: 20px 20px 0 0; } }
+
+/* Keep the sign-language control clear of the fixed mobile tab bar. */
+body #ai-avatar.sign-language-widget {
+  right: 1rem !important;
+  bottom: calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom) + 1rem) !important;
+}

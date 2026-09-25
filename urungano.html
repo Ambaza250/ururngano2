@@ -175,6 +175,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     
+    <link rel="stylesheet" href="urungano-design.css">
 </head>
 
 
@@ -704,6 +705,33 @@
     </div>
 </section>
 
+<!-- Community impact metrics use placeholders until a public aggregate-count endpoint is available. -->
+<section class="impact-stats" aria-labelledby="impact-stats-title">
+  <div class="impact-stats-inner">
+    <div class="impact-stats-intro">
+      <p class="impact-eyebrow" data-en="Growing together" data-rw="Dukura turi kumwe">Dukura turi kumwe</p>
+      <h2 id="impact-stats-title" data-en="Our numbers don’t lie" data-rw="Imibare yacu irivugira">Imibare yacu irivugira</h2>
+      <p data-en="More people are finding trusted support and information through Urungano." data-rw="Abantu benshi barimo kubona amakuru n'ubufasha bwizewe binyuze kuri Urungano.">Abantu benshi barimo kubona amakuru n'ubufasha bwizewe binyuze kuri Urungano.</p>
+    </div>
+    <div class="impact-stats-grid">
+      <article class="impact-stat-card">
+        <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg></span>
+        <strong>34</strong>
+        <span data-en="Total visits" data-rw="Abasura yose">Abasura yose</span>
+      </article>
+      <article class="impact-stat-card">
+        <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1.2a6 6 0 0 1 12 0V20H3Zm13-9.5a3 3 0 1 0-1.2-5.8M18 14a4.4 4.4 0 0 1 3 4.2V20h-3"/></svg></span>
+        <strong>12</strong>
+        <span data-en="Registered users" data-rw="Abakoresha biyandikishije">Abakoresha biyandikishije</span>
+      </article>
+      <article class="impact-stat-card">
+        <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4"/></svg></span>
+        <strong>2</strong>
+        <span data-en="Registered institutions" data-rw="Ibigo byiyandikishije">Ibigo byiyandikishije</span>
+      </article>
+    </div>
+  </div>
+</section>
 <!-- Quick Links Section - Footer Top -->
 <div class="quick-links bg-white border-b border-gray-100 py-8">
     <div class="max-w-6xl mx-auto px-6">
@@ -1132,10 +1160,14 @@ function setAuthUI(loggedIn) {
     </script>
 
     <!-- Urungano AI Sign Language Avatar -->
-    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
+    <details id="ai-avatar" class="sign-language-widget">
+        <summary class="sign-language-toggle" aria-label="Show or hide sign language video" title="Show or hide sign language video">
+            <span aria-hidden="true">♿</span>
+        </summary>
+        <div class="sign-language-panel">
         <div class="relative">
             <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
-                <img src="main page.gif" 
+                <img src="main page.gif" loading="lazy" 
                      alt="Urungano AI Signing" 
                      class="w-full h-full object-cover">
             </div>
@@ -1155,6 +1187,7 @@ Urungano ni Urubuga rw'ikoranabuhanga rwizewe kandi rudaheza rutanga amakuru n�
             </p>
         </div>
     </div>
+    </details>
 
 
   <script type="module" src="institution-tracker.js"></script>

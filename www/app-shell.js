@@ -68,7 +68,7 @@
     location.assign(bookingPage);
   };
   const mount = () => {
-    document.querySelectorAll('nav, footer, #ai-avatar').forEach(node => node.remove());
+    document.querySelectorAll('nav, footer').forEach(node => node.remove());
     const header = document.createElement('header');
     header.className = 'app-header';
     header.innerHTML = `<a class="app-brand" href="urungano.html" aria-label="Urungano home"><img src="urungano-logo.jpeg" alt=""><span>Urungano</span></a><div class="app-language" aria-label="Language"><button type="button" data-lang="rw">RW</button><button type="button" data-lang="en">EN</button></div>`;

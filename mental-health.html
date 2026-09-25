@@ -96,6 +96,7 @@
             #ai-avatar .tooltip { width: 288px; }
         }
     </style>
+    <link rel="stylesheet" href="urungano-design.css">
 </head>
 <body class="bg-slate-50" data-lang="rw">
 
@@ -481,10 +482,14 @@
     </script>
 
     <!-- Urungano AI Sign Language Avatar -->
-    <div id="ai-avatar" class="fixed z-50 flex flex-col items-end cursor-pointer group">
+    <details id="ai-avatar" class="sign-language-widget">
+        <summary class="sign-language-toggle" aria-label="Show or hide sign language video" title="Show or hide sign language video">
+            <span aria-hidden="true">♿</span>
+        </summary>
+        <div class="sign-language-panel">
         <div class="relative">
             <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
-                <img src="mental health.gif"
+                <img src="mental health.gif" loading="lazy"
                      alt="Urungano AI Signing for Mental Health"
                      class="w-full h-full object-cover"
                      onerror="this.onerror=null; this.src='signs.gif';">
@@ -505,6 +510,7 @@
             </p>
         </div>
     </div>
+    </details>
 
 <script>
     const questions = {
