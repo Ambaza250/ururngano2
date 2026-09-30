@@ -500,6 +500,7 @@
                     <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
                         <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
                     </button>
+                    <a id="manage-account-btn" href="account.html" class="nav-button bg-teal-700 text-white hover:bg-teal-800 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" data-en="Manage account" data-rw="Hindura amakuru ya konti" style="white-space:nowrap; display:none;">Hindura amakuru ya konti</a>
                 <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:inline-flex;">
                     <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
                 </button>
@@ -531,6 +532,7 @@
                 <button id="login-btn-mobile" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
                     <span id="login-btn-text-mobile" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
                 </button>
+                <a id="manage-account-btn-mobile" href="account.html" class="nav-button bg-teal-700 text-white font-semibold px-5 py-3 rounded-2xl text-sm text-center" data-en="Manage account information" data-rw="Hindura amakuru ya konti" style="display:none;">Hindura amakuru ya konti</a>
 
                 <button id="therapy-cta-btn-mobile" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
                     <span id="therapy-cta-text-mobile" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
@@ -561,10 +563,10 @@
         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden chat-container">
             
             <!-- Chat Header -->
-            <div class="bg-blue-600 px-4 py-4 md:px-8 md:py-6 text-white flex items-center justify-between gap-3">
+            <!--div class="bg-blue-600 px-4 py-4 md:px-8 md:py-6 text-white flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                     <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-10 h-10 md:w-14 md:h-14 object-cover rounded-2xl flex-shrink-0">
-                    <div class="min-w-0">
+                    <div class="min-w-0 chat-title-copy">
                         <h2 id="chat-title" class="text-base md:text-2xl font-bold truncate"
                             data-en="Urungano AI Assistant" data-rw="Urungano AI Assistant">
                             Urungano AI Assistant
@@ -576,9 +578,9 @@
                     </div>
                 </div>
 
-                <!-- Voice Button -->
                 
-            </div>
+                
+            </div -->
 
             <!-- Udify Chatbot -->
             <div style="height: calc(100% - 80px);">
@@ -707,32 +709,7 @@
 </section>
 
 <!-- Community impact metrics use placeholders until a public aggregate-count endpoint is available. -->
-<section class="impact-stats" aria-labelledby="impact-stats-title">
-  <div class="impact-stats-inner">
-    <div class="impact-stats-intro">
-      <p class="impact-eyebrow" data-en="Growing together" data-rw="Dukura turi kumwe">Dukura turi kumwe</p>
-      <h2 id="impact-stats-title" data-en="Our numbers don’t lie" data-rw="Imibare yacu irivugira">Imibare yacu irivugira</h2>
-      <p data-en="More people are finding trusted support and information through Urungano." data-rw="Abantu benshi barimo kubona amakuru n'ubufasha bwizewe binyuze kuri Urungano.">Abantu benshi barimo kubona amakuru n'ubufasha bwizewe binyuze kuri Urungano.</p>
-    </div>
-    <div class="impact-stats-grid">
-      <article class="impact-stat-card">
-        <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg></span>
-        <strong>12,480+</strong>
-        <span data-en="Total visits" data-rw="Abasura yose">Abasura yose</span>
-      </article>
-      <article class="impact-stat-card">
-        <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1.2a6 6 0 0 1 12 0V20H3Zm13-9.5a3 3 0 1 0-1.2-5.8M18 14a4.4 4.4 0 0 1 3 4.2V20h-3"/></svg></span>
-        <strong>3,200+</strong>
-        <span data-en="Registered users" data-rw="Abakoresha biyandikishije">Abakoresha biyandikishije</span>
-      </article>
-      <article class="impact-stat-card">
-        <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4"/></svg></span>
-        <strong>85+</strong>
-        <span data-en="Registered institutions" data-rw="Ibigo byiyandikishije">Ibigo byiyandikishije</span>
-      </article>
-    </div>
-  </div>
-</section>
+
 <!-- Quick Links Section - Footer Top -->
 <div class="quick-links bg-white border-b border-gray-100 py-8">
     <div class="max-w-6xl mx-auto px-6">
@@ -786,7 +763,6 @@
             </div>
         </div>
         <div class="text-sm opacity-75">
-            <p data-en="Urungano is a safe space for young people in Rwanda. All information is confidential and youth-friendly." data-rw="Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.">Urungano ni ahantu hizewe ku rubyiruko mu Rwanda. Amakuru yose ni ay'ibanga kandi yizewe ku rubyiruko.</p>
             <div class="mt-4 space-y-2">
                 <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
                 <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
@@ -1031,6 +1007,7 @@ function setAuthUI(loggedIn) {
                 _unsubscribe = authMod.onAuthStateChanged(_auth, async (user) => {
                     _currentUser = user;
                     setAuthUI(!!user);
+                    document.querySelectorAll('#manage-account-btn, #manage-account-btn-mobile').forEach(button => button.style.display = user ? 'inline-flex' : 'none');
 
                     const btn = document.getElementById('therapy-cta-btn');
                     if (!btn) return;

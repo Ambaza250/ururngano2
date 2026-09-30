@@ -85,6 +85,7 @@ footer h3 { color: #fff !important; }
 #welcome-title, .hero-banner h1 { font-size: clamp(2.45rem, 5.4vw, 4.8rem) !important; line-height: 1.08 !important; }
 .nav-button { border-radius: 999px !important; }
 .nav-button:not([class*="bg-blue-"]):not([class*="bg-emerald-"]) { box-shadow: 0 5px 18px rgba(16,55,53,.08) !important; }
+body[data-lang="rw"] nav .nav-button { font-size: .9em !important; padding-inline: .9em !important; padding-block: .9em !important; }
 .chat-container { border: 1px solid var(--ur-line); box-shadow: var(--ur-shadow) !important; }
 .emergency-section, .helpline-section { background: #fff4f1 !important; border-color: #e7a398 !important; }
 .emergency-section h2, .helpline-section h2 { color: #974f46 !important; }
@@ -155,6 +156,7 @@ body:has(.container) { background: radial-gradient(ellipse at 10% 5%, #e8f5f0, t
   .quick-link { min-height: 180px; }
 }
 @media (max-width: 640px) {
+  .chat-title-copy { display: none !important; }
   body { font-size: 15px; }
   .banner, .hero-banner, .hero-bg { border-radius: 0 0 24px 24px; }
   .banner { min-height: 410px; }
