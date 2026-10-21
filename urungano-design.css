@@ -143,7 +143,8 @@ body:has(.container) { background: radial-gradient(ellipse at 10% 5%, #e8f5f0, t
 .impact-stats-intro .impact-eyebrow { margin: 0 0 6px; color: var(--ur-teal); font-size: .76rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 .impact-stats-intro h2 { margin: 0; color: var(--ur-ink); font-size: clamp(2rem, 4vw, 3rem); }
 .impact-stats-intro > p:last-child { margin: 10px auto 0; max-width: 560px; }
-.impact-stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.impact-stats-grid { display: grid; grid-auto-columns: minmax(260px, 1fr); grid-auto-flow: column; grid-template-rows: minmax(190px, auto); gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; padding: 2px 2px 14px; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+.impact-stats-grid::-webkit-scrollbar { display: none; }
 .impact-stat-card { display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 22px 16px; border: 1px solid #d9e9e5; border-radius: 24px; background: rgba(255,255,255,.88); box-shadow: 0 10px 28px rgba(27,74,70,.07); text-align: center; }
 .impact-stat-icon { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: #d9f2ef; color: var(--ur-teal); }
 .impact-stat-icon svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
@@ -165,9 +166,9 @@ body:has(.container) { background: radial-gradient(ellipse at 10% 5%, #e8f5f0, t
   .container { padding: 12px !important; }
   .auth-card { padding: 24px !important; }
   .chat-container { min-height: 400px !important; }
-  .impact-stats-grid { grid-template-columns: 1fr; gap: 12px; }
+  .impact-stats-grid { grid-auto-columns: minmax(68vw, 1fr); grid-template-rows: minmax(118px, auto); gap: 10px; }
   .impact-stats-intro { margin-bottom: 22px; }
-  .impact-stat-card { min-height: 154px; }
+  .impact-stat-card { min-height: 118px; padding: 14px 12px; scroll-snap-align: start; }
   #ai-avatar.sign-language-widget { right: 1rem; bottom: 1rem; }
   .sign-language-toggle { width: 50px; height: 50px; border-radius: 16px; }
   #ai-avatar .avatar-img-wrap { width: 108px !important; height: 108px !important; }
