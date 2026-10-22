@@ -84,8 +84,11 @@ footer h3 { color: #fff !important; }
 }
 #welcome-title, .hero-banner h1 { font-size: clamp(2.45rem, 5.4vw, 4.8rem) !important; line-height: 1.08 !important; }
 .nav-button { border-radius: 999px !important; }
+.hidden.md\:flex .nav-button { display: inline-flex; align-items: center; }
+body nav .hidden.md\:flex .nav-button { padding-inline: 1.125rem; padding-block: .675rem; }
 .nav-button:not([class*="bg-blue-"]):not([class*="bg-emerald-"]) { box-shadow: 0 5px 18px rgba(16,55,53,.08) !important; }
 body[data-lang="rw"] nav .nav-button { font-size: .9em !important; padding-inline: .9em !important; padding-block: .9em !important; }
+body[data-lang="rw"] nav .hidden.md\:flex .nav-button { padding-inline: .81em !important; padding-block: .81em !important; }
 .chat-container { border: 1px solid var(--ur-line); box-shadow: var(--ur-shadow) !important; }
 .emergency-section, .helpline-section { background: #fff4f1 !important; border-color: #e7a398 !important; }
 .emergency-section h2, .helpline-section h2 { color: #974f46 !important; }
