@@ -735,8 +735,7 @@
     </div>
 </section>
 
-<!-- Community impact metrics use placeholders until a public aggregate-count endpoint is available. -->
-<!-- Community impact metrics use placeholders until a public aggregate-count endpoint is available. -->
+<!-- Community impact metrics – continuous infinite card carousel -->
 <section class="impact-stats" aria-labelledby="impact-stats-title">
   <div class="impact-stats-inner">
     <div class="impact-stats-intro">
@@ -746,6 +745,7 @@
     </div>
 
     <div class="impact-stats-grid" id="impact-stats-grid">
+      <!-- ORIGINAL SET -->
       <article class="impact-stat-card">
         <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg></span>
         <strong>34</strong>
@@ -780,14 +780,23 @@
   const grid = document.getElementById('impact-stats-grid');
   if (!grid) return;
 
-  const AUTO_INTERVAL = 2000;   // move every 2 seconds
-  const RESUME_DELAY = 2000;    // resume 2 seconds after user stops interacting
+  // --- 1. Duplicate the cards once so the track is continuous ---
+  const originals = Array.from(grid.children);
+  originals.forEach(card => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true'); // hide duplicates from screen readers
+    grid.appendChild(clone);
+  });
 
-  let autoTimer = null;
+  const AUTO_INTERVAL = 2000;   // advance every 2 seconds
+  const RESUME_DELAY  = 2000;   // resume 2 s after user stops interacting
+
+  let autoTimer   = null;
   let resumeTimer = null;
   let isUserInteracting = false;
+  let isResetting = false;      // ignore scroll events while we jump
 
-  function getCardStep() {
+  function getStep() {
     const card = grid.querySelector('.impact-stat-card');
     if (!card) return 280;
     const style = window.getComputedStyle(grid);
@@ -795,18 +804,30 @@
     return card.offsetWidth + gap;
   }
 
+  // Width of one full set of original cards
+  function getSetWidth() {
+    return getStep() * originals.length;
+  }
+
   function scrollNext() {
-    if (isUserInteracting) return;
+    if (isUserInteracting || isResetting) return;
 
-    const step = getCardStep();
-    const maxScroll = grid.scrollWidth - grid.clientWidth;
+    const step = getStep();
+    const setWidth = getSetWidth();
 
-    // If we're at (or very near) the end, jump back to start
-    if (grid.scrollLeft >= maxScroll - 4) {
-      grid.scrollTo({ left: 0, behavior: 'smooth' });
-    } else {
-      grid.scrollBy({ left: step, behavior: 'smooth' });
-    }
+    grid.scrollBy({ left: step, behavior: 'smooth' });
+
+    // After the smooth scroll finishes, check if we need to loop
+    setTimeout(() => {
+      // When we've scrolled past the first set, jump back by one set width
+      // (instant, no animation) so the user never sees a gap.
+      if (grid.scrollLeft >= setWidth - 2) {
+        isResetting = true;
+        grid.scrollLeft = grid.scrollLeft - setWidth;
+        // tiny delay so the browser applies the jump before we clear the flag
+        requestAnimationFrame(() => { isResetting = false; });
+      }
+    }, 450); // match typical smooth-scroll duration
   }
 
   function startAutoScroll() {
@@ -822,6 +843,7 @@
   }
 
   function pauseAndResumeLater() {
+    if (isResetting) return;
     isUserInteracting = true;
     stopAutoScroll();
 
@@ -832,16 +854,31 @@
     }, RESUME_DELAY);
   }
 
-  // Pause while user is interacting, resume 2s after they stop
+  // Pause while user is interacting, resume after they stop
   grid.addEventListener('pointerdown', pauseAndResumeLater);
   grid.addEventListener('touchstart', pauseAndResumeLater, { passive: true });
   grid.addEventListener('wheel', pauseAndResumeLater, { passive: true });
+
+  // Also keep the seamless loop working when the user scrolls manually
   grid.addEventListener('scroll', () => {
-    // only treat as user scroll when they are actively interacting
+    if (isResetting) return;
+
+    const setWidth = getSetWidth();
+    if (grid.scrollLeft >= setWidth - 2) {
+      isResetting = true;
+      grid.scrollLeft = grid.scrollLeft - setWidth;
+      requestAnimationFrame(() => { isResetting = false; });
+    } else if (grid.scrollLeft <= 1) {
+      // optional: allow scrolling left into the clone set
+      isResetting = true;
+      grid.scrollLeft = grid.scrollLeft + setWidth;
+      requestAnimationFrame(() => { isResetting = false; });
+    }
+
     if (isUserInteracting) pauseAndResumeLater();
   }, { passive: true });
 
-  // Start auto-scroll
+  // Start
   startAutoScroll();
 })();
 </script>
