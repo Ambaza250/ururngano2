@@ -736,6 +736,7 @@
 </section>
 
 <!-- Community impact metrics use placeholders until a public aggregate-count endpoint is available. -->
+<!-- Community impact metrics use placeholders until a public aggregate-count endpoint is available. -->
 <section class="impact-stats" aria-labelledby="impact-stats-title">
   <div class="impact-stats-inner">
     <div class="impact-stats-intro">
@@ -743,7 +744,8 @@
       <h2 id="impact-stats-title" data-en="Our numbers don’t lie" data-rw="Imibare yacu irivugira">Imibare yacu irivugira</h2>
       <p data-en="More people are finding trusted support and information through Urungano." data-rw="Abantu benshi barimo kubona amakuru n'ubufasha bwizewe binyuze kuri Urungano.">Abantu benshi barimo kubona amakuru n'ubufasha bwizewe binyuze kuri Urungano.</p>
     </div>
-    <div class="impact-stats-grid">
+
+    <div class="impact-stats-grid" id="impact-stats-grid">
       <article class="impact-stat-card">
         <span class="impact-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg></span>
         <strong>34</strong>
@@ -772,6 +774,77 @@
     </div>
   </div>
 </section>
+
+<script>
+(function () {
+  const grid = document.getElementById('impact-stats-grid');
+  if (!grid) return;
+
+  const AUTO_INTERVAL = 2000;   // move every 2 seconds
+  const RESUME_DELAY = 2000;    // resume 2 seconds after user stops interacting
+
+  let autoTimer = null;
+  let resumeTimer = null;
+  let isUserInteracting = false;
+
+  function getCardStep() {
+    const card = grid.querySelector('.impact-stat-card');
+    if (!card) return 280;
+    const style = window.getComputedStyle(grid);
+    const gap = parseFloat(style.columnGap || style.gap) || 12;
+    return card.offsetWidth + gap;
+  }
+
+  function scrollNext() {
+    if (isUserInteracting) return;
+
+    const step = getCardStep();
+    const maxScroll = grid.scrollWidth - grid.clientWidth;
+
+    // If we're at (or very near) the end, jump back to start
+    if (grid.scrollLeft >= maxScroll - 4) {
+      grid.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      grid.scrollBy({ left: step, behavior: 'smooth' });
+    }
+  }
+
+  function startAutoScroll() {
+    stopAutoScroll();
+    autoTimer = setInterval(scrollNext, AUTO_INTERVAL);
+  }
+
+  function stopAutoScroll() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  function pauseAndResumeLater() {
+    isUserInteracting = true;
+    stopAutoScroll();
+
+    if (resumeTimer) clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => {
+      isUserInteracting = false;
+      startAutoScroll();
+    }, RESUME_DELAY);
+  }
+
+  // Pause while user is interacting, resume 2s after they stop
+  grid.addEventListener('pointerdown', pauseAndResumeLater);
+  grid.addEventListener('touchstart', pauseAndResumeLater, { passive: true });
+  grid.addEventListener('wheel', pauseAndResumeLater, { passive: true });
+  grid.addEventListener('scroll', () => {
+    // only treat as user scroll when they are actively interacting
+    if (isUserInteracting) pauseAndResumeLater();
+  }, { passive: true });
+
+  // Start auto-scroll
+  startAutoScroll();
+})();
+</script>
 <!-- Footer -->
 <footer class="bg-slate-900 text-white py-12">
     <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
