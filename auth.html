@@ -68,7 +68,7 @@
           <span data-en="Login / Register" data-rw="Kwinjira / kwiyandikisha">Kwinjira / kwiyandikisha</span>
         </h2>
         <p class="text-slate-600 mt-2 text-sm">
-          <span data-en="Use your credentials to chat and cht with Urungano AI." data-rw="Koresha ayo makuru yo kwinjira kugirango uganire kandi ubashe kuganira na Urungano AI.">
+          <span data-en="Use your credentials to chat and chat with Urungano AI." data-rw="Koresha ayo makuru yo kwinjira kugirango uganire kandi ubashe kuganira na Urungano AI.">
             Koresha ayo makuru yo kwinjira kugirango uganire kandi ubashe kugnira na Urungano AI.
           </span>
         </p>
@@ -320,7 +320,7 @@
         status.innerHTML = `<span class="text-green-600"><i class="fa-solid fa-check"></i> ${document.body.getAttribute('data-lang') === 'en' ? 'Registration successful!' : 'Iyandikishwa ryagenze neza!'}</span>`;
 
 setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'urungano.html';
         }, 600);
       } catch (e) {
         authFlowInProgress = false;
@@ -370,7 +370,7 @@ setTimeout(() => {
         }
 const currentLang = document.body.getAttribute('data-lang') || 'rw';
         switchLanguage(currentLang);
-        window.location.href = 'index.html';
+        window.location.href = 'urungano.html';
       }
     });
 
