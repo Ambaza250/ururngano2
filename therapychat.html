@@ -205,178 +205,224 @@
     // 1) When a user logs in, they can see ONLY therapists.
     // 2) When a therapist logs in, they can see ALL users who messaged them.
 
-    async function loadTherapistsForUserSidebar() {
-      const list = document.getElementById("users-list");
-      list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+    async function getLatestBookingForUser(uid) {
+  if (!uid) return null;
+  const bookingRef = collection(db, "users", uid, "bookings");
+  let latest = null;
 
-      list.innerHTML = "";
-
-      // USER MODE: only show the therapist that the user paid for.
-      // Latest booking is stored at: users/{uid}/bookings/{bookingId}
-      // and includes: therapistUid + therapistName.
-      const bookingRef = collection(db, "users", currentUser?.uid, "bookings");
-
-      let latest = null;
-      try {
-        // Prefer orderBy if createdAt exists.
-        const q = query(bookingRef, orderBy("createdAt", "desc"), limit(1));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          latest = { id: snap.docs[0].id, ...(snap.docs[0].data() || {}) };
+  try {
+    const q = query(bookingRef, orderBy("createdAt", "desc"), limit(1));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      latest = { id: snap.docs[0].id, ...(snap.docs[0].data() || {}) };
+    }
+  } catch (e) {
+    // No index / permission → fall back without orderBy
+    try {
+      const snap = await getDocs(query(bookingRef, limit(20)));
+      let best = null;
+      let bestMs = -1;
+      snap.forEach((docSnap) => {
+        const d = docSnap.data() || {};
+        const raw = d.createdAt;
+        let ms = 0;
+        if (raw) {
+          ms = raw.toMillis ? raw.toMillis() : new Date(raw).getTime();
+          if (!Number.isFinite(ms)) ms = 0;
         }
-      } catch (e) {
-        // Fallback: grab a few and pick latest by createdAt when present.
-        try {
-          const snap = await getDocs(query(bookingRef, limit(10)));
-          let best = null;
-          let bestMs = null;
-          snap.forEach((docSnap) => {
-            const d = docSnap.data() || {};
-            const raw = d.createdAt;
-            let ms = null;
-            if (raw) {
-              ms = raw.toMillis ? raw.toMillis() : new Date(raw).getTime();
-              if (!Number.isFinite(ms)) ms = null;
-            }
-            if (!best) {
-              best = { id: docSnap.id, ...d };
-              bestMs = ms;
-            } else if (ms !== null && bestMs !== null) {
-              if (ms > bestMs) {
-                best = { id: docSnap.id, ...d };
-                bestMs = ms;
-              }
-            } else if (bestMs === null && ms !== null) {
-              best = { id: docSnap.id, ...d };
-              bestMs = ms;
-            }
-          });
-          latest = best;
-        } catch (e2) {
-          console.error(e2);
+        if (!best || ms > bestMs) {
+          best = { id: docSnap.id, ...d };
+          bestMs = ms;
         }
-      }
+      });
+      latest = best;
+    } catch (e2) {
+      console.error("getLatestBookingForUser failed", e2);
+    }
+  }
+  return latest;
+}
 
-      const latestStatus = latest?.status;
-      const payment = latest?.payment || {};
-      const paid = (latestStatus === "confirmed") || (payment?.confirmed === true);
+function isBookingPaid(booking) {
+  if (!booking) return false;
+  const payment = booking.payment || {};
+  return (
+    booking.status === "confirmed" ||
+    payment.confirmed === true ||
+    booking.status === "pending" // treat pending as bookable once payment.confirmed is set by booking.html
+  );
+}
 
-      if (!latest || !paid || !latest?.therapistUid) {
-        const hint = document.createElement("div");
-        hint.style.color = "#64748b";
-        hint.style.marginTop = "10px";
-        hint.textContent = isEnglish
-          ? "You need to book a therapist first to start therapy chat."
-          : "Ugomba kubanza gutegura umujyanama kugira ngo utangire ikiganiro (therapy chat).";
-        list.appendChild(hint);
-        return;
-      }
+   async function loadTherapistsForUserSidebar() {
+  const list = document.getElementById("users-list");
+  list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
 
-      const therapist = {
-        uid: latest.therapistUid,
-        username: latest.therapistName || latest.therapistUid,
+  const latest = await getLatestBookingForUser(currentUser?.uid);
+  list.innerHTML = "";
+
+  if (!latest || !latest.therapistUid) {
+    const hint = document.createElement("div");
+    hint.style.color = "#64748b";
+    hint.style.marginTop = "10px";
+    hint.textContent = isEnglish
+      ? "You need to book a therapist first to start therapy chat."
+      : "Ugomba kubanza gutegura umujyanama kugira ngo utangire ikiganiro (therapy chat).";
+    list.appendChild(hint);
+    return;
+  }
+
+  if (!isBookingPaid(latest)) {
+    const hint = document.createElement("div");
+    hint.style.color = "#64748b";
+    hint.style.marginTop = "10px";
+    hint.textContent = isEnglish
+      ? "Your booking is not confirmed yet. Please wait for confirmation."
+      : "Booking yawe ntiyemejwe. Tegereza kwemezwa.";
+    list.appendChild(hint);
+    return;
+  }
+
+  // Prefer live therapist profile name when available
+  let displayName = latest.therapistName || latest.therapistUid;
+  try {
+    const prof = await loadTherapistProfileByUid(latest.therapistUid);
+    if (prof?.username) displayName = prof.username;
+    else if (prof?.email) displayName = prof.email;
+  } catch (_) {}
+
+  const therapist = {
+    uid: latest.therapistUid,
+    username: displayName,
+  };
+
+  userCache[therapist.uid] = {
+    uid: therapist.uid,
+    username: therapist.username,
+  };
+
+  const div = document.createElement("div");
+  div.className = "user-item sidebar-item";
+  div.dataset.type = "therapist";
+  div.dataset.id = therapist.uid;
+  div.innerHTML = `<strong>${escapeHtml(therapist.username || "Therapist")}</strong>`;
+  div.onclick = () => openPrivateChat(therapist);
+  list.appendChild(div);
+}
+
+   async function loadUsersWhoMessagedTherapistSidebar() {
+  const list = document.getElementById("users-list");
+  list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+
+  const therapistUid = currentUser?.uid;
+  if (!therapistUid) {
+    list.innerHTML = "";
+    return;
+  }
+
+  if (!therapistProfile?.uid) {
+    const prof = await loadTherapistProfileByUid(therapistUid);
+    if (prof) {
+      therapistProfile = prof;
+      userCache[therapistUid] = {
+        uid: therapistUid,
+        username: prof.username || prof.email || "Therapist",
+        ...(prof || {}),
       };
-
-      // Cache therapist name so header + message rendering works.
-      userCache[therapist.uid] = { uid: therapist.uid, username: therapist.username };
-
-      const div = document.createElement("div");
-      div.className = "user-item sidebar-item";
-      div.dataset.type = "therapist";
-      div.dataset.id = therapist.uid;
-      div.innerHTML = `<strong>${escapeHtml(therapist.username || "Therapist")}</strong>`;
-      div.onclick = () => openPrivateChat(therapist);
-      list.appendChild(div);
+      currentUserProfile = userCache[therapistUid];
     }
+  }
 
+  const otherUidsSet = new Set();
 
-    async function loadUsersWhoMessagedTherapistSidebar() {
-      const list = document.getElementById("users-list");
-      list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
-      list.innerHTML = "";
+  // 1) Users who already have messages with this therapist
+  try {
+    const messagesSnap = await getDocs(query(collectionGroup(db, "messages")));
+    messagesSnap.forEach((msgDoc) => {
+      const segments = msgDoc.ref?.path?.split("/") || [];
+      if (segments.length < 4) return;
+      const chatsIdx = segments.lastIndexOf("chats");
+      const messagesIdx = segments.lastIndexOf("messages");
+      if (chatsIdx === -1 || messagesIdx === -1) return;
+      if (messagesIdx !== chatsIdx + 2) return;
 
-      // Therapist sidebar must be based on the currently authenticated therapist account.
-      // Using therapistProfile?.uid can be undefined depending on timing/initialization.
-      const therapistUid = currentUser?.uid;
-      if (!therapistUid) return;
+      const chatId = segments[chatsIdx + 1];
+      const parts = chatId.split("_");
+      if (parts.length !== 2) return;
 
-      // Ensure therapistProfile is available for any later header rendering / caching.
-      if (!therapistProfile?.uid) {
-        const prof = await loadTherapistProfileByUid(therapistUid);
-        if (prof) {
-          therapistProfile = prof;
-          userCache[therapistUid] = {
-            uid: therapistUid,
-            username: prof.username || prof.email || "Therapist",
-            ...(prof || {}),
-          };
-          currentUserProfile = userCache[therapistUid];
-        }
+      if (parts[0] === therapistUid || parts[1] === therapistUid) {
+        const other = parts[0] === therapistUid ? parts[1] : parts[0];
+        if (other !== therapistUid) otherUidsSet.add(other);
       }
+    });
+  } catch (e) {
+    console.warn("messages collectionGroup failed (rules/index?)", e);
+  }
 
+  // 2) Users who booked this therapist (even if they never messaged)
+  try {
+    const bookingsSnap = await getDocs(
+      query(
+        collectionGroup(db, "bookings"),
+        where("therapistUid", "==", therapistUid)
+      )
+    );
+    bookingsSnap.forEach((bDoc) => {
+      // path: users/{userUid}/bookings/{bookingId}
+      const segments = bDoc.ref?.path?.split("/") || [];
+      const usersIdx = segments.indexOf("users");
+      if (usersIdx === -1 || !segments[usersIdx + 1]) return;
+      const userUid = segments[usersIdx + 1];
+      const data = bDoc.data() || {};
+      if (userUid && userUid !== therapistUid && isBookingPaid(data)) {
+        otherUidsSet.add(userUid);
+      }
+    });
+  } catch (e) {
+    console.warn("bookings collectionGroup failed (rules/index?)", e);
+  }
 
-      // Discover conversations by scanning chats/*/messages using a collection group.
-      // Each message doc lives at: chats/{chatId}/messages/{messageId}
-      // chatId is saved as: sorted(uid1_uid2)
-      const otherUidsSet = new Set();
+  list.innerHTML = "";
+  const otherUids = Array.from(otherUidsSet);
 
-      const messagesSnap = await getDocs(query(collectionGroup(db, "messages")));
+  if (otherUids.length === 0) {
+    const emptyHint = document.createElement("div");
+    emptyHint.style.color = "#64748b";
+    emptyHint.style.marginTop = "10px";
+    emptyHint.textContent = isEnglish
+      ? "No users have chosen you yet."
+      : "Nta mukoresha uracyatoranyije.";
+    list.appendChild(emptyHint);
+    return;
+  }
 
-      messagesSnap.forEach((msgDoc) => {
-        // firestore path example: chats/{chatId}/messages/{messageId}
-        const segments = msgDoc.ref?.path?.split("/") || [];
-        if (segments.length < 4) return;
-
-        const chatsIdx = segments.lastIndexOf("chats");
-        const messagesIdx = segments.lastIndexOf("messages");
-        if (chatsIdx === -1 || messagesIdx === -1) return;
-        if (messagesIdx !== chatsIdx + 2) return;
-
-        const chatId = segments[chatsIdx + 1];
-        const parts = chatId.split("_");
-        if (parts.length !== 2) return;
-
-        if (parts[0] === therapistUid || parts[1] === therapistUid) {
-          const other = parts[0] === therapistUid ? parts[1] : parts[0];
-          otherUidsSet.add(other);
-        }
+  const users = [];
+  for (const uid of otherUids) {
+    try {
+      const snap = await getDoc(doc(db, "users", uid));
+      const data = snap.exists() ? snap.data() : { uid, username: uid };
+      userCache[uid] = { uid, ...data };
+      users.push({
+        uid,
+        username: data.username || data.email || "User",
+        ...data,
       });
-
-      const otherUids = Array.from(otherUidsSet);
-
-      if (otherUids.length === 0) {
-        const emptyHint = document.createElement("div");
-        emptyHint.style.color = "#64748b";
-        emptyHint.style.marginTop = "10px";
-        emptyHint.textContent = `Therapist UID: ${therapistUid} | No conversations found.`;
-        list.appendChild(emptyHint);
-        return;
-      }
-
-      // Load usernames from users collection (or fallback)
-      const users = [];
-
-
-      for (const uid of otherUids) {
-        const snap = await getDoc(doc(db, "users", uid));
-        const data = snap.exists() ? snap.data() : { uid, username: uid };
-        userCache[uid] = data;
-        users.push({ uid, username: data.username || "User", ...data });
-      }
-
-      users.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
-
-      users.forEach((user) => {
-        const div = document.createElement("div");
-        div.className = "user-item sidebar-item";
-        div.dataset.type = "user";
-        div.dataset.id = user.uid;
-        div.innerHTML = `<strong>${escapeHtml(user.username || "User")}</strong>`;
-        div.onclick = () => openPrivateChat(user);
-        list.appendChild(div);
-      });
+    } catch (_) {
+      users.push({ uid, username: uid });
     }
+  }
 
+  users.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
+
+  users.forEach((user) => {
+    const div = document.createElement("div");
+    div.className = "user-item sidebar-item";
+    div.dataset.type = "user";
+    div.dataset.id = user.uid;
+    div.innerHTML = `<strong>${escapeHtml(user.username || "User")}</strong>`;
+    div.onclick = () => openPrivateChat(user);
+    list.appendChild(div);
+  });
+}
     // ===================== GROUPS (Disabled in Therapy Chat) =====================
     // Therapy chat must be an exact replica of chat page, but behavior changes only.
     // We'll keep the groups section but disable loading and prevent selection.
@@ -404,48 +450,60 @@
       // disabled
     }
 
-    async function openPrivateChat(otherUser) {
-      // USER MODE: allow chat ONLY with the therapist they paid for.
-      if (userRole === "user") {
-        const bookingRef = collection(db, "users", currentUser?.uid, "bookings");
-        let latest = null;
-        try {
-          const qLatest = query(bookingRef, orderBy("createdAt", "desc"), limit(1));
-          const snap = await getDocs(qLatest);
-          if (!snap.empty) latest = { id: snap.docs[0].id, ...(snap.docs[0].data() || {}) };
-        } catch (e) {
-          // ignore and keep latest null
-          }
+async function openPrivateChat(otherUser) {
+  // USER MODE: allow chat ONLY with the therapist they booked/paid for.
+  if (userRole === "user") {
+    const latest = await getLatestBookingForUser(currentUser?.uid);
+    const paidTherapistUid = latest?.therapistUid;
 
-        const paidTherapistUid = latest?.therapistUid;
-        if (!paidTherapistUid || otherUser?.uid !== paidTherapistUid) {
-          const container = document.getElementById("messages");
-          container.innerHTML = `<div style="color:#b45309; padding:10px;">${isEnglish ? "You can only chat with your selected therapist." : "Ushobora kuganira n'umujyanama watoranijwe."}</div>`;
-          return;
-        }
-      }
-
-      currentTarget = { type: "private", data: otherUser };
-      markActiveItem(otherUser.uid ? (userRole === "therapist" ? "user" : "therapist") : "user", otherUser.uid);
-      refreshHeader();
-      clearMessages();
-
-      const chatId = [currentUser.uid, otherUser.uid].sort().join("_");
-      const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
-      unsubscribeMessages = onSnapshot(
-        q,
-        renderMessages,
-        (err) => {
-          console.error('Therapy chat onSnapshot error:', err);
-          const container = document.getElementById('messages');
-          container.innerHTML = `<div style="color:red; padding:10px;">Failed to load messages.</div>`;
-        }
-      );
-
-      // Match chat.html behavior: switch to chat view immediately on mobile.
-      updateMobileViews();
+    if (
+      !paidTherapistUid ||
+      otherUser?.uid !== paidTherapistUid ||
+      !isBookingPaid(latest)
+    ) {
+      const container = document.getElementById("messages");
+      container.innerHTML = `<div style="color:#b45309; padding:10px;">${
+        isEnglish
+          ? "You can only chat with your selected therapist."
+          : "Ushobora kuganira n'umujyanama watoranijwe."
+      }</div>`;
+      return;
     }
+  }
 
+  currentTarget = { type: "private", data: otherUser };
+  markActiveItem(
+    otherUser.uid
+      ? userRole === "therapist"
+        ? "user"
+        : "therapist"
+      : "user",
+    otherUser.uid
+  );
+  refreshHeader();
+  clearMessages();
+
+  const chatId = [currentUser.uid, otherUser.uid].sort().join("_");
+  const q = query(
+    collection(db, "chats", chatId, "messages"),
+    orderBy("createdAt")
+  );
+
+  unsubscribeMessages = onSnapshot(
+    q,
+    renderMessages,
+    (err) => {
+      console.error("Therapy chat onSnapshot error:", err);
+      const container = document.getElementById("messages");
+      container.innerHTML = `<div style="color:red; padding:10px;">${
+        isEnglish ? "Failed to load messages." : "Byanze gupakira ubutumwa."
+      }</div>`;
+    }
+  );
+
+  // Match chat.html behavior: switch to chat view immediately on mobile.
+  updateMobileViews();
+}
 
     function refreshHeader() {
       if (!currentTarget) return;
@@ -578,33 +636,41 @@
     };
 
     function refreshLanguage() {
-      document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
+  document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
 
+  const usersTitle = document.getElementById("users-title");
+  if (userRole === "therapist") {
+    usersTitle.textContent = t("Abakoresha bagiye kugusanganira", "Users who chose you");
+  } else {
+    usersTitle.textContent = t("Umujyanama wawe", "Your therapist");
+  }
 
-      // Sidebar title depends on role
-      const usersTitle = document.getElementById("users-title");
-      if (userRole === "therapist") {
-        usersTitle.textContent = t("Abakoresha bagiye kugusanganira", "Users who messaged you");
-      } else {
-        usersTitle.textContent = t("Abajyanama", "Therapists");
-      }
+  document.getElementById("send-btn").textContent = t("Ohereza", "Send");
+  document.getElementById("message-input").placeholder = t(
+    "Andika message hano...",
+    "Type your message here..."
+  );
+  document.getElementById("lang-toggle").textContent = isEnglish
+    ? "Kinyarwanda | English"
+    : "English | Kinyarwanda";
+  document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
+  document.querySelectorAll(".back-btn").forEach(
+    (el) => (el.textContent = t("← Ahabanza", "← Back"))
+  );
 
-      document.getElementById("send-btn").textContent = t("Ohereza", "Send");
-      document.getElementById("message-input").placeholder = t(
-        "Andika message hano...",
-        "Type your message here..."
+  // Always translate the empty-state header
+  const header = document.getElementById("chat-header");
+  if (header) {
+    if (currentTarget) {
+      refreshHeader();
+    } else {
+      header.textContent = t(
+        "Hitamo itsinda cyangwa umuntu ushaka kuganiramo",
+        "Select a chat or person to talk to"
       );
-      document.getElementById("lang-toggle").textContent = isEnglish ? "Kinyarwanda | English" : "English | Kinyarwanda";
-      document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
-      document.querySelectorAll(".back-btn").forEach(el => el.textContent = t("← Ahabanza", "← Back"));
-
-      if (currentTarget) refreshHeader();
     }
-
-    window.toggleLanguage = () => {
-      isEnglish = !isEnglish;
-      refreshLanguage();
-    };
+  }
+}
 
     async function initRoleAndSidebar(user) {
       currentUser = user;
