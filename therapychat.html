@@ -208,20 +208,15 @@
     async function getLatestBookingForUser(uid) {
   if (!uid) return null;
   const bookingRef = collection(db, "users", uid, "bookings");
-  let latest = null;
-
   try {
     const q = query(bookingRef, orderBy("createdAt", "desc"), limit(1));
     const snap = await getDocs(q);
-    if (!snap.empty) {
-      latest = { id: snap.docs[0].id, ...(snap.docs[0].data() || {}) };
-    }
+    if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() || {}) };
   } catch (e) {
-    // No index / permission → fall back without orderBy
+    console.warn("orderBy bookings failed, fallback", e);
     try {
       const snap = await getDocs(query(bookingRef, limit(20)));
-      let best = null;
-      let bestMs = -1;
+      let best = null, bestMs = -1;
       snap.forEach((docSnap) => {
         const d = docSnap.data() || {};
         const raw = d.createdAt;
@@ -235,12 +230,13 @@
           bestMs = ms;
         }
       });
-      latest = best;
+      return best;
     } catch (e2) {
-      console.error("getLatestBookingForUser failed", e2);
+      console.error(e2);
+      return null;
     }
   }
-  return latest;
+  return null;
 }
 
 function isBookingPaid(booking) {
@@ -249,179 +245,169 @@ function isBookingPaid(booking) {
   return (
     booking.status === "confirmed" ||
     payment.confirmed === true ||
-    booking.status === "pending" // treat pending as bookable once payment.confirmed is set by booking.html
+    booking.status === "pending"
   );
 }
 
-   async function loadTherapistsForUserSidebar() {
-  const list = document.getElementById("users-list");
-  list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
-
-  const latest = await getLatestBookingForUser(currentUser?.uid);
+function showSidebarMessage(list, text) {
   list.innerHTML = "";
-
-  if (!latest || !latest.therapistUid) {
-    const hint = document.createElement("div");
-    hint.style.color = "#64748b";
-    hint.style.marginTop = "10px";
-    hint.textContent = isEnglish
-      ? "You need to book a therapist first to start therapy chat."
-      : "Ugomba kubanza gutegura umujyanama kugira ngo utangire ikiganiro (therapy chat).";
-    list.appendChild(hint);
-    return;
-  }
-
-  if (!isBookingPaid(latest)) {
-    const hint = document.createElement("div");
-    hint.style.color = "#64748b";
-    hint.style.marginTop = "10px";
-    hint.textContent = isEnglish
-      ? "Your booking is not confirmed yet. Please wait for confirmation."
-      : "Booking yawe ntiyemejwe. Tegereza kwemezwa.";
-    list.appendChild(hint);
-    return;
-  }
-
-  // Prefer live therapist profile name when available
-  let displayName = latest.therapistName || latest.therapistUid;
-  try {
-    const prof = await loadTherapistProfileByUid(latest.therapistUid);
-    if (prof?.username) displayName = prof.username;
-    else if (prof?.email) displayName = prof.email;
-  } catch (_) {}
-
-  const therapist = {
-    uid: latest.therapistUid,
-    username: displayName,
-  };
-
-  userCache[therapist.uid] = {
-    uid: therapist.uid,
-    username: therapist.username,
-  };
-
-  const div = document.createElement("div");
-  div.className = "user-item sidebar-item";
-  div.dataset.type = "therapist";
-  div.dataset.id = therapist.uid;
-  div.innerHTML = `<strong>${escapeHtml(therapist.username || "Therapist")}</strong>`;
-  div.onclick = () => openPrivateChat(therapist);
-  list.appendChild(div);
+  const hint = document.createElement("div");
+  hint.style.color = "#64748b";
+  hint.style.marginTop = "10px";
+  hint.style.fontSize = "14px";
+  hint.style.lineHeight = "1.4";
+  hint.textContent = text;
+  list.appendChild(hint);
 }
 
-   async function loadUsersWhoMessagedTherapistSidebar() {
+async function loadTherapistsForUserSidebar() {
   const list = document.getElementById("users-list");
+  if (!list) return;
+  list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
+
+  try {
+    const latest = await getLatestBookingForUser(currentUser?.uid);
+
+    if (!latest || !latest.therapistUid) {
+      showSidebarMessage(
+        list,
+        isEnglish
+          ? "No booking found. Book a therapist first, then reopen this page."
+          : "Nta booking yabonetse. Tegura umujyanama ubanze, hanyuma fungura iyi paji."
+      );
+      return;
+    }
+
+    if (!isBookingPaid(latest)) {
+      showSidebarMessage(
+        list,
+        isEnglish
+          ? "Your booking is not confirmed yet."
+          : "Booking yawe ntiyemejwe."
+      );
+      return;
+    }
+
+    let displayName = latest.therapistName || latest.therapistUid;
+    try {
+      const prof = await loadTherapistProfileByUid(latest.therapistUid);
+      if (prof?.username) displayName = prof.username;
+      else if (prof?.email) displayName = prof.email;
+    } catch (_) {}
+
+    const therapist = { uid: latest.therapistUid, username: displayName };
+    userCache[therapist.uid] = { uid: therapist.uid, username: therapist.username };
+
+    list.innerHTML = "";
+    const div = document.createElement("div");
+    div.className = "user-item sidebar-item";
+    div.dataset.type = "therapist";
+    div.dataset.id = therapist.uid;
+    div.innerHTML = `<strong>${escapeHtml(therapist.username || "Therapist")}</strong>`;
+    div.onclick = () => openPrivateChat(therapist);
+    list.appendChild(div);
+  } catch (e) {
+    console.error(e);
+    showSidebarMessage(list, (isEnglish ? "Error: " : "Ikosa: ") + (e.message || String(e)));
+  }
+}
+
+async function loadUsersWhoMessagedTherapistSidebar() {
+  const list = document.getElementById("users-list");
+  if (!list) return;
   list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
 
   const therapistUid = currentUser?.uid;
   if (!therapistUid) {
-    list.innerHTML = "";
+    showSidebarMessage(list, isEnglish ? "Not logged in." : "Ntiwinjiye.");
     return;
   }
 
-  if (!therapistProfile?.uid) {
-    const prof = await loadTherapistProfileByUid(therapistUid);
-    if (prof) {
-      therapistProfile = prof;
-      userCache[therapistUid] = {
-        uid: therapistUid,
-        username: prof.username || prof.email || "Therapist",
-        ...(prof || {}),
-      };
-      currentUserProfile = userCache[therapistUid];
+  try {
+    if (!therapistProfile?.uid) {
+      const prof = await loadTherapistProfileByUid(therapistUid);
+      if (prof) {
+        therapistProfile = prof;
+        userCache[therapistUid] = {
+          uid: therapistUid,
+          username: prof.username || prof.email || "Therapist",
+          ...prof
+        };
+        currentUserProfile = userCache[therapistUid];
+      }
     }
-  }
 
-  const otherUidsSet = new Set();
+    const otherUidsSet = new Set();
 
-  // 1) Users who already have messages with this therapist
-  try {
-    const messagesSnap = await getDocs(query(collectionGroup(db, "messages")));
-    messagesSnap.forEach((msgDoc) => {
-      const segments = msgDoc.ref?.path?.split("/") || [];
-      if (segments.length < 4) return;
-      const chatsIdx = segments.lastIndexOf("chats");
-      const messagesIdx = segments.lastIndexOf("messages");
-      if (chatsIdx === -1 || messagesIdx === -1) return;
-      if (messagesIdx !== chatsIdx + 2) return;
-
-      const chatId = segments[chatsIdx + 1];
-      const parts = chatId.split("_");
-      if (parts.length !== 2) return;
-
-      if (parts[0] === therapistUid || parts[1] === therapistUid) {
-        const other = parts[0] === therapistUid ? parts[1] : parts[0];
-        if (other !== therapistUid) otherUidsSet.add(other);
-      }
-    });
-  } catch (e) {
-    console.warn("messages collectionGroup failed (rules/index?)", e);
-  }
-
-  // 2) Users who booked this therapist (even if they never messaged)
-  try {
-    const bookingsSnap = await getDocs(
-      query(
-        collectionGroup(db, "bookings"),
-        where("therapistUid", "==", therapistUid)
-      )
-    );
-    bookingsSnap.forEach((bDoc) => {
-      // path: users/{userUid}/bookings/{bookingId}
-      const segments = bDoc.ref?.path?.split("/") || [];
-      const usersIdx = segments.indexOf("users");
-      if (usersIdx === -1 || !segments[usersIdx + 1]) return;
-      const userUid = segments[usersIdx + 1];
-      const data = bDoc.data() || {};
-      if (userUid && userUid !== therapistUid && isBookingPaid(data)) {
-        otherUidsSet.add(userUid);
-      }
-    });
-  } catch (e) {
-    console.warn("bookings collectionGroup failed (rules/index?)", e);
-  }
-
-  list.innerHTML = "";
-  const otherUids = Array.from(otherUidsSet);
-
-  if (otherUids.length === 0) {
-    const emptyHint = document.createElement("div");
-    emptyHint.style.color = "#64748b";
-    emptyHint.style.marginTop = "10px";
-    emptyHint.textContent = isEnglish
-      ? "No users have chosen you yet."
-      : "Nta mukoresha uracyatoranyije.";
-    list.appendChild(emptyHint);
-    return;
-  }
-
-  const users = [];
-  for (const uid of otherUids) {
+    // Primary: therapists/{uid}/clients (no collection group needed)
     try {
-      const snap = await getDoc(doc(db, "users", uid));
-      const data = snap.exists() ? snap.data() : { uid, username: uid };
-      userCache[uid] = { uid, ...data };
-      users.push({
-        uid,
-        username: data.username || data.email || "User",
-        ...data,
+      const clientsSnap = await getDocs(collection(db, "therapists", therapistUid, "clients"));
+      clientsSnap.forEach((docSnap) => {
+        const d = docSnap.data() || {};
+        const uid = d.userUid || docSnap.id;
+        if (uid && uid !== therapistUid) otherUidsSet.add(uid);
       });
-    } catch (_) {
-      users.push({ uid, username: uid });
+    } catch (e) {
+      console.warn("clients subcollection failed", e);
     }
+
+    // Fallback: existing chats via messages (optional)
+    try {
+      const messagesSnap = await getDocs(query(collectionGroup(db, "messages")));
+      messagesSnap.forEach((msgDoc) => {
+        const segments = msgDoc.ref?.path?.split("/") || [];
+        const chatsIdx = segments.lastIndexOf("chats");
+        const messagesIdx = segments.lastIndexOf("messages");
+        if (chatsIdx === -1 || messagesIdx !== chatsIdx + 2) return;
+        const parts = segments[chatsIdx + 1].split("_");
+        if (parts.length !== 2) return;
+        if (parts[0] === therapistUid || parts[1] === therapistUid) {
+          const other = parts[0] === therapistUid ? parts[1] : parts[0];
+          if (other !== therapistUid) otherUidsSet.add(other);
+        }
+      });
+    } catch (e) {
+      console.warn("messages scan failed", e);
+    }
+
+    const otherUids = Array.from(otherUidsSet);
+    if (otherUids.length === 0) {
+      showSidebarMessage(
+        list,
+        isEnglish
+          ? "No users have chosen you yet. (They must complete booking again after the latest update.)"
+          : "Nta mukoresha uracyatoranyije. (Bagomba gusubira gukora booking nyuma y'ivugurura.)"
+      );
+      return;
+    }
+
+    list.innerHTML = "";
+    const users = [];
+    for (const uid of otherUids) {
+      try {
+        const snap = await getDoc(doc(db, "users", uid));
+        const data = snap.exists() ? snap.data() : { uid, username: uid };
+        userCache[uid] = { uid, ...data };
+        users.push({ uid, username: data.username || data.email || "User", ...data });
+      } catch (_) {
+        users.push({ uid, username: uid });
+      }
+    }
+
+    users.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
+    users.forEach((user) => {
+      const div = document.createElement("div");
+      div.className = "user-item sidebar-item";
+      div.dataset.type = "user";
+      div.dataset.id = user.uid;
+      div.innerHTML = `<strong>${escapeHtml(user.username || "User")}</strong>`;
+      div.onclick = () => openPrivateChat(user);
+      list.appendChild(div);
+    });
+  } catch (e) {
+    console.error(e);
+    showSidebarMessage(list, (isEnglish ? "Error: " : "Ikosa: ") + (e.message || String(e)));
   }
-
-  users.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
-
-  users.forEach((user) => {
-    const div = document.createElement("div");
-    div.className = "user-item sidebar-item";
-    div.dataset.type = "user";
-    div.dataset.id = user.uid;
-    div.innerHTML = `<strong>${escapeHtml(user.username || "User")}</strong>`;
-    div.onclick = () => openPrivateChat(user);
-    list.appendChild(div);
-  });
 }
     // ===================== GROUPS (Disabled in Therapy Chat) =====================
     // Therapy chat must be an exact replica of chat page, but behavior changes only.
@@ -636,29 +622,38 @@ async function openPrivateChat(otherUser) {
     };
 
     function refreshLanguage() {
-  document.getElementById("groups-title").textContent = t("Amatsinda", "Groups");
+  const groupsTitle = document.getElementById("groups-title");
+  if (groupsTitle) groupsTitle.textContent = t("Amatsinda", "Groups");
 
   const usersTitle = document.getElementById("users-title");
-  if (userRole === "therapist") {
-    usersTitle.textContent = t("Abakoresha bagiye kugusanganira", "Users who chose you");
-  } else {
-    usersTitle.textContent = t("Umujyanama wawe", "Your therapist");
+  if (usersTitle) {
+    if (userRole === "therapist") {
+      usersTitle.textContent = t("Abakoresha bagiye kugusanganira", "Users who chose you");
+    } else {
+      usersTitle.textContent = t("Umujyanama wawe", "Your therapist");
+    }
   }
 
-  document.getElementById("send-btn").textContent = t("Ohereza", "Send");
-  document.getElementById("message-input").placeholder = t(
-    "Andika message hano...",
-    "Type your message here..."
-  );
-  document.getElementById("lang-toggle").textContent = isEnglish
-    ? "Kinyarwanda | English"
-    : "English | Kinyarwanda";
-  document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
-  document.querySelectorAll(".back-btn").forEach(
-    (el) => (el.textContent = t("← Ahabanza", "← Back"))
-  );
+  const sendBtn = document.getElementById("send-btn");
+  if (sendBtn) sendBtn.textContent = t("Ohereza", "Send");
 
-  // Always translate the empty-state header
+  const messageInput = document.getElementById("message-input");
+  if (messageInput) {
+    messageInput.placeholder = t("Andika message hano...", "Type your message here...");
+  }
+
+  const langToggle = document.getElementById("lang-toggle");
+  if (langToggle) {
+    langToggle.textContent = isEnglish ? "Kinyarwanda | English" : "English | Kinyarwanda";
+  }
+
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) logoutBtn.textContent = t("Sohoka", "Logout");
+
+  document.querySelectorAll(".back-btn").forEach((el) => {
+    el.textContent = t("← Ahabanza", "← Back");
+  });
+
   const header = document.getElementById("chat-header");
   if (header) {
     if (currentTarget) {
