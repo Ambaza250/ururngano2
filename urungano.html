@@ -168,313 +168,19 @@
     }
     </style>
 
-    <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Geocoder UI (we will override its behavior; actual search will use Geoapify) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     
     <link rel="stylesheet" href="urungano-design.css">
 </head>
 
 
-    <script>
-    let map;
 
-    // ====== Current location + markers state ======
-    let userLatLng = null;
-    let userMarker = null;
-
-    // We’ll keep references so we can clear old results/routes.
-    let resultsLayer = null;
-    let routeLine = null;
-
-    function initMap() {
-        map = L.map('map', { zoomControl: true }).setView([-1.9441, 30.0619], 12);
-
-        // Geoapify base tiles (raster)
-        const geoapifyKey = '6ca1c4e580ca4b89adb10ce089fb466e';
-        // Using "osm-bright" style for good readability (you can switch styles later)
-        const geoapifyTilesUrl = `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${encodeURIComponent(geoapifyKey)}`;
-        L.tileLayer(geoapifyTilesUrl, {
-            attribution: '&copy; Geoapify',
-            maxZoom: 20
-        }).addTo(map);
-
-
-        resultsLayer = L.layerGroup().addTo(map);
-
-        // ====== Search control (we will override its behavior) ======
-        const geocoderControl = L.Control.geocoder({
-            position: 'topleft',
-            placeholder: 'Search Police, Hospital, Isange, Kigali...',
-            geocoder: L.Control.Geocoder.nominatim({
-                geocodingQueryParams: { countrycodes: 'rw' }
-            })
-        }).addTo(map);
-
-        // Bias results by current location (distance sort), and render clickable candidates.
-        geocoderControl.on('markgeocode', (e) => {
-            // Use the user typed value as the text for Geoapify search.
-            // Then we bias/score the returned places using `userLatLng`.
-            try {
-                const input = geocoderControl._input && geocoderControl._input.value;
-                const rawQuery = (input || '').trim();
-
-                // If userLatLng unknown, we can’t bias results.
-                if (!userLatLng) return;
-                if (!rawQuery) return;
-
-                // Clear Leaflet’s default marker and render our distance-sorted candidates.
-                e.layer && e.layer.remove && e.layer.remove();
-                geocodeNearby(rawQuery);
-            } catch (err) {
-                console.log('geocoder markgeocode override error', err);
-            }
-        });
-
-
-        // Force map to redraw after 300ms (fixes most blank map issues)
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 300);
-    }
-
-    async function geocodeNearby(query) {
-        if (!query || !userLatLng) return;
-
-        const geoapifyKey = '6ca1c4e580ca4b89adb10ce089fb466e';
-        const [uLat, uLng] = userLatLng;
-
-        // Geoapify Places search around user (radius gives locality bias)
-        const radiusKm = 25; // ~25km-ish (keeps your previous behavior close)
-
-        // Prevent slow searches stacking up.
-        if (!geocodeNearby._inflight) geocodeNearby._inflight = 0;
-        const token = ++geocodeNearby._inflight;
-
-        const url = new URL('https://api.geoapify.com/v1/geocode/search');
-        url.searchParams.set('text', query);
-        url.searchParams.set('apiKey', geoapifyKey);
-        url.searchParams.set('limit', '8');
-        url.searchParams.set('country', 'RW');
-        url.searchParams.set('type', 'places');
-        // Geoapify supports both proximity bias and bounding circle.
-        // Use both to strongly localize results around the user.
-        url.searchParams.set('bias', `proximity:${uLng},${uLat}`);
-        url.searchParams.set('radius', `${radiusKm}`);
-        // Also pass location explicitly (some Geoapify setups honor it better).
-        url.searchParams.set('lon', `${uLng}`);
-        url.searchParams.set('lat', `${uLat}`);
-
-
-        let data;
-        try {
-            const controller = new AbortController();
-            const t = setTimeout(() => controller.abort(), 5000);
-
-            const res = await fetch(url.toString(), {
-                headers: { 'Accept': 'application/json' },
-                signal: controller.signal
-            });
-
-            clearTimeout(t);
-            data = await res.json();
-
-            // If a newer search started, ignore this result.
-            if (token !== geocodeNearby._inflight) return;
-        } catch (e) {
-            clearTimeout && clearTimeout(t);
-            if (e && e.name === 'AbortError') return;
-            console.log('Geoapify fetch failed', e);
-            return;
-        }
-
-        const features = data?.features;
-        if (!Array.isArray(features) || features.length === 0) return;
-
-        const normalized = features.map((f) => {
-            const lat = f?.properties?.lat ?? f?.geometry?.coordinates?.[1];
-            const lon = f?.properties?.lon ?? f?.geometry?.coordinates?.[0];
-            const display_name = f?.properties?.name || f?.properties?.formatted || 'Location';
-
-            return {
-                lat: String(lat),
-                lon: String(lon),
-                display_name
-            };
-        }).filter((x) => Number.isFinite(parseFloat(x.lat)) && Number.isFinite(parseFloat(x.lon)));
-
-        // Sort by distance from user.
-        normalized.sort((a, b) => {
-            const aLat = parseFloat(a.lat);
-            const aLng = parseFloat(a.lon);
-            const bLat = parseFloat(b.lat);
-            const bLng = parseFloat(b.lon);
-            return haversineKm(userLatLng[0], userLatLng[1], aLat, aLng) -
-                   haversineKm(userLatLng[0], userLatLng[1], bLat, bLng);
-        });
-
-        renderResults(normalized.slice(0, 6));
-    }
-
-
-    function renderResults(items) {
-        // Clear old markers
-        resultsLayer.clearLayers();
-
-        // Also clear old route when user searches again.
-        clearRoute();
-
-        const [uLat, uLng] = userLatLng || [null, null];
-
-        items.forEach((item, idx) => {
-            const latlng = [parseFloat(item.lat), parseFloat(item.lon)];
-            const title = item.display_name || item.name || 'Location';
-
-            const m = L.marker(latlng, { title })
-                .addTo(resultsLayer)
-                .bindPopup(`${idx === 0 ? '<b>Closest</b><br/>' : ''}${title}`);
-
-            // Click marker => draw route from user (or map center)
-            m.on('click', () => {
-                const start = userLatLng ? userLatLng : map.getCenter().toArray();
-                const dest = latlng;
-                drawRoute(start, dest);
-            });
-        });
-    }
-
-    function clearRoute() {
-        if (routeLine) {
-            map.removeLayer(routeLine);
-            routeLine = null;
-        }
-    }
-
-    // Haversine distance in km
-    function haversineKm(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a =
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    // Draw driving route using OSRM public demo router.
-    async function drawRoute(startLatLng, destLatLng) {
-        if (!startLatLng || !destLatLng) return;
-
-        clearRoute();
-
-        // OSRM expects [lon,lat]
-        const [sLat, sLng] = startLatLng;
-        const [dLat, dLng] = destLatLng;
-
-        const url = `https://router.project-osrm.org/route/v1/driving/${encodeURIComponent(sLng)},${encodeURIComponent(sLat)};${encodeURIComponent(dLng)},${encodeURIComponent(dLat)}?overview=full&geometries=geojson&steps=false`;
-
-        let data = null;
-        try {
-            const res = await fetch(url);
-            data = await res.json();
-        } catch (e) {
-            console.log('Routing failed', e);
-            alert('Routing failed. Please try again.');
-            return;
-        }
-
-        if (!data || !data.routes || !data.routes[0] || !data.routes[0].geometry) {
-            alert('No route found between these locations.');
-            return;
-        }
-
-        const coords = data.routes[0].geometry.coordinates; // [lon,lat]
-        const latlngs = coords.map(c => [c[1], c[0]]);
-
-        routeLine = L.polyline(latlngs, { color: '#ef4444', weight: 6, opacity: 0.85 }).addTo(map);
-
-        // Fit bounds
-        const bounds = routeLine.getBounds();
-        map.fitBounds(bounds, { padding: [30, 30] });
-
-        // Add start/end markers
-        L.marker([sLat, sLng]).addTo(map).bindPopup('<b>Start</b>').openPopup();
-        L.marker([dLat, dLng]).addTo(map).bindPopup('<b>Destination</b>').openPopup();
-    }
-
-    function locateUser() {
-        if (!navigator.geolocation) return;
-
-        // Ask for more accurate location when possible.
-        // Also retry once: sometimes the first fix is a coarse network estimate.
-        const opts = {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0
-        };
-
-        const applyFix = (pos) => {
-            const accuracyM = pos.coords.accuracy;
-            const latlng = [pos.coords.latitude, pos.coords.longitude];
-
-            // If accuracy is poor, avoid using it (this prevents wrong jumps like defaulting to Kigali).
-            // You can tune this threshold.
-            // If accuracy is poor, still store it for search bias,
-            // but don't move the map (prevents wrong jumps).
-            if (Number.isFinite(accuracyM) && accuracyM > 2000) {
-                userLatLng = latlng;
-                if (userMarker) userMarker.remove();
-                userMarker = L.marker(latlng).addTo(map)
-                    .bindPopup("<b>You are here</b>")
-                    .openPopup();
-                return;
-            }
-
-            userLatLng = latlng;
-            map.flyTo(latlng, 15, { duration: 2 });
-
-
-            if (userMarker) userMarker.remove();
-            userMarker = L.marker(latlng).addTo(map)
-                .bindPopup("<b>You are here</b>")
-                .openPopup();
-        };
-
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                applyFix(pos);
-
-                // If first fix looks inaccurate, try once more.
-                if (Number.isFinite(pos.coords.accuracy) && pos.coords.accuracy > 2000) {
-                    navigator.geolocation.getCurrentPosition(
-                        applyFix,
-                        () => {},
-                        opts
-                    );
-                }
-            },
-            () => alert("Please allow location access."),
-            opts
-        );
-    }
-
-    // Initialize
-    window.addEventListener('load', initMap);
-</script>
 
     
 <body class="bg-slate-50" data-lang="rw">
 
     <!-- Banner -->
     <div class="banner">
+        <div class="hero-slideshow" aria-hidden="true"><div class="hero-slide is-active"></div><div class="hero-slide"></div></div>
         <div class="banner-overlay"></div>
         
         <!-- NAV -->
@@ -568,41 +274,25 @@
         </div>
     </div>
 
-    <!-- Main Chat Section -->
-    <div id="ai-chatbot" class="max-w-6xl mx-auto px-3 py-6 md:px-6 md:py-12">
-        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden chat-container">
-            
-            <!-- Chat Header -->
-            <div class="bg-blue-600 px-4 py-4 md:px-8 md:py-6 text-white flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3 min-w-0">
-                    <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-10 h-10 md:w-14 md:h-14 object-cover rounded-2xl flex-shrink-0">
-                    <div class="min-w-0 chat-title-copy">
-                        <h2 id="chat-title" class="text-base md:text-2xl font-bold truncate"
-                            data-en="Urungano AI Assistant" data-rw="Urungano AI Assistant">
-                            Urungano AI Assistant
-                        </h2>
-                        <p id="chat-subtitle" class="text-blue-100 text-xs md:text-sm truncate"
-                           data-en="Anonymous • Secure • Real-time Support" data-rw="Ni Ibanga • Irizewe • Ubufasha Buhoraho">
-                            Ni Ibanga • Irizewe • Ubufasha Buhoraho
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Voice Button -->
-                
-            </div>
-
-            <!-- Udify Chatbot -->
-            <div style="height: calc(100% - 80px);">
-                <iframe id="chatFrame"
-                    src="https://udify.app/chat/4c3chgpwFrrgfL4d"
-                    style="width: 100%; height: 100%;"
-                    frameborder="0"
-                    allow="microphone">
-                </iframe>
-            </div>
-        </div>
-    </div>
+<!-- Main page feature sections -->
+<main class="home-sections" aria-label="Urungano services">
+  <section id="srh-overview" class="home-feature home-feature-srh" aria-labelledby="srh-overview-title">
+    <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">🌸</span><h2 id="srh-overview-title" data-en="Sexual and Reproductive Health" data-rw="Ubuzima bw’Imyororokere">Ubuzima bw’Imyororokere</h2><p data-en="Find simple lessons about periods, the body, and staying healthy. Learn about HIV and ways to prevent it. Use the tracker to keep track of your period dates." data-rw="Soma amasomo yoroshye ku mihango, umubiri n’uko wakomeza kugira ubuzima bwiza. Menya ibijyanye na virusi itera SIDA n’uko wayirinda. Koresha igikoresho gikurikirana amatariki y’imihango yawe.">Soma amasomo yoroshye ku mihango, umubiri n’uko wakomeza kugira ubuzima bwiza. Menya ibijyanye na virusi itera SIDA n’uko wayirinda. Koresha igikoresho gikurikirana amatariki y’imihango yawe.</p></div>
+    <div class="home-feature-actions"><a class="home-action" href="srh.html#lesson1" data-en="Lessons" data-rw="Amasomo">Amasomo</a><a class="home-action" href="srh.html#calculator" data-en="Menstrual tracker" data-rw="Ikurikirana ry’imihango">Ikurikirana ry’imihango</a><a class="home-action" href="srh.html#ai-assistant" data-en="Urungano AI" data-rw="Urungano AI">Urungano AI</a></div>
+  </section>
+  <section class="home-feature home-feature-peers" aria-labelledby="peers-title">
+    <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">💬</span><h2 id="peers-title" data-en="Chat with peers" data-rw="Ganira n’urungano">Ganira n’urungano</h2><p data-en="Meet other young people in a respectful space. Share experiences and ask questions. Encourage one another and feel less alone." data-rw="Hura n’urundi rubyiruko ahantu hubahana. Musangire ibyo mwanyuzemo kandi mubaze ibibazo. Muterane inkunga kandi mwumve ko mutari mwenyine.">Hura n’urundi rubyiruko ahantu hubahana. Musangire ibyo mwanyuzemo kandi mubaze ibibazo. Muterane inkunga kandi mwumve ko mutari mwenyine.</p></div>
+    <div class="home-feature-actions"><a class="home-action" href="chat.html" data-en="Chat with peers" data-rw="Ganira n’urungano">Ganira n’urungano</a></div>
+  </section>
+  <section class="home-feature home-feature-mental" aria-labelledby="mental-overview-title">
+    <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">🧠</span><h2 id="mental-overview-title" data-en="Mental health" data-rw="Ubuzima bwo mu mutwe">Ubuzima bwo mu mutwe</h2><p data-en="Read simple lessons about feelings and mental health. Learn to notice when you or someone else may need support. Take a private check-in about how you have been feeling." data-rw="Soma amasomo yoroshye ku marangamutima no ku buzima bwo mu mutwe. Menya ibimenyetso byakwereka ko wowe cyangwa undi muntu akeneye ubufasha. Subiza ibibazo by’ibanga bigufasha kureba uko umaze iminsi wiyumva.">Soma amasomo yoroshye ku marangamutima no ku buzima bwo mu mutwe. Menya ibimenyetso byakwereka ko wowe cyangwa undi muntu akeneye ubufasha. Subiza ibibazo by’ibanga bigufasha kureba uko umaze iminsi wiyumva.</p></div>
+    <div class="home-feature-actions"><a class="home-action" href="mental-health.html#lesson1" data-en="Lessons" data-rw="Amasomo">Amasomo</a><a class="home-action" href="mental-health.html#screening-tool" data-en="Mental health test" data-rw="Isuzuma ry’ubuzima bwo mu mutwe">Isuzuma ry’ubuzima bwo mu mutwe</a><a class="home-action" href="mental-health.html#ai-assistant" data-en="Urungano AI" data-rw="Urungano AI">Urungano AI</a></div>
+  </section>
+  <section class="home-feature home-feature-therapy" aria-labelledby="therapy-title">
+    <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">🤝</span><h2 id="therapy-title" data-en="Chat with a therapist" data-rw="Ganira n’umujyanama">Ganira n’umujyanama</h2><p data-en="Talk with a trained helper who will listen and treat you with care. Share what is on your mind in a private conversation. Get support that fits your needs." data-rw="Ganira n’umujyanama wateguwe kugufasha, akwitayeho kandi akakugirira ibanga. Musangire ibikuri ku mutima. Uhabwe ubufasha bujyanye n’ibyo ukeneye.">Ganira n’umujyanama wateguwe kugufasha, akwitayeho kandi akakugirira ibanga. Musangire ibikuri ku mutima. Uhabwe ubufasha bujyanye n’ibyo ukeneye.</p></div>
+    <div class="home-feature-actions"><a class="home-action" href="booking.html" data-en="Book a therapist" data-rw="Tegura umujyanama">Tegura umujyanama</a></div>
+  </section>
+</main>
 
 <!-- Core Services Section -->
 <section class="quick-links bg-white border-b border-gray-100 py-8">
@@ -701,39 +391,6 @@
     </div>
 </section>
 
-
-<!-- Find Help Near You -->
-<section class="nearby-help py-16 bg-gray-50" id="nearby-help">
-    <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold text-center mb-4 text-red-700" 
-            data-en="Find Help Near You" 
-            data-rw="Shaka Ubufasha Buri Hafi Yawe">
-            Find Help Near You
-        </h2>
-        
-        <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" 
-           data-en="Search for Police Stations, Hospitals, or Isange One Stop Centers. Type your location for better results." 
-           data-rw="Shaka Amapolisi, Ibitaro, cyangwa Ibigo by'Isange. Andika aho uri kugira ubufasha bwiza.">
-            Search for Police Stations, Hospitals, or Isange One Stop Centers. Type your location for better results.
-        </p>
-
-        <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
-            <!-- Map Container - Fixed Height -->
-            <div id="map" style="height: 520px; width: 100%; background: #f0f0f0;"></div>
-
-            <!-- Bottom Bar -->
-            <div class="p-5 bg-white border-t flex flex-wrap gap-4 justify-center items-center">
-                <button onclick="locateUser()" 
-                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-medium flex items-center gap-2 transition-all">
-                    📍 Use My Current Location
-                </button>
-                <div class="text-sm text-gray-500">
-                    💡 Tip: Search "Police Kigali", "Hospital Remera", or "Isange"
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
 <!-- Community impact metrics – continuous infinite card carousel -->
 <section class="impact-stats" aria-labelledby="impact-stats-title">
@@ -896,7 +553,7 @@
         <div>
             <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
             <div class="flex flex-col space-y-3 text-sm">
-                <a href="#ai-chatbot" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                <a href="#srh-overview" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Services" data-rw="Ubuzima bw’Imyororokere">Ubuzima bw’Imyororokere</span></a>
                 <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
                 <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
                 <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
@@ -1290,6 +947,36 @@ function setAuthUI(loggedIn) {
         };
     </script>
 
+<!-- WhatsApp – Baza Shangazi -->
+<details id="whatsapp-shangazi" class="whatsapp-widget">
+  <summary class="whatsapp-toggle" aria-label="Baza Shangazi on WhatsApp" title="Baza Shangazi">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </summary>
+
+  <div class="whatsapp-panel">
+    <p class="whatsapp-title">
+      <span data-en="Ask Shangazi" data-rw="Baza Shangazi">Baza Shangazi</span>
+    </p>
+    <p class="whatsapp-desc">
+      <span data-en="Chat with Shangazi on WhatsApp for friendly guidance." data-rw="Ganira na Shangazi kuri WhatsApp ugire ubufasha bwizewe.">
+        Ganira na Shangazi kuri WhatsApp ugire ubufasha bwizewe.
+      </span>
+    </p>
+    <a class="whatsapp-btn"
+       href="https://wa.me/250786561823"
+       target="_blank"
+       rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      <span data-en="Chat on WhatsApp" data-rw="Ganira kuri WhatsApp">Ganira kuri WhatsApp</span>
+    </a>
+  </div>
+</details>
+    
+
     <!-- Urungano AI Sign Language Avatar -->
     <details id="ai-avatar" class="sign-language-widget">
         <summary class="sign-language-toggle" aria-label="Show or hide sign language video" title="Show or hide sign language video">
@@ -1321,6 +1008,23 @@ Urungano ni Urubuga rw'ikoranabuhanga rwizewe kandi rudaheza rutanga amakuru n�
     </details>
 
 
+  <script>
+    (() => {
+      const slides = ['banner-image.png', 'banner-image2.jpg', 'banner-image3.jpg'];
+      const layers = document.querySelectorAll('.hero-slide');
+      let activeLayer = 0, slideIndex = 0;
+      layers[0].style.backgroundImage = `url("${slides[0]}")`;
+      layers[1].style.backgroundImage = `url("${slides[1]}")`;
+      window.setInterval(() => {
+        slideIndex = (slideIndex + 1) % slides.length;
+        const incoming = layers[1 - activeLayer];
+        incoming.style.backgroundImage = `url("${slides[slideIndex]}")`;
+        incoming.classList.add('is-active');
+        layers[activeLayer].classList.remove('is-active');
+        activeLayer = 1 - activeLayer;
+      }, 2000);
+    })();
+  </script>
   <script type="module" src="institution-tracker.js"></script>
   <script src="page-visitor-tracker.js"></script>
 </body>

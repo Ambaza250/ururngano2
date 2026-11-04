@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ibitwerekeye - Urungano Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="app-shell.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
 
@@ -263,6 +262,28 @@
           </li>
         </ul>
       </div>
+
+      <section class="about-faq" aria-labelledby="about-faq-title">
+        <h2 id="about-faq-title" data-rw="Ibibazo bikunze kubazwa" data-en="Frequently Asked Questions">Ibibazo bikunze kubazwa</h2>
+        <div class="space-y-3">
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="cursor-pointer font-semibold text-slate-800" data-rw="Urungano ni iki?" data-en="What is Urungano?">Urungano ni iki?</summary>
+            <p class="mt-3 text-slate-600" data-rw="Urungano ni urubuga rutanga amakuru n'ubufasha ku buzima bw'imyororokere no mu mutwe, rwibanda ku rubyiruko rwo mu Rwanda." data-en="Urungano is a platform that provides information and support on sexual and reproductive health and mental health, with a focus on young people in Rwanda.">Urungano ni urubuga rutanga amakuru n'ubufasha ku buzima bw'imyororokere no mu mutwe, rwibanda ku rubyiruko rwo mu Rwanda.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="cursor-pointer font-semibold text-slate-800" data-rw="Ni izihe serivisi nabona kuri Urungano?" data-en="What services can I find on Urungano?">Ni izihe serivisi nabona kuri Urungano?</summary>
+            <p class="mt-3 text-slate-600" data-rw="Ushobora kubona amakuru ku buzima bw'imyororokere n'ubuzima bwo mu mutwe, kuganira na Urungano AI, no gushaka ubufasha hafi yawe." data-en="You can find sexual and reproductive health and mental health information, talk with Urungano AI, and look for help near you.">Ushobora kubona amakuru ku buzima bw'imyororokere n'ubuzima bwo mu mutwe, kuganira na Urungano AI, no gushaka ubufasha hafi yawe.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="cursor-pointer font-semibold text-slate-800" data-rw="Nabona nte ubufasha bwihutirwa?" data-en="How can I get urgent help?">Nabona nte ubufasha bwihutirwa?</summary>
+            <p class="mt-3 text-slate-600" data-rw="Mu gihe uri mu kaga cyangwa ukeneye ubufasha bwihuse, hamagara nimero z'ubutabazi ziri ku rupapuro rwacu rw'ibanze, cyangwa uhamagare 112." data-en="If you are in danger or need urgent help, call the emergency numbers listed on our home page, or call 112.">Mu gihe uri mu kaga cyangwa ukeneye ubufasha bwihuse, hamagara nimero z'ubutabazi ziri ku rupapuro rwacu rw'ibanze, cyangwa uhamagare 112.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="cursor-pointer font-semibold text-slate-800" data-rw="Urungano rubika ibanga ry'amakuru yanjye?" data-en="Does Urungano keep my information private?">Urungano rubika ibanga ry'amakuru yanjye?</summary>
+            <p class="mt-3 text-slate-600" data-rw="Twita ku ibanga ry'abakoresha. Irinde gushyira amakuru akuranga mu biganiro rusange cyangwa mu bibazo utifuza gusangiza abandi." data-en="We value user privacy. Avoid sharing identifying details in public conversations or in questions you do not want others to see.">Twita ku ibanga ry'abakoresha. Irinde gushyira amakuru akuranga mu biganiro rusange cyangwa mu bibazo utifuza gusangiza abandi.</p>
+          </details>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -300,7 +321,7 @@
 <div>
             <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
             <div class="flex flex-col space-y-3 text-sm">
-                <a href="urungano.html#ai-chatbot" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                <a href="srh.html#ai-assistant" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
                 <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
                 <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
                 <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
@@ -337,8 +358,37 @@
         window.onload = () => switchLanguage('rw');
     </script>
 
-  <script type="module" src="institution-tracker.js"></script>
-  <!-- Urungano AI Sign Language Avatar -->
+<!-- WhatsApp – Baza Shangazi -->
+<details id="whatsapp-shangazi" class="whatsapp-widget">
+  <summary class="whatsapp-toggle" aria-label="Baza Shangazi on WhatsApp" title="Baza Shangazi">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </summary>
+
+  <div class="whatsapp-panel">
+    <p class="whatsapp-title">
+      <span data-en="Ask Shangazi" data-rw="Baza Shangazi">Baza Shangazi</span>
+    </p>
+    <p class="whatsapp-desc">
+      <span data-en="Chat with Shangazi on WhatsApp for friendly guidance." data-rw="Ganira na Shangazi kuri WhatsApp ugire ubufasha bwizewe.">
+        Ganira na Shangazi kuri WhatsApp ugire ubufasha bwizewe.
+      </span>
+    </p>
+    <a class="whatsapp-btn"
+       href="https://wa.me/250786561823"
+       target="_blank"
+       rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      <span data-en="Chat on WhatsApp" data-rw="Ganira kuri WhatsApp">Ganira kuri WhatsApp</span>
+    </a>
+  </div>
+</details>
+    
+
+    <!-- Urungano AI Sign Language Avatar -->
     <details id="ai-avatar" class="sign-language-widget">
         <summary class="sign-language-toggle" aria-label="Show or hide sign language video" title="Show or hide sign language video">
             <span aria-hidden="true">♿</span>
@@ -366,7 +416,7 @@ Amakuru kuri twe, inshingano n'intego yacu.</p>
         </div>
     </div>
     </details>
-
-  <script src="app-shell.js"></script>
+  <script type="module" src="institution-tracker.js"></script>
+  <script src="page-visitor-tracker.js"></script>
 </body>
 </html>

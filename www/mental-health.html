@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ubuzima bwo mu Mutwe - Urungano Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="app-shell.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
 
@@ -167,7 +166,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-3 py-6 md:px-6 md:py-12">
+    <div id="mental-health-lessons" class="max-w-4xl mx-auto px-3 py-6 md:px-6 md:py-12">
 
         <!-- Page heading -->
         <div class="text-center mb-8 md:mb-12">
@@ -189,7 +188,7 @@
                     Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe
                 </span>
             </div>
-            <div id="lesson1" class="accordion-content bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
+            <div id="lesson1" class="accordion-content scroll-mt-8 bg-white rounded-b-2xl md:rounded-b-3xl px-5 pb-8 md:px-8 md:pb-10 border border-t-0 border-slate-200">
                 <img src="lesson thumbnails/mental health lesson 1.jpg" alt="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe" class="w-full rounded-2xl mb-5 object-cover max-h-56 shadow-md border border-slate-100">
                 <div class="voice-note">
                     <button type="button" class="voice-note-label" onclick="playVoiceNote(this)" data-en="Lesson 1: Understanding Mental Illness" data-rw="Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe">Isomo rya 1: Gusobanukirwa Uburwayi bwo mu Mutwe</button>
@@ -310,7 +309,7 @@
             </div>
         </div>
         <!-- Mental Health Screening Tool -->
-        <div class="mb-12">
+        <div id="screening-tool" class="mb-12 scroll-mt-8">
             <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
                     <h3 class="text-2xl font-bold mb-1" 
@@ -375,17 +374,43 @@
                 </div>
             </div>
         </div>
-        <!-- Back Button -->
-        <div class="text-center">
-            <a href="urungano.html"
-               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3.5 md:px-10 md:py-4 rounded-2xl transition text-sm md:text-base"
-               data-en="← Back to Home" data-rw="← Subira ku rupapuro rw'ibanze">
-                ← Subira ku rupapuro rw'ibanze
-            </a>
+    </div>
+    <!-- Urungano AI support -->
+    <div id="ai-assistant" class="max-w-6xl mx-auto px-3 py-6 md:px-6 md:py-12">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden chat-container">
+            
+            <!-- Chat Header -->
+            <div class="bg-blue-600 px-4 py-4 md:px-8 md:py-6 text-white flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img src="urungano-logo.jpeg" alt="Urungano Logo" class="w-10 h-10 md:w-14 md:h-14 object-cover rounded-2xl flex-shrink-0">
+                    <div class="min-w-0 chat-title-copy">
+                        <h2 id="chat-title" class="text-base md:text-2xl font-bold truncate"
+                            data-en="Urungano AI Assistant" data-rw="Urungano AI Assistant">
+                            Urungano AI Assistant
+                        </h2>
+                        <p id="chat-subtitle" class="text-blue-100 text-xs md:text-sm truncate"
+                           data-en="Anonymous • Secure • Real-time Support" data-rw="Ni Ibanga • Irizewe • Ubufasha Buhoraho">
+                            Ni Ibanga • Irizewe • Ubufasha Buhoraho
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Voice Button -->
+                
+            </div>
+
+            <!-- Udify Chatbot -->
+            <div style="height: calc(100% - 80px);">
+                <iframe id="chatFrame"
+                    src="https://udify.app/chat/4c3chgpwFrrgfL4d"
+                    style="width: 100%; height: 100%;"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+            </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="bg-slate-900 text-white py-12">
         <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
             <div>
@@ -399,7 +424,7 @@
             <div>
                 <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
                 <div class="flex flex-col space-y-3 text-sm">
-                    <a href="urungano.html#ai-chatbot" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                    <a href="#ai-assistant" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
                     <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
                     <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
                     <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
@@ -480,6 +505,67 @@
 
         window.onload = () => switchLanguage('rw');
     </script>
+
+<!-- WhatsApp – Baza Shangazi -->
+<details id="whatsapp-shangazi" class="whatsapp-widget">
+  <summary class="whatsapp-toggle" aria-label="Baza Shangazi on WhatsApp" title="Baza Shangazi">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </summary>
+
+  <div class="whatsapp-panel">
+    <p class="whatsapp-title">
+      <span data-en="Ask Shangazi" data-rw="Baza Shangazi">Baza Shangazi</span>
+    </p>
+    <p class="whatsapp-desc">
+      <span data-en="Chat with Shangazi on WhatsApp for friendly guidance." data-rw="Ganira na Shangazi kuri WhatsApp ugire ubufasha bwizewe.">
+        Ganira na Shangazi kuri WhatsApp ugire ubufasha bwizewe.
+      </span>
+    </p>
+    <a class="whatsapp-btn"
+       href="https://wa.me/250786561823"
+       target="_blank"
+       rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      <span data-en="Chat on WhatsApp" data-rw="Ganira kuri WhatsApp">Ganira kuri WhatsApp</span>
+    </a>
+  </div>
+</details>
+    
+
+    <!-- Urungano AI Sign Language Avatar -->
+    <details id="ai-avatar" class="sign-language-widget">
+        <summary class="sign-language-toggle" aria-label="Show or hide sign language video" title="Show or hide sign language video">
+            <span aria-hidden="true">♿</span>
+        </summary>
+        <div class="sign-language-panel">
+        <div class="relative">
+            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
+                <img src="mental health.gif" loading="lazy"
+                     alt="Urungano AI Signing for Mental Health"
+                     class="w-full h-full object-cover"
+                     onerror="this.onerror=null; this.src='signs.gif';">
+            </div>
+
+
+        </div>
+
+        <!-- Hover Tooltip -->
+        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
+            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
+                <span data-en="Mental Health Sign Language Lesson" data-rw="Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso">Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso</span>
+            </p>
+            <p class="text-slate-600 text-xs leading-relaxed"
+               data-en="Lessons on mental health. They include understanding and caring for your mental health. There is also a mental health assessment."
+               data-rw="Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.">
+                Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.
+            </p>
+        </div>
+    </div>
+    </details>
 
 <script>
     const questions = {
@@ -612,38 +698,7 @@
         }
     }
 </script>
-<!-- Urungano AI Sign Language Avatar -->
-    <details id="ai-avatar" class="sign-language-widget">
-        <summary class="sign-language-toggle" aria-label="Show or hide sign language video" title="Show or hide sign language video">
-            <span aria-hidden="true">♿</span>
-        </summary>
-        <div class="sign-language-panel">
-        <div class="relative">
-            <div class="avatar-img-wrap bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-600 hover:border-blue-700 transition-all duration-300 group-hover:scale-110">
-                <img src="mental health.gif" loading="lazy"
-                     alt="Urungano AI Signing for Mental Health"
-                     class="w-full h-full object-cover"
-                     onerror="this.onerror=null; this.src='signs.gif';">
-            </div>
-
-
-        </div>
-
-        <!-- Hover Tooltip -->
-        <div class="tooltip mt-3 bg-white shadow-2xl rounded-2xl p-4 opacity-0 group-hover:opacity-100 transition-all translate-y-3 group-hover:translate-y-0 pointer-events-none">
-            <p class="text-blue-600 font-semibold mb-1.5 flex items-center gap-2 text-sm">
-                <span data-en="Mental Health Sign Language Lesson" data-rw="Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso">Isomo ry'Ubuzima bwo mu Mutwe mu Rurimi rw'Ibimenyetso</span>
-            </p>
-            <p class="text-slate-600 text-xs leading-relaxed"
-               data-en="Lessons on mental health. They include understanding and caring for your mental health. There is also a mental health assessment."
-               data-rw="Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.">
-                Amasomo k'ubuzima bwo mu mutwe. Harimo gusobanukirwa no kwita k'ubuzima bwawe bwo mu mutwe. Hariho Kandi isuzuma ry'ubuzima bwo mutwe.
-            </p>
-        </div>
-    </div>
-    </details>
-
-  <script src="app-shell.js"></script>
   <script type="module" src="institution-tracker.js"></script>
+  <script src="page-visitor-tracker.js"></script>
 </body>
 </html>
