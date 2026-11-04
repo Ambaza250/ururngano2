@@ -7,9 +7,18 @@
   <link rel="stylesheet" href="urungano-design.css">
 </head>
 <body class="bg-slate-50" data-lang="en">
-  <main class="max-w-xl mx-auto px-5 py-10">
-    <section class="bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-8">
-      <p class="text-sm font-semibold text-teal-700">Urungano</p>
+  <nav class="account-nav">
+    <a href="urungano.html" class="account-brand"><img src="urungano-logo.jpeg" alt=""><span>Urungano</span></a>
+    <div class="account-language" aria-label="Language">
+      <button type="button" id="btn-rw" onclick="switchLanguage('rw')">RW</button>
+      <button type="button" id="btn-en" class="active" onclick="switchLanguage('en')">EN</button>
+    </div>
+  </nav>
+  <main class="account-main">
+    <a class="account-back" href="urungano.html" data-en="← Back to home" data-rw="← Subira ahabanza">← Back to home</a>
+    <section class="account-card">
+      <div class="account-heading-icon" aria-hidden="true">👤</div>
+      <p class="account-eyebrow" data-en="Your profile" data-rw="Umwirondoro wawe">Your profile</p>
       <h1 class="text-2xl font-bold text-slate-900 mt-2" data-en="Manage account information" data-rw="Hindura amakuru ya konti">Manage account information</h1>
       <p id="account-email" class="text-sm text-slate-500 mt-2"></p>
       <form id="account-form" class="mt-7 space-y-5">
@@ -25,6 +34,15 @@
       </form>
     </section>
   </main>
+  <script>
+    function switchLanguage(lang) {
+      document.documentElement.lang = lang;
+      document.body.dataset.lang = lang;
+      document.querySelectorAll('[data-en]').forEach(el => { el.textContent = el.getAttribute(lang === 'en' ? 'data-en' : 'data-rw'); });
+      document.getElementById('btn-rw').classList.toggle('active', lang === 'rw');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    }
+  </script>
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js';
     import { getAuth, onAuthStateChanged, updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
