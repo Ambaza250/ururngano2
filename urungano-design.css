@@ -253,21 +253,23 @@ body:has(.container) { background: radial-gradient(ellipse at 10% 5%, #e8f5f0, t
 }
 @media (max-width: 767px) {
   .banner { min-height: 710px; }
+  .banner > nav { position: relative !important; z-index: 5000 !important; }
+  #mobile-menu { position: absolute; top: calc(100% - 2px); left: 0; right: 0; z-index: 6000; margin-top: 0 !important; padding: 12px; border: 1px solid #e2e8f0; border-radius: 0 0 18px 18px; background: rgba(255,255,255,.99); box-shadow: 0 16px 30px rgba(15,23,42,.2); }
   .banner-overlay { background: linear-gradient(180deg,rgba(245,251,247,.68),rgba(245,251,247,.86) 38%,rgba(245,251,247,.97) 100%) !important; }
   .banner > nav { margin: 8px 10px 0; padding: 9px 10px !important; border-radius: 18px; }
   .logo-img { width: 44px; height: 44px; }
   .hero-copy { bottom: 32px !important; left: 20px !important; width: calc(100% - 40px) !important; }
-  #welcome-title { font-size: clamp(2.35rem, 10vw, 3.35rem) !important; }
+  #welcome-title { font-size: clamp(1.9rem, 8vw, 2.65rem) !important; }
   #welcome-subtitle { font-size: 1rem !important; }
-  .hero-actions { gap: 7px; margin-top: 18px; }
+  .hero-actions { flex-direction: column; align-items: stretch; gap: 7px; margin-top: 18px; max-width: 480px; margin-left: auto; margin-right: auto; }
   .hero-actions a { min-height: 48px; }
-  .hero-primary { width: 100%; }
-  .hero-secondary { flex: 1; }
-  .hero-help { flex: 1; }
+  .hero-primary,.hero-secondary,.hero-help { width: 100%; flex: none; }
   .hero-trust { gap: 7px 12px; margin-top: 15px; font-size: .76rem; }
   .home-feature { min-height: auto; gap: 1.15rem; padding: 1.35rem; }
-  .home-feature-actions { display: flex; }
-  .home-action { flex: 1 1 auto; width: auto; }
+  .home-feature-actions { display: grid; grid-template-columns: 1fr; }
+  .home-action { flex: none; width: 100%; }
+  .home-feature h2 { font-size: 1.3rem; }
+  .home-feature p { font-size: .95rem; line-height: 1.55; }
   .emergency-section { margin: 0 12px 34px; border-radius: 24px; }
   body { padding-bottom: 84px; }
 }
@@ -403,3 +405,41 @@ body:has(.account-main), body:has(.booking-main), body:has(.card) { background: 
 .whatsapp-desc { margin: 0 0 14px; font-size: .85rem; line-height: 1.4; color: #64748b; }
 .whatsapp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 14px; border-radius: 12px; background: #25D366; color: #fff; font-weight: 600; text-decoration: none; }
 @media (max-width: 767px) { #whatsapp-shangazi.whatsapp-widget { right: 1rem; bottom: calc(1rem + 64px + 10px); } .whatsapp-toggle { width: 50px; height: 50px; border-radius: 16px; } }
+/* Shared shell for the added health service pages */
+.urungano-site-header { position: sticky; top: 0; z-index: 5000; background: rgba(255,255,255,.97); box-shadow: 0 4px 18px rgba(15,23,42,.08); }
+.urungano-nav { position: relative; display: flex; align-items: center; gap: clamp(.5rem,2vw,1.5rem); max-width: 1200px; margin: 0 auto; padding: .75rem clamp(.75rem,3vw,1.5rem); }
+.urungano-brand { display: flex; align-items: center; gap: .65rem; color: #2563eb; font-size: 1.2rem; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.urungano-brand img { width: 42px; height: 42px; border-radius: 13px; object-fit: cover; }
+.urungano-desktop-links { display: flex; align-items: center; justify-content: center; gap: clamp(.6rem,2vw,1.5rem); flex: 1; }
+.urungano-desktop-links a,.urungano-mobile-menu a { color: #334155; font-size: .92rem; font-weight: 600; text-decoration: none; }
+.urungano-desktop-links a:hover,.urungano-mobile-menu a:hover { color: #2563eb; }
+.urungano-header-controls { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+.urungano-language { display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: #f1f5f9; }
+.urungano-language button { border: 0; border-radius: 999px; background: transparent; padding: .45rem .65rem; color: #475569; font-size: .75rem; font-weight: 700; cursor: pointer; }
+.urungano-language button.active { background: white; color: #1d4ed8; box-shadow: 0 1px 5px rgba(15,23,42,.15); }
+.urungano-menu-toggle { display: none; border: 0; border-radius: 12px; background: #f1f5f9; padding: .55rem .7rem; color: #334155; font-size: 1.2rem; cursor: pointer; }
+.urungano-mobile-menu { display: none; }
+.urungano-site-footer { margin-top: 3rem; background: #0f172a; color: #e2e8f0; padding: 2.5rem 1rem 1rem; }
+.urungano-footer-inner { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 2rem; max-width: 1150px; margin: 0 auto; }
+.urungano-footer-inner h2,.urungano-footer-inner h3 { margin: 0 0 .75rem; color: white; font-size: 1.1rem; }
+.urungano-footer-inner p { margin: 0; color: #cbd5e1; }
+.urungano-footer-inner a { display: block; width: fit-content; margin: .55rem 0; color: #cbd5e1; text-decoration: none; }
+.urungano-footer-inner a:hover { color: white; }
+.urungano-footer-note { max-width: 1150px; margin: 2rem auto 0; padding-top: 1rem; border-top: 1px solid #334155; color: #94a3b8; font-size: .85rem; }
+.service-page h1 { font-size: clamp(1.8rem,5vw,3.25rem); line-height: 1.1; }
+.service-page h2 { font-size: clamp(1.35rem,3.4vw,2rem); line-height: 1.2; }
+.service-page p,.service-page label,.service-page button,.service-page a { overflow-wrap: anywhere; }
+@media (max-width: 767px) {
+  .urungano-nav { min-height: 60px; }
+  .urungano-desktop-links { display: none; }
+  .urungano-menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  .urungano-mobile-menu { position: absolute; top: calc(100% + 1px); left: 0; right: 0; z-index: 6000; flex-direction: column; gap: .25rem; padding: .8rem 1rem 1rem; border-top: 1px solid #e2e8f0; border-radius: 0 0 18px 18px; background: white; box-shadow: 0 14px 25px rgba(15,23,42,.18); }
+  .urungano-mobile-menu.open { display: flex; }
+  .urungano-mobile-menu a { padding: .75rem .6rem; font-size: .95rem; }
+  .urungano-footer-inner { grid-template-columns: 1fr; gap: 1.25rem; }
+  .service-page main { padding-left: .85rem !important; padding-right: .85rem !important; }
+  .service-page .hero-copy,.service-page article,.service-page section { min-width: 0; }
+  .service-page .text-4xl { font-size: 1.9rem; }
+  .service-page .text-3xl { font-size: 1.55rem; }
+  .service-page .text-2xl { font-size: 1.3rem; }
+}

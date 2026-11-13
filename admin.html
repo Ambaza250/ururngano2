@@ -288,6 +288,14 @@
       </div>
     </section>
 
+    <section id="health-admin-section" class="hidden mt-10 space-y-8">
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 md:p-6"><h2 class="text-2xl font-bold" data-en="Add a doctor" data-rw="Ongeramo muganga">Ongeramo muganga</h2><form id="doctor-form" class="grid md:grid-cols-2 gap-3 mt-4"><input id="doctor-name" required class="rounded-xl border p-3" placeholder="Izina rya muganga" data-placeholder-en="Doctor name" data-placeholder-rw="Izina rya muganga"><input id="doctor-expertise" required class="rounded-xl border p-3" placeholder="Umwuga wihariye" data-placeholder-en="Expertise" data-placeholder-rw="Umwuga wihariye"><input id="doctor-number" required class="rounded-xl border p-3" placeholder="Nimero ya WhatsApp, urugero 2507…" data-placeholder-en="WhatsApp number, e.g. 2507…" data-placeholder-rw="Nimero ya WhatsApp, urugero 2507…"><input id="doctor-bio" class="rounded-xl border p-3" placeholder="Amagambo amuvuga muri make" data-placeholder-en="Short introduction" data-placeholder-rw="Amagambo amuvuga muri make"><button class="rounded-xl bg-blue-700 p-3 text-white font-semibold md:col-span-2" data-en="Add doctor" data-rw="Ongeramo muganga">Ongeramo muganga</button></form><p id="doctor-admin-status" class="mt-3 text-sm"></p><div id="doctor-admin-list" class="mt-4"></div></div>
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 md:p-6"><h2 class="text-2xl font-bold" data-en="Pharmacy orders for review" data-rw="Ubusabe bw’imiti busuzumwa">Ubusabe bw’imiti busuzumwa</h2><p class="text-slate-600 mt-1" data-en="Approve orders to show payment instructions, or reject them." data-rw="Emeza ubusabe kugira ngo amabwiriza yo kwishyura agaragare, cyangwa ubyange.">Emeza ubusabe kugira ngo amabwiriza yo kwishyura agaragare, cyangwa ubyange.</p><div id="pending-orders" class="mt-4">Birimo gufunguka…</div></div>
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 md:p-6"><h2 class="text-2xl font-bold" data-en="Paid pharmacy orders" data-rw="Imiti yishyuwe">Imiti yishyuwe</h2><p class="text-slate-600 mt-1" data-en="Review payment screenshots and confirm delivery." data-rw="Suzuma amafoto y’ubwishyu wemeze ko imiti yagejejweho.">Suzuma amafoto y’ubwishyu wemeze ko imiti yagejejweho.</p><div id="paid-orders" class="mt-4">Birimo gufunguka…</div></div>
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 md:p-6"><h2 class="text-2xl font-bold" data-en="Doctor consultation bookings" data-rw="Gahunda zo kugisha inama abaganga">Gahunda zo kugisha inama abaganga</h2><div id="doctor-bookings" class="mt-4">Birimo gufunguka…</div></div>
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 md:p-6"><h2 class="text-2xl font-bold" data-en="Add a hospital for lab tests" data-rw="Ongeramo ibitaro bikora ibipimo">Ongeramo ibitaro bikora ibipimo</h2><p class="mt-1 text-slate-600" data-en="Select the tests available at this location." data-rw="Hitamo ibipimo biboneka muri ibi bitaro.">Hitamo ibipimo biboneka muri ibi bitaro.</p><form id="lab-hospital-form" class="mt-4 grid gap-3"><input id="lab-hospital-name" required class="rounded-xl border p-3" placeholder="Izina ry’ibitaro" data-placeholder-en="Hospital name" data-placeholder-rw="Izina ry’ibitaro"><input id="lab-hospital-address" required class="rounded-xl border p-3" placeholder="Aderesi y’ibitaro" data-placeholder-en="Hospital address" data-placeholder-rw="Aderesi y’ibitaro"><fieldset><legend class="mb-2 font-semibold" data-en="Tests provided" data-rw="Ibipimo bitangwa">Ibipimo bitangwa</legend><div id="lab-test-options" class="grid sm:grid-cols-2 gap-2"></div></fieldset><button class="rounded-xl bg-violet-700 p-3 text-white font-semibold" data-en="Add hospital" data-rw="Ongeramo ibitaro">Ongeramo ibitaro</button></form><p id="lab-hospital-status" class="mt-3 text-sm"></p><div id="lab-hospital-list" class="mt-4"></div></div>
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 md:p-6"><h2 class="text-2xl font-bold" data-en="Lab test payment approvals" data-rw="Kwemeza ubwishyu bw’ibipimo">Kwemeza ubwishyu bw’ibipimo</h2><p class="mt-1 text-slate-600" data-en="Approve payment to schedule the test for the next day at 8:00 a.m." data-rw="Emeza ubwishyu kugira ngo igipimo gitegurwe bukeye saa mbiri za mu gitondo.">Emeza ubwishyu kugira ngo igipimo gitegurwe bukeye saa mbiri za mu gitondo.</p><div id="lab-booking-list" class="mt-4">Birimo gufunguka…</div></div>
+    </section>
     <section id="admin-dashboard" class="hidden mt-10" aria-labelledby="admin-dashboard-title">
       <div class="mb-5"><h2 id="admin-dashboard-title" class="text-2xl md:text-3xl font-bold text-slate-800"><i class="fa-solid fa-chart-line text-blue-600 mr-2"></i><span data-en="Site dashboard" data-rw="Imibare y'urubuga">Site dashboard</span></h2><p class="text-sm text-slate-600 mt-1" data-en="Overall activity across the site." data-rw="Imibare rusange y'ibikorwa ku rubuga.">Overall activity across the site.</p></div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -315,8 +323,12 @@
         const en = el.getAttribute('data-en');
         const rw = el.getAttribute('data-rw');
         if (!en || !rw) return;
-        el.textContent = (lang === 'en') ? en : rw;
+        const translated = (lang === 'en') ? en : rw;
+        const directText = Array.from(el.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.nodeValue.trim());
+        if (directText) directText.nodeValue = ` ${translated} `;
+        else if (!el.childElementCount) el.textContent = translated;
       });
+      document.querySelectorAll('[data-placeholder-en][data-placeholder-rw]').forEach(el => { el.placeholder = lang === 'en' ? el.dataset.placeholderEn : el.dataset.placeholderRw; });
 
       const btnRw = document.getElementById('btn-rw');
       const btnEn = document.getElementById('btn-en');
@@ -324,6 +336,7 @@
         btnRw.classList.toggle('active', lang === 'rw');
         btnEn.classList.toggle('active', lang === 'en');
       }
+      if (window.adminCurrentUser) refreshHealthAdmin(window.adminCurrentUser).catch(error => console.error('Unable to refresh translated admin sections', error));
     };
 
     function setStatus(html) {
@@ -337,6 +350,17 @@
 
     function t(en, rw) {
       return getLang() === 'en' ? en : rw;
+    }
+
+    async function readAdminApiResponse(response, fallbackMessage) {
+      const raw = await response.text();
+      let payload = {};
+      try { payload = raw ? JSON.parse(raw) : {}; } catch (_error) {
+        if (response.status === 404) throw new Error('The local server is running an older version. Stop it, run `npm start` in the project folder, then reload this page.');
+        throw new Error(fallbackMessage);
+      }
+      if (!response.ok) throw new Error(payload.error || fallbackMessage);
+      return payload;
     }
 
     window.adminLogin = async () => {
@@ -375,6 +399,7 @@
         document.getElementById('therapist-section').classList.remove('hidden');
         document.getElementById('institution-section').classList.remove('hidden');
         document.getElementById('data-section').classList.remove('hidden');
+        document.getElementById('health-admin-section').classList.remove('hidden');
         await refreshData();
         setStatus('');
 
@@ -395,6 +420,7 @@
       document.getElementById('admin-dashboard').classList.add('hidden');
       document.getElementById('therapist-section').classList.add('hidden');
       document.getElementById('institution-section').classList.add('hidden');
+      document.getElementById('health-admin-section').classList.add('hidden');
       document.getElementById('login-section').classList.remove('hidden');
       setStatus('');
     };
@@ -579,6 +605,44 @@
       }
     }
 
+    async function refreshHealthAdmin(currentUser) {
+      const area = document.getElementById('health-admin-section');
+      if (!area) return;
+      area.classList.remove('hidden');
+      const token = await currentUser.getIdToken();
+      const response = await fetch('/api/admin/health-services', { headers: { Authorization: 'Bearer ' + token } });
+      const payload = await readAdminApiResponse(response, 'Unable to load health service data.');
+      document.getElementById('doctor-admin-list').innerHTML = payload.doctors.map(d => `<div class="border-t py-2"><b>${escapeHtml(d.name || '')}</b> · ${escapeHtml(d.expertise || '')} · ${escapeHtml(d.whatsapp || '')}</div>`).join('') || t('No doctors added yet.','Nta baganga barongerwamo.');
+      const orderRows = (status, actions) => payload.orders.filter(x => x.status === status).map(x => { return `<article class="border-b py-4"><b>${escapeHtml(x.drug)}</b> × ${Number(x.quantity)||1} · ${t('user','ukoresha')} ${escapeHtml(x.userId)} · ${x.requiresPrescription ? t('Prescription required','Hasabwa urupapuro rwa muganga') : t('No prescription needed','Nta rupapuro rukenewe')} ${x.imageUrl ? `· <a class="text-blue-700 underline" href="${escapeHtml(x.imageUrl)}" target="_blank" rel="noopener">${t('View prescription','Reba urupapuro')}</a>` : ''} ${actions(x.id)}</article>` }).join('') || `<p class="text-slate-500 py-3">${t('No orders here.','Nta busabe buhari.')}</p>`;
+      document.getElementById('pending-orders').innerHTML = orderRows('pending', id => `<button class="order-action ml-3 rounded-lg bg-emerald-600 px-3 py-2 text-white" data-id="${id}" data-status="approved">${t('Approve','Emeza')}</button><button class="order-action ml-2 rounded-lg bg-red-600 px-3 py-2 text-white" data-id="${id}" data-status="rejected">${t('Reject','Yanga')}</button>`);
+      document.getElementById('paid-orders').innerHTML = orderRows('paid', id => `<button class="order-action ml-3 rounded-lg bg-blue-700 px-3 py-2 text-white" data-id="${id}" data-status="delivered">${t('Confirm delivered','Emeza ko yagejejweho')}</button>`);
+      document.querySelectorAll('.order-action').forEach(button => button.onclick = async () => { button.disabled=true; try { const r=await fetch(`/api/admin/pharmacy-orders/${button.dataset.id}/status`, {method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({status:button.dataset.status})}); const result=await r.json(); if(!r.ok) throw Error(result.error); await refreshHealthAdmin(currentUser); } catch(e) { button.disabled=false; alert(e.message); } });
+      document.getElementById('doctor-bookings').innerHTML = payload.doctorBookings.map(b=>`<article class="border-b py-3">${t('User','Umukoresha')} ${escapeHtml(b.uid)} · ${escapeHtml(b.status || 'pending')} · ${t('phone','nimero')} ${escapeHtml(b.phone || '')} ${b.paymentConfirmed ? '· '+t('paid','yishyuwe') : `<button class="doctor-confirm ml-2 rounded-lg bg-emerald-600 px-3 py-2 text-white" data-uid="${b.uid}" data-id="${b.id}">${t('Confirm payment','Emeza ubwishyu')}</button>`}</article>`).join('') || `<p class="text-slate-500">${t('No doctor bookings.','Nta gahunda z’abaganga zihari.')}</p>`;
+      document.querySelectorAll('.doctor-confirm').forEach(button => button.onclick = async () => { try { const r=await fetch(`/api/admin/doctor-bookings/${button.dataset.uid}/${button.dataset.id}/confirm`,{method:'POST',headers:{Authorization:'Bearer '+token}}); const result=await r.json(); if(!r.ok) throw Error(result.error); await refreshHealthAdmin(currentUser); } catch(e) { alert(e.message); } });
+      await refreshLabAdmin(currentUser);
+    }
+    document.getElementById('doctor-form')?.addEventListener('submit', async event => {
+      event.preventDefault(); const status=document.getElementById('doctor-admin-status');
+      try { const appMod=await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js'); const authMod=await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js'); const user=authMod.getAuth(appMod.initializeApp(firebaseConfig)).currentUser; if(!user) throw Error(t('Sign in as admin first.','Ongera winjire nka admin.')); const response=await fetch('/api/admin/doctors',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await user.getIdToken()},body:JSON.stringify({name:document.getElementById('doctor-name').value.trim(),expertise:document.getElementById('doctor-expertise').value.trim(),whatsapp:document.getElementById('doctor-number').value.trim(),bio:document.getElementById('doctor-bio').value.trim()})}); await readAdminApiResponse(response,t('Unable to add doctor.','Ntibyashobotse kongeramo muganga.')); event.target.reset(); status.textContent=t('Doctor added.','Muganga yongeweho.'); await refreshHealthAdmin(user); } catch(e) { status.textContent=e.message; }
+    });
+
+    const supportedLabTests = [{en:'Blood sugar',rw:'Isukari mu maraso'},{en:'Liver function',rw:'Imikorere y’umwijima'},{en:'Heart function',rw:'Imikorere y’umutima'},{en:'Kidney test',rw:'Isuzuma ry’impyiko'},{en:'Diabetes',rw:'Diyabete'},{en:'X-ray test',rw:'Isuzuma rya X-ray'}];
+    const displayLabTest = value => { const entry=supportedLabTests.find(test=>test.en===value); return entry ? (getLang()==='en'?entry.en:entry.rw) : value; };
+    document.getElementById('lab-test-options').innerHTML = supportedLabTests.map((test,index) => `<label class="flex items-center gap-2 rounded-lg border p-3"><input type="checkbox" name="hospital-test" value="${test.en}" id="hospital-test-${index}"><span data-en="${test.en}" data-rw="${test.rw}">${test.rw}</span></label>`).join('');
+    async function refreshLabAdmin(currentUser) {
+      const token = await currentUser.getIdToken();
+      const response = await fetch('/api/admin/lab-services', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await readAdminApiResponse(response, 'Unable to load lab hospital data.');
+      document.getElementById('lab-hospital-list').innerHTML = data.hospitals.map(h => `<article class="border-b py-3"><b>${escapeHtml(h.name)}</b> · ${escapeHtml(h.address)}<p class="text-sm text-slate-600">${t('Tests:','Ibipimo:')} ${(h.tests||[]).map(displayLabTest).map(escapeHtml).join(', ')}</p></article>`).join('') || `<p class="text-slate-500">${t('No hospitals added yet.','Nta bitaro byongerwamo.')}</p>`;
+      const pending = data.bookings.filter(b => b.status === 'pending_payment_review');
+      document.getElementById('lab-booking-list').innerHTML = pending.map(b => `<article class="mb-3 rounded-xl border p-4"><b>${escapeHtml(displayLabTest(b.test))}</b> ${t('at','kuri')} ${escapeHtml(b.hospitalName)} · ${escapeHtml(b.hospitalAddress)}<p class="mt-1 text-sm">${t('User','Umukoresha')} ${escapeHtml(b.userId)} · ${t('payment phone','nimero yishyuriraho')} ${escapeHtml(b.phone)}</p><p class="text-sm">${t('MoMo code:','Kode ya MoMo:')} ${escapeHtml(b.paymentCode)}</p><button class="approve-lab-booking mt-3 rounded-lg bg-emerald-700 px-4 py-2 text-white" data-uid="${b.userId}" data-id="${b.id}">${t('Approve payment and schedule','Emeza ubwishyu utegure gahunda')}</button></article>`).join('') || `<p class="text-slate-500">${t('No lab payments awaiting approval.','Nta bwishyu bw’ibipimo butegereje kwemezwa.')}</p>`;
+      document.querySelectorAll('.approve-lab-booking').forEach(button => button.onclick = async () => { button.disabled=true; try { const r=await fetch(`/api/admin/lab-bookings/${button.dataset.uid}/${button.dataset.id}/approve`,{method:'POST',headers:{Authorization:'Bearer '+token}}); const result=await readAdminApiResponse(r,'Unable to approve lab payment.'); alert(`${displayLabTest(result.test)} ${t('appointment confirmed at','gahunda yemejwe kuri')} ${result.hospitalName}, ${result.hospitalAddress}, ${t('on','itariki')} ${result.appointmentDate} ${t('at','saa')} ${result.appointmentTime} (${result.appointmentTimezone}).`); await refreshLabAdmin(currentUser); } catch(e) { button.disabled=false; alert(e.message); } });
+    }
+    document.getElementById('lab-hospital-form')?.addEventListener('submit', async event => {
+      event.preventDefault(); const status=document.getElementById('lab-hospital-status');
+      try { const appMod=await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js'); const authMod=await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js'); const user=authMod.getAuth(appMod.initializeApp(firebaseConfig)).currentUser; if(!user) throw Error(t('Sign in as admin first.','Ongera winjire nka admin.')); const tests=Array.from(document.querySelectorAll('input[name="hospital-test"]:checked')).map(input=>input.value); const response=await fetch('/api/admin/lab-hospitals',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await user.getIdToken()},body:JSON.stringify({name:document.getElementById('lab-hospital-name').value.trim(),address:document.getElementById('lab-hospital-address').value.trim(),tests})}); await readAdminApiResponse(response,t('Unable to add hospital.','Ntibyashobotse kongeramo ibitaro.')); event.target.reset(); status.textContent=t('Hospital added.','Ibitaro byongeweho.'); await refreshLabAdmin(user); } catch(e) { status.textContent=e.message; }
+    });
+
     async function refreshData() {
       const list = document.getElementById('paid-list');
       const loadingIndicator = document.getElementById('loading-indicator');
@@ -607,10 +671,12 @@
         if (!currentUser) {
           throw new Error('Admin Firebase user not signed in. Firestore will be blocked by security rules.');
         }
+        window.adminCurrentUser = currentUser;
 
         setStatus(`<span class="text-blue-700"><i class="fa-solid fa-user-check mr-2"></i>Firebase admin signed in as: ${escapeHtml(currentUser.email || currentUser.uid || '')}</span>`);
 
         const db = getFirestore(app);
+        await refreshHealthAdmin(currentUser);
         const usersSnap = await getDocs(collection(db, 'users'));
         const therapistsSnap = await getDocs(collection(db, 'therapists'));
         refreshPageViewCount(currentUser);
@@ -755,6 +821,7 @@
             document.getElementById('therapist-section').classList.remove('hidden');
             document.getElementById('institution-section').classList.remove('hidden');
             document.getElementById('data-section').classList.remove('hidden');
+            document.getElementById('health-admin-section').classList.remove('hidden');
             await refreshData();
           } else {
             localStorage.removeItem('urungano_admin_authed');

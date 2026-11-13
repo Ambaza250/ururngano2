@@ -16,6 +16,94 @@ app.use(cors({
 
 app.use(express.json({ limit: '256kb' }));
 
+// Pharmacy order submission and review. Screenshots are uploaded directly to
+// Cloudinary with a short-lived signature; only the resulting secure URL is
+// stored in Firestore.
+app.post('/api/pharmacy/upload-signature', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyFirebaseUser(req);
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    if (!cloudName || !apiKey || !apiSecret) return res.status(503).json({ error: 'Image upload is not configured.' });
+    const timestamp = Number(req.body?.timestamp);
+    if (!Number.isInteger(timestamp) || Math.abs(Date.now() / 1000 - timestamp) > 300) return res.status(400).json({ error: 'Invalid upload timestamp.' });
+    const params = `folder=urungano/pharmacy-orders&timestamp=${timestamp}`;
+    const signature = crypto.createHash('sha1').update(params + apiSecret).digest('hex');
+    return res.json({ cloudName, apiKey, timestamp, signature });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to prepare upload.' }); }
+});
+
+app.post('/api/pharmacy/orders', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const drug = sanitizeString(req.body?.drug, 120);
+    const quantity = Number(req.body?.quantity);
+    const catalog = {
+      'Amoxicillin': false, 'ORS': false, 'Antimalarial medicine': true,
+      'Paracetamol': false, 'Ibuprofen': false, 'Aspirin': false,
+      'Antacid tablets': false, 'Cetirizine': false, 'Cough lozenges': false,
+      'Condoms': false, 'Emergency contraceptive pills': false,
+      'Daily contraceptive pills': false, 'Folic acid': false,
+      'Metformin': true, 'Amlodipine': true, 'Inhaler (salbutamol)': true,
+      'Antibiotic eye drops': true, 'Prescription skin cream': true
+    };
+    if (!Object.prototype.hasOwnProperty.call(catalog, drug) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) return res.status(400).json({ error: 'Choose a medicine from the catalog and a valid quantity.' });
+    const requiresPrescription = catalog[drug];
+    const imageUrl = sanitizeString(req.body?.imageUrl, 1000);
+    if (requiresPrescription && !/^https:\/\/res\.cloudinary\.com\//.test(imageUrl)) return res.status(400).json({ error: 'Upload a valid prescription image for this medicine.' });
+    if (!requiresPrescription && imageUrl && !/^https:\/\/res\.cloudinary\.com\//.test(imageUrl)) return res.status(400).json({ error: 'Invalid uploaded image.' });
+    const ref = await firebaseAdmin.firestore().collection('pharmacyOrders').add({ userId: user.uid, drug, quantity, requiresPrescription, ...(imageUrl ? { imageUrl } : {}), status: requiresPrescription ? 'pending' : 'approved', ...(!requiresPrescription ? { momoCode: '*182*8*1*34345*10000#' } : {}), createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true, id: ref.id });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to create order.' }); }
+});
+
+app.get('/api/pharmacy/orders', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const snap = await firebaseAdmin.firestore().collection('pharmacyOrders').where('userId', '==', user.uid).get();
+    const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => {
+      const aTime = a.createdAt?._seconds || a.createdAt?.seconds || 0;
+      const bTime = b.createdAt?._seconds || b.createdAt?.seconds || 0;
+      return bTime - aTime;
+    });
+    return res.json({ orders });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load your orders.' }); }
+});
+
+app.post('/api/pharmacy/orders/:id/paid', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const ref = firebaseAdmin.firestore().collection('pharmacyOrders').doc(sanitizeString(req.params.id, 150));
+    const snap = await ref.get();
+    if (!snap.exists || snap.data().userId !== user.uid) return res.status(404).json({ error: 'Order not found.' });
+    if (snap.data().status !== 'approved') return res.status(409).json({ error: 'This order is not awaiting payment.' });
+    await ref.update({ status: 'paid', paidAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to update payment status.' }); }
+});
+
+app.post('/api/admin/pharmacy-orders/:id/status', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const allowed = ['approved', 'paid', 'delivered', 'rejected'];
+    const status = sanitizeString(req.body?.status, 20);
+    if (!allowed.includes(status)) return res.status(400).json({ error: 'Invalid order status.' });
+    const ref = firebaseAdmin.firestore().collection('pharmacyOrders').doc(sanitizeString(req.params.id, 150));
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'Order not found.' });
+    const updates = { status, updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() };
+    if (status === 'approved') updates.momoCode = '*182*8*1*34345*10000#';
+    await ref.update(updates);
+    return res.json({ ok: true });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to update order.' }); }
+});
+
 const DATA_DIR = path.join(__dirname, 'data');
 const PERIODS_FILE = path.join(DATA_DIR, 'periods.json');
 
@@ -271,6 +359,169 @@ app.get('/api/admin/dashboard-stats', async (req, res) => {
     console.error('Unable to load admin dashboard stats', e);
     return res.status(e.status || 500).json({ error: e.message || 'Unable to load dashboard statistics.' });
   }
+});
+
+// Doctor directory is public; all writes and operational data stay admin-only.
+app.get('/api/doctors', async (_req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const snap = await firebaseAdmin.firestore().collection('doctors').orderBy('name').get();
+    return res.json({ doctors: snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) });
+  } catch (e) { return res.status(500).json({ error: e.message || 'Unable to load doctors.' }); }
+});
+
+app.get('/api/doctor-bookings', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const snap = await firebaseAdmin.firestore().collection('users').doc(user.uid).collection('doctorBookings').get();
+    return res.json({ bookings: snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load bookings.' }); }
+});
+
+app.post('/api/doctor-bookings', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const doctorId = sanitizeString(req.body?.doctorId, 150);
+    const phone = sanitizeString(req.body?.phone, 40);
+    if (!doctorId || !phone) return res.status(400).json({ error: 'Choose a doctor and enter your payment phone number.' });
+    const db = firebaseAdmin.firestore();
+    const doctor = await db.collection('doctors').doc(doctorId).get();
+    if (!doctor.exists) return res.status(404).json({ error: 'Doctor not found.' });
+    const ref = await db.collection('users').doc(user.uid).collection('doctorBookings').add({ doctorId, phone, status: 'pending', paymentConfirmed: false, createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true, id: ref.id });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to create booking.' }); }
+});
+
+app.get('/api/admin/health-services', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const db = firebaseAdmin.firestore();
+    const [doctorsSnap, ordersSnap, usersSnap] = await Promise.all([
+      db.collection('doctors').orderBy('name').get(),
+      db.collection('pharmacyOrders').get(),
+      db.collection('users').get()
+    ]);
+    const doctorBookings = [];
+    for (const userDoc of usersSnap.docs) {
+      const bookings = await userDoc.ref.collection('doctorBookings').get();
+      bookings.docs.forEach(doc => doctorBookings.push({ uid: userDoc.id, id: doc.id, ...doc.data() }));
+    }
+    return res.json({
+      doctors: doctorsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+      orders: ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+      doctorBookings
+    });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load health service data.' }); }
+});
+
+app.post('/api/admin/doctors', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const name = sanitizeString(req.body?.name, 120);
+    const expertise = sanitizeString(req.body?.expertise, 180);
+    const whatsapp = sanitizeString(req.body?.whatsapp, 40);
+    const bio = sanitizeString(req.body?.bio, 500);
+    if (!name || !expertise || !whatsapp) return res.status(400).json({ error: 'Name, expertise, and WhatsApp number are required.' });
+    const ref = await firebaseAdmin.firestore().collection('doctors').add({ name, expertise, whatsapp, bio, createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true, id: ref.id });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to add doctor.' }); }
+});
+
+app.post('/api/admin/doctor-bookings/:uid/:id/confirm', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const ref = firebaseAdmin.firestore().collection('users').doc(sanitizeString(req.params.uid, 150)).collection('doctorBookings').doc(sanitizeString(req.params.id, 150));
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'Doctor booking not found.' });
+    await ref.update({ paymentConfirmed: true, status: 'confirmed', confirmedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to confirm payment.' }); }
+});
+
+const LAB_TESTS = ['Blood sugar', 'Liver function', 'Heart function', 'Kidney test', 'Diabetes', 'X-ray test'];
+
+app.get('/api/lab-hospitals', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const test = sanitizeString(req.query.test, 80);
+    if (!LAB_TESTS.includes(test)) return res.status(400).json({ error: 'Choose a valid lab test.' });
+    const snap = await firebaseAdmin.firestore().collection('labHospitals').where('tests', 'array-contains', test).get();
+    return res.json({ hospitals: snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) });
+  } catch (e) { return res.status(500).json({ error: e.message || 'Unable to find hospitals.' }); }
+});
+
+app.get('/api/lab-bookings', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const snap = await firebaseAdmin.firestore().collection('labBookings').where('userId', '==', user.uid).get();
+    return res.json({ bookings: snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load lab bookings.' }); }
+});
+
+app.post('/api/lab-bookings', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const test = sanitizeString(req.body?.test, 80);
+    const hospitalId = sanitizeString(req.body?.hospitalId, 150);
+    const phone = sanitizeString(req.body?.phone, 40);
+    if (!LAB_TESTS.includes(test) || !hospitalId || !phone) return res.status(400).json({ error: 'Choose a valid test and hospital, and enter your payment phone number.' });
+    const db = firebaseAdmin.firestore();
+    const hospitalSnap = await db.collection('labHospitals').doc(hospitalId).get();
+    if (!hospitalSnap.exists || !(hospitalSnap.data().tests || []).includes(test)) return res.status(400).json({ error: 'That hospital does not provide the selected test.' });
+    const ref = await db.collection('labBookings').add({ userId: user.uid, test, hospitalId, hospitalName: hospitalSnap.data().name, hospitalAddress: hospitalSnap.data().address, phone, status: 'pending_payment_review', paymentPhone: phone, paymentCode: '*182*8*1*34345*10000#', createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true, id: ref.id });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to create lab booking.' }); }
+});
+
+app.get('/api/admin/lab-services', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const db = firebaseAdmin.firestore();
+    const [hospitalsSnap, bookingsSnap] = await Promise.all([db.collection('labHospitals').orderBy('name').get(), db.collection('labBookings').get()]);
+    const bookings = bookingsSnap.docs.map(doc => ({ id: doc.id, uid: doc.data().userId, ...doc.data() }));
+    return res.json({ hospitals: hospitalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })), bookings });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load lab services.' }); }
+});
+
+app.post('/api/admin/lab-hospitals', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const name = sanitizeString(req.body?.name, 160);
+    const address = sanitizeString(req.body?.address, 300);
+    const tests = Array.isArray(req.body?.tests) ? [...new Set(req.body.tests.filter(test => LAB_TESTS.includes(test)))] : [];
+    if (!name || !address || !tests.length) return res.status(400).json({ error: 'Enter the hospital name and address, and select at least one test.' });
+    const ref = await firebaseAdmin.firestore().collection('labHospitals').add({ name, address, tests, createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true, id: ref.id });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to add hospital.' }); }
+});
+
+app.post('/api/admin/lab-bookings/:uid/:id/approve', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyAdmin(req);
+    const ref = firebaseAdmin.firestore().collection('labBookings').doc(sanitizeString(req.params.id, 150));
+    const snap = await ref.get();
+    if (!snap.exists || snap.data().userId !== sanitizeString(req.params.uid, 150)) return res.status(404).json({ error: 'Lab booking not found.' });
+    const booking = snap.data();
+    if (booking.status !== 'pending_payment_review') return res.status(409).json({ error: 'This booking is no longer awaiting payment approval.' });
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Kigali', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+    const dateParts = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    const nextDay = new Date(Date.UTC(Number(dateParts.year), Number(dateParts.month) - 1, Number(dateParts.day) + 1));
+    const appointmentDate = nextDay.toISOString().slice(0, 10);
+    // Rwanda uses UTC+2 year-round; 08:00 Africa/Kigali is 06:00 UTC.
+    const appointmentAt = new Date(`${appointmentDate}T06:00:00.000Z`);
+    await ref.update({ status: 'confirmed', paymentApproved: true, paymentApprovedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(), appointmentDate, appointmentTime: '08:00', appointmentTimezone: 'Africa/Kigali', appointmentAt });
+    return res.json({ ok: true, appointmentDate, appointmentTime: '08:00', appointmentTimezone: 'Africa/Kigali', hospitalName: booking.hospitalName, hospitalAddress: booking.hospitalAddress, test: booking.test });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to approve lab payment.' }); }
 });
 
 // ===== Therapist creation endpoint =====
@@ -581,6 +832,25 @@ app.post('/api/periods/save', async (req, res) => {
     console.error(e);
     return res.status(500).json({ error: 'Failed to save period data.' });
   }
+});
+
+// Keep page URLs extensionless while continuing to serve the existing .html files.
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  let requestedUrl;
+  try { requestedUrl = new URL(req.url, 'http://localhost'); } catch { return next(); }
+  let pathname;
+  try { pathname = decodeURIComponent(requestedUrl.pathname); } catch { return next(); }
+  if (pathname.toLowerCase().endsWith('.html')) {
+    return res.redirect(301, pathname.slice(0, -5) + requestedUrl.search);
+  }
+  if (path.extname(pathname) || pathname === '/') return next();
+  const candidate = path.resolve(__dirname, `.${pathname}.html`);
+  const projectRoot = path.resolve(__dirname) + path.sep;
+  if (candidate.startsWith(projectRoot) && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+    return res.sendFile(candidate);
+  }
+  return next();
 });
 
 // Serve all static files (HTML, images, etc.)
