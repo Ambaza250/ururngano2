@@ -4,36 +4,24 @@
     <header class="urungano-site-header">
       <nav class="urungano-nav" aria-label="Main navigation">
         <a class="urungano-brand" href="/urungano" aria-label="Urungano home"><img src="/urungano-logo.jpeg" alt=""><span>Urungano</span></a>
-        <div class="urungano-desktop-links">
-          <a href="/urungano" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
-          <a href="/srh" data-en="SRH services" data-rw="Ubuzima bw’imyororokere">Ubuzima bw’imyororokere</a>
-          <a href="/mental-health" data-en="Mental health" data-rw="Ubuzima bwo mu mutwe">Ubuzima bwo mu mutwe</a>
-          <a href="/about-us" data-en="About us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
-        </div>
         <div class="urungano-header-controls">
           <div class="urungano-language" aria-label="Choose language">
             <button type="button" data-language="rw" id="site-lang-rw">RW</button>
             <button type="button" data-language="en" id="site-lang-en">EN</button>
           </div>
-          <button type="button" class="urungano-menu-toggle" id="site-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-mobile-menu">☰</button>
+          <a class="urungano-profile" id="site-account-link" href="/auth" aria-label="Account" title="Account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg></a>
+          <button type="button" class="urungano-menu-toggle" id="site-menu-toggle" aria-label="Open menu" title="Open menu" aria-expanded="false" aria-controls="site-mobile-menu" style="display:inline-flex">☰</button>
         </div>
         <div class="urungano-mobile-menu" id="site-mobile-menu">
-          <a href="/urungano" data-en="Home" data-rw="Ahabanza">Ahabanza</a>
+          <a href="/chat" data-site-auth-action="peers" hidden data-en="Chat with peers" data-rw="Ganira n’urungano">Ganira n’urungano</a>
+          <a href="/therapychat" data-site-auth-action="therapist-chat" hidden data-en="Chat with a therapist" data-rw="Ganira n’umujyanama">Ganira n’umujyanama</a>
+          <a href="/booking" data-site-auth-action="therapist-booking" hidden data-en="Book a therapist" data-rw="Tegura umujyanama">Tegura umujyanama</a>
           <a href="/srh" data-en="SRH services" data-rw="Ubuzima bw’imyororokere">Ubuzima bw’imyororokere</a>
           <a href="/mental-health" data-en="Mental health" data-rw="Ubuzima bwo mu mutwe">Ubuzima bwo mu mutwe</a>
           <a href="/about-us" data-en="About us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
         </div>
       </nav>
     </header>`;
-  const footer = `
-    <footer class="urungano-site-footer">
-      <div class="urungano-footer-inner">
-        <div><h2 data-en="Urungano" data-rw="Urungano">Urungano</h2><p data-en="A safe place to learn and find support." data-rw="Ahantu hizewe ho kwigira no gushaka ubufasha.">Ahantu hizewe ho kwigira no gushaka ubufasha.</p></div>
-        <div><h3 data-en="Explore" data-rw="Sura">Sura</h3><a href="/urungano" data-en="Home" data-rw="Ahabanza">Ahabanza</a><a href="/srh" data-en="SRH services" data-rw="Ubuzima bw’imyororokere">Ubuzima bw’imyororokere</a><a href="/about-us" data-en="About us" data-rw="Ibitwerekeye">Ibitwerekeye</a></div>
-        <div><h3 data-en="Get help" data-rw="Shaka ubufasha">Shaka ubufasha</h3><a href="tel:112" data-en="Emergency: 112" data-rw="Ibutabazi: 112">Ibutabazi: 112</a><a href="https://wa.me/250786561823" target="_blank" rel="noopener" data-en="Chat with Baza Shangazi" data-rw="Ganira na Baza Shangazi">Ganira na Baza Shangazi</a></div>
-      </div>
-      <p class="urungano-footer-note">© 2026 Urungano</p>
-    </footer>`;
   const shangaziWidget = `
     <details id="whatsapp-shangazi" class="whatsapp-widget">
       <summary class="whatsapp-toggle" aria-label="Baza Shangazi on WhatsApp" title="Baza Shangazi">
@@ -65,10 +53,46 @@
   }
 
   document.body.insertAdjacentHTML('afterbegin', header);
-  document.body.insertAdjacentHTML('beforeend', footer);
+  document.querySelectorAll('body > nav').forEach(nav => { if (!nav.classList.contains('urungano-nav')) nav.hidden = true; });
+  document.querySelectorAll('body > header').forEach(existing => { if (!existing.classList.contains('urungano-site-header')) existing.hidden = true; });
   document.body.insertAdjacentHTML('beforeend', shangaziWidget);
   document.querySelectorAll('[data-language]').forEach(button => button.addEventListener('click', () => applyLanguage(button.dataset.language)));
   const toggle = document.getElementById('site-menu-toggle');
+  import('https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js').then(async appMod => {
+    const authMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js');
+    const app = appMod.getApps()[0] || appMod.initializeApp({apiKey:'AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4',authDomain:'urungano-chat-50d62.firebaseapp.com',projectId:'urungano-chat-50d62',storageBucket:'urungano-chat-50d62.firebasestorage.app',messagingSenderId:'730372170670',appId:'1:730372170670:web:91300da03f18f488afde3f'});
+    let authGeneration = 0;
+    authMod.onAuthStateChanged(authMod.getAuth(app), user => {
+      const generation = ++authGeneration;
+      const account = document.getElementById('site-account-link');
+      account.href = user ? '/account' : '/auth'; account.title = user ? (window.siteText('Account','Konti')) : (window.siteText('Sign in','Injira'));
+      const peersLink = document.querySelector('[data-site-auth-action="peers"]');
+      const bookingLink = document.querySelector('[data-site-auth-action="therapist-booking"]');
+      const therapistChatLink = document.querySelector('[data-site-auth-action="therapist-chat"]');
+      peersLink.hidden = !user;
+      bookingLink.hidden = true;
+      therapistChatLink.hidden = true;
+      if (!user) return;
+
+      (async () => {
+        let hasConfirmedBooking = false;
+        try {
+          const fsMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js');
+          const db = fsMod.getFirestore(app);
+          const bookings = await fsMod.getDocs(fsMod.collection(db, 'users', user.uid, 'bookings'));
+          hasConfirmedBooking = bookings.docs.some(doc => {
+            const booking = doc.data() || {};
+            return booking.status === 'confirmed' || booking.payment?.confirmed === true;
+          });
+        } catch (_) {
+          // Keep the booking option available if booking status cannot be checked.
+        }
+        if (generation !== authGeneration) return;
+        therapistChatLink.hidden = !hasConfirmedBooking;
+        bookingLink.hidden = hasConfirmedBooking;
+      })();
+    });
+  }).catch(() => {});
   toggle.addEventListener('click', () => {
     const menu = document.getElementById('site-mobile-menu');
     const open = menu.classList.toggle('open');

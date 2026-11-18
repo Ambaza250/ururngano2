@@ -6,25 +6,18 @@
   <title>Urungano Chat</title>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
     import {
       getAuth,
       createUserWithEmailAndPassword,
       signInWithEmailAndPassword,
       onAuthStateChanged,
-      signOut,
       updateProfile
     } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
     import {
       getFirestore,
-      collection,
-      addDoc,
-      onSnapshot,
-      query,
-      orderBy,
       doc,
       setDoc,
-      getDocs,
       getDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
@@ -38,7 +31,7 @@
       appId: "1:730372170670:web:91300da03f18f488afde3f"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = getApps()[0] || initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
@@ -46,9 +39,14 @@
     let currentUserProfile = null;
     let currentTarget = null;
     let unsubscribeMessages = null;
-let isEnglish = false;
+    let isEnglish = document.body.dataset.lang === "en";
     const userCache = {};
     let groupsCache = [];
+    let messageCache = [];
+    let replyTo = null;
+    const blockedUsers = new Set(JSON.parse(localStorage.getItem("urungano-blocked-users") || "[]"));
+    let typingTimer;
+    let lastSentAt = 0;
 
     // Hardcoded translations for known group names (fallback if Firestore data lacks nameRw/nameEn)
     const groupNameTranslations = {
@@ -132,44 +130,20 @@ let isEnglish = false;
       if (sidebar) sidebar.style.display = "none";
       if (chatArea) chatArea.style.display = "flex";
 
-      // Ensure a mobile back button exists.
+      // Add mobile back navigation without replacing the chat toolbar.
       const header = document.getElementById("chat-header");
-      if (header) {
-        const html = header.innerHTML;
-        if (!html.includes('id="mobile-back-btn"')) {
-          // Prepend a back button.
-          header.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px; justify-content:flex-start;">
-              <button id="mobile-back-btn" onclick="window.mobileBackToList()" style="background:#0f766e; padding:10px 16px; border-radius:30px; font-weight:700; border:none; cursor:pointer;">← ${t("Garuka", "Back")}</button>
-              <span id="chat-header-title">${header.textContent}</span>
-            </div>
-          `;
-        }
-      }
-
-      // Keep header title updated for the selected chat.
-      const titleEl = document.getElementById("chat-header-title");
-      if (titleEl) {
-        titleEl.textContent = header.textContent.replace('← ' + t("Garuka", "Back"), '').trim();
+      if (header && !document.getElementById("mobile-back-btn")) {
+        const back=document.createElement("button");back.id="mobile-back-btn";back.type="button";back.textContent=`← ${t("Garuka","Back")}`;back.onclick=()=>window.mobileBackToList();header.prepend(back);
       }
     }
-
-
 
     function enterChatListView() {
       if (!isMobileViewport()) return;
-      const sidebar = document.querySelector(".sidebar");
-      const chatArea = document.querySelector(".chat-area");
-      if (sidebar) sidebar.style.display = "block";
-      if (chatArea) chatArea.style.display = "none";
-
-      // Ensure header looks like a list and remove any mobile back button UI.
-      const header = document.getElementById("chat-header");
-      if (header) {
-        header.innerHTML = t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo", "Select a chat");
-      }
+      const sidebar=document.querySelector(".sidebar"),chatArea=document.querySelector(".chat-area");
+      if(sidebar)sidebar.style.display="block";if(chatArea)chatArea.style.display="none";
+      document.getElementById("mobile-back-btn")?.remove();
+      const title=document.getElementById("chat-header-title");if(title)title.textContent=t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo","Select a chat");
     }
-
 
     function handleResponsiveMobileMode() {
       if (!isMobileViewport()) {
@@ -254,14 +228,15 @@ let isEnglish = false;
     async function loadGroups() {
       const list = document.getElementById("groups-list");
       list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
-      const snapshot = await getDocs(collection(db, "groups"));
-      groupsCache = [];
-      snapshot.forEach(docSnap => {
-        const g = docSnap.data();
-        if (!g.id) return;
-        groupsCache.push(g);
-      });
-      renderGroups();
+      try {
+        const response = await fetch("/api/chat/groups", { headers: { Authorization: `Bearer ${await currentUser.getIdToken()}` } });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to load groups.");
+        groupsCache = Array.isArray(result.groups) ? result.groups : [];
+        renderGroups();
+      } catch (error) {
+        list.innerHTML = `<p role="alert">${escapeHtml(error.message || t("Ntibyashobotse gupakira amatsinda.", "Could not load groups."))}</p>`;
+      }
     }
 
     function getGroupIcon(group) {
@@ -291,26 +266,26 @@ let isEnglish = false;
     async function loadUsers() {
       const list = document.getElementById("users-list");
       list.innerHTML = `<p>${t("Tegereza...", "Loading...")}</p>`;
-      const snapshot = await getDocs(collection(db, "users"));
-      list.innerHTML = "";
-      const users = [];
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data.uid && data.uid !== currentUser?.uid) {
-          userCache[data.uid] = data;
-          users.push(data);
-        }
-      });
-      users.sort((a,b) => (a.username||"").localeCompare(b.username||""));
-      users.forEach(user => {
-        const div = document.createElement("div");
-        div.className = "user-item sidebar-item";
-        div.dataset.type = "user";
-        div.dataset.id = user.uid;
-        div.innerHTML = `<span class="item-icon">👤</span><strong>${escapeHtml(user.username || "User")}</strong>`;
-        div.onclick = () => openPrivateChat(user);
-        list.appendChild(div);
-      });
+      try {
+        const response = await fetch("/api/chat/users", { headers: { Authorization: `Bearer ${await currentUser.getIdToken()}` } });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to load people.");
+        const users = Array.isArray(result.users) ? result.users : [];
+        list.innerHTML = "";
+        users.sort((a,b) => (a.username||"").localeCompare(b.username||""));
+        users.filter(user => user.uid && !blockedUsers.has(user.uid)).forEach(user => {
+          userCache[user.uid] = user;
+          const div = document.createElement("div");
+          div.className = "user-item sidebar-item";
+          div.dataset.type = "user";
+          div.dataset.id = user.uid;
+          div.innerHTML = `<span class="item-icon">👤</span><strong>${escapeHtml(user.username || "User")}</strong>`;
+          div.onclick = () => openPrivateChat(user);
+          list.appendChild(div);
+        });
+      } catch (error) {
+        list.innerHTML = `<p role="alert">${escapeHtml(error.message || t("Ntibyashobotse gupakira abantu.", "Could not load people."))}</p>`;
+      }
     }
 
     function markActiveItem(type, id) {
@@ -321,7 +296,48 @@ let isEnglish = false;
 
     function clearMessages() {
       document.getElementById("messages").innerHTML = "";
+      document.getElementById("emoji-picker-popover")?.setAttribute("hidden", "");
       if (unsubscribeMessages) unsubscribeMessages();
+      unsubscribeMessages = null;
+    }
+
+    document.getElementById("block-user-btn")?.addEventListener("click", async () => {
+      if (currentTarget?.type !== "private") return;
+      const blockedUser = currentTarget.data;
+      if (blockedUsers.has(blockedUser.uid)) return;
+      const confirmation = isEnglish ? `Block ${blockedUser.username || "this user"}?` : `Ufunga ${blockedUser.username || "uyu muntu"}?`;
+      if (!confirm(confirmation)) return;
+      blockedUsers.add(blockedUser.uid);
+      localStorage.setItem("urungano-blocked-users", JSON.stringify([...blockedUsers]));
+      document.getElementById("block-user-btn").disabled = true;
+      document.getElementById("block-user-btn").textContent = t("Yafunzwe", "Blocked");
+      await loadUsers();
+    });
+
+    function subscribeToMessages(type, chatId) {
+      if (unsubscribeMessages) unsubscribeMessages();
+      let stopped = false;
+      let loading = false;
+      const refresh = async () => {
+        if (stopped || loading || !currentUser) return;
+        loading = true;
+        try {
+          const params = new URLSearchParams({ chatType: type, chatId });
+          const response = await fetch(`/api/chat/messages?${params}`, { headers: { Authorization: `Bearer ${await currentUser.getIdToken()}` } });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Unable to load messages.");
+          if (stopped || !currentTarget || (type === "group" ? currentTarget.data.id !== chatId : [currentUser.uid, currentTarget.data.uid].sort().join("_") !== chatId)) return;
+          const docs = (Array.isArray(result.messages) ? result.messages : []).map(message => ({ id: message.id, data: () => message }));
+          renderMessages({ docs });
+        } catch (error) {
+          if (!stopped) document.getElementById("messages").innerHTML = `<p role="alert">${escapeHtml(error.message || "Unable to load messages.")}</p>`;
+        } finally {
+          loading = false;
+        }
+      };
+      const timer = setInterval(refresh, 2500);
+      unsubscribeMessages = () => { stopped = true; clearInterval(timer); };
+      refresh();
     }
 
     function openGroup(group) {
@@ -329,8 +345,7 @@ let isEnglish = false;
       markActiveItem("group", group.id);
       refreshHeader();
       clearMessages();
-      const q = query(collection(db, "groups", group.id, "messages"), orderBy("createdAt"));
-      unsubscribeMessages = onSnapshot(q, renderMessages);
+      subscribeToMessages("group", group.id);
 
       // WhatsApp-like mobile navigation: go to chat view.
       updateMobileViews();
@@ -343,8 +358,7 @@ let isEnglish = false;
       refreshHeader();
       clearMessages();
       const chatId = [currentUser.uid, user.uid].sort().join("_");
-      const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt"));
-      unsubscribeMessages = onSnapshot(q, renderMessages);
+      subscribeToMessages("private", chatId);
 
       // WhatsApp-like mobile navigation: go to chat view.
       updateMobileViews();
@@ -352,62 +366,183 @@ let isEnglish = false;
 
 
 function refreshHeader() {
-      if (!currentTarget) return;
-      const header = document.getElementById("chat-header");
+      const title=document.getElementById("chat-header-title");
+      const blockButton=document.getElementById("block-user-btn");
+      if (!currentTarget) { if(title)title.textContent=t("Hitamo itsinda cyangwa umuntu wo kuganiramo","Select a chat");if(blockButton)blockButton.hidden=true;return; }
+      const rules=document.getElementById("group-rules");if(rules){rules.classList.toggle("hidden",currentTarget.type!=="group");rules.textContent=t("Wubaha abandi, irinde gusangiza amakuru bwite kandi wirinde amagambo akomeretsa.","Be kind, protect personal information, and avoid harmful content.");}
+      if(blockButton){const isPrivate=currentTarget.type==="private",isBlocked=isPrivate&&blockedUsers.has(currentTarget.data.uid);blockButton.hidden=!isPrivate;blockButton.disabled=isBlocked;blockButton.textContent=isBlocked?t("Yafunzwe","Blocked"):t("Funga umuntu","Block user");}
       if (currentTarget.type === "group") {
         const groupName = getTranslatedGroupName(currentTarget.data);
-        header.textContent = isEnglish 
-          ? `Group: ${groupName}`
-          : `Itsinda: ${groupName}`;
+        title.textContent = isEnglish ? `Group: ${groupName}` : `Itsinda: ${groupName}`;
       } else {
-        header.textContent = isEnglish 
-          ? `Chatting with ${currentTarget.data.username}`
-          : `Kuganira na ${currentTarget.data.username}`;
+        title.textContent = isEnglish ? `Chatting with ${currentTarget.data.username}` : `Kuganira na ${currentTarget.data.username}`;
       }
     }
 
     function renderMessages(snapshot) {
       const container = document.getElementById("messages");
+      const wasAtBottom = container.scrollHeight - container.clientHeight - container.scrollTop < 32;
+      const previousScrollTop = container.scrollTop;
+      const openMenus = new Set(Array.from(container.querySelectorAll(".message[data-message-id] details[open]")).map(details => `${details.closest('.message').dataset.messageId}:${details.className}`));
       container.innerHTML = "";
-      snapshot.forEach(docSnap => {
-        const msg = docSnap.data();
-        const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "";
-
-        const div = document.createElement("div");
-        div.className = `message ${msg.senderId === currentUser.uid ? "sent" : "received"}`;
-
-        div.innerHTML = `
-          ${msg.senderId !== currentUser.uid ? `<span class="sender-name">${escapeHtml(userCache[msg.senderId]?.username || "User")}</span>` : ''}
-          <div>${escapeHtml(msg.text)}</div>
-          <small>${time}</small>
-        `;
+      messageCache = snapshot.docs.map(d => ({ id:d.id, ...d.data() }));
+      const shown = messageCache.filter(m => !(m.expiresAt&&m.expiresAt<Date.now()));
+      shown.forEach(msg => {
+        const createdAt = msg.createdAt?.toDate ? msg.createdAt.toDate() : new Date((msg.createdAt?._seconds ?? msg.createdAt?.seconds ?? 0) * 1000);
+        const time = Number.isNaN(createdAt.getTime()) || !msg.createdAt ? "" : createdAt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        const div=document.createElement("div");div.className=`message ${msg.senderId===currentUser.uid?"sent":"received"}`;div.dataset.messageId=msg.id;
+        const reactions=msg.reactions||{};
+        const reactionSummary=Object.entries(reactions).filter(([,users])=>Array.isArray(users)&&users.length).map(([emoji,users])=>`<button class="reaction-count" data-react="${escapeHtml(emoji)}" data-id="${msg.id}" aria-label="${t("Subiza ukoresheje","React with")} ${escapeHtml(emoji)}">${escapeHtml(emoji)} ${users.length}</button>`).join("");
+        div.innerHTML=`${msg.senderId!==currentUser.uid?`<span class="sender-name">${escapeHtml(msg.senderName||userCache[msg.senderId]?.username||"User")}</span>`:''}${msg.replyText?`<small class="reply-quote">↪ ${escapeHtml(msg.replyText)}</small>`:''}<div>${escapeHtml(msg.text)}</div><small>${time}</small>${reactionSummary?`<div class="reaction-counts">${reactionSummary}</div>`:""}<div class="message-actions"><details class="message-menu"><summary aria-label="${t("Amahitamo y'ubutumwa","Message options")}" title="${t("Amahitamo y'ubutumwa","Message options")}">⋯</summary><div class="message-menu-dropdown"><button type="button" data-report="${msg.id}">${t("Tanga raporo","Report")}</button><button type="button" data-reply="${msg.id}">${t("Subiza","Reply")}</button></div></details><button type="button" data-open-reactions="${msg.id}" aria-label="${t("Ongeraho igitekerezo","Add reaction")}">😊 ${t("Igitekerezo","React")}</button></div>`;
+        div.querySelectorAll("details").forEach(details => { if (openMenus.has(`${msg.id}:${details.className}`)) details.open = true; });
         container.appendChild(div);
       });
-      container.scrollTop = container.scrollHeight;
+      container.scrollTop = wasAtBottom ? container.scrollHeight : previousScrollTop;
     }
 
+    const emojiCategories = [
+      { id: "all", rw: "Byose", en: "All" }, { id: "smileys", rw: "Amasura", en: "Smileys" },
+      { id: "people", rw: "Abantu", en: "People" }, { id: "nature", rw: "Kamere", en: "Nature" },
+      { id: "food", rw: "Ibiribwa", en: "Food" }, { id: "activities", rw: "Ibikorwa", en: "Activities" },
+      { id: "travel", rw: "Ingendo", en: "Travel" }, { id: "objects", rw: "Ibikoresho", en: "Objects" },
+      { id: "symbols", rw: "Ibimenyetso", en: "Symbols" }, { id: "flags", rw: "Amabendera", en: "Flags" }
+    ];
+    let activeEmojiCategory = "all";
+    let activeReactionMessageId = null;
+
+    function getEmojiCategory(emoji) {
+      const cp = emoji.codePointAt(0);
+      if (cp >= 0x1f1e6 && cp <= 0x1f1ff) return "flags";
+      if ((cp >= 0x1f600 && cp <= 0x1f64f) || (cp >= 0x1f910 && cp <= 0x1f92f) || (cp >= 0x1f970 && cp <= 0x1f97a)) return "smileys";
+      if ((cp >= 0x1f466 && cp <= 0x1f9dd) || (cp >= 0x1f3fb && cp <= 0x1f3ff)) return "people";
+      if ((cp >= 0x1f330 && cp <= 0x1f343) || (cp >= 0x1f400 && cp <= 0x1f43f) || (cp >= 0x1f980 && cp <= 0x1f9ae)) return "nature";
+      if ((cp >= 0x1f345 && cp <= 0x1f37f) || (cp >= 0x1f950 && cp <= 0x1f96f) || (cp >= 0x1f9c0 && cp <= 0x1f9cb)) return "food";
+      if ((cp >= 0x1f3a0 && cp <= 0x1f3ff) || (cp >= 0x1f93a && cp <= 0x1f945)) return "activities";
+      if ((cp >= 0x1f680 && cp <= 0x1f6ff) || (cp >= 0x1f5fb && cp <= 0x1f64f)) return "travel";
+      if ((cp >= 0x1f4a0 && cp <= 0x1f4ff) || (cp >= 0x1f5a4 && cp <= 0x1f5ff)) return "objects";
+      return "symbols";
+    }
+
+    function buildEmojiCatalog() {
+      const all = new Set();
+      const emojiPattern = /\p{Emoji}/u, presentationPattern = /\p{Emoji_Presentation}/u, modifierBasePattern = /\p{Emoji_Modifier_Base}/u;
+      const addRange = (start, end) => {
+        for (let cp = start; cp <= end; cp++) {
+          const glyph = String.fromCodePoint(cp);
+          if (!emojiPattern.test(glyph) || (cp < 0x2600 && !presentationPattern.test(glyph))) continue;
+          const emoji = presentationPattern.test(glyph) ? glyph : `${glyph}\uFE0F`;
+          all.add(emoji);
+          if (modifierBasePattern.test(glyph)) for (let tone = 0x1f3fb; tone <= 0x1f3ff; tone++) all.add(`${emoji}${String.fromCodePoint(tone)}`);
+        }
+      };
+      addRange(0x2600, 0x27ff); addRange(0x1f000, 0x1faff);
+      for (const key of ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*"]) all.add(`${key}\uFE0F\u20E3`);
+      ["👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👩‍👩‍👧","👩‍👩‍👧‍👦","👨‍👨‍👦","👨‍👨‍👧‍👦","👩‍❤️‍👩","👨‍❤️‍👨","👩‍❤️‍👨","🏳️‍🌈","🏳️‍⚧️","🏴‍☠️","👩‍⚕️","👨‍⚕️","🧑‍⚕️","👩‍🏫","👨‍🏫","🧑‍🏫","👩‍💻","👨‍💻","🧑‍💻","👩‍🚀","👨‍🚀","🧑‍🚀"].forEach(emoji => all.add(emoji));
+      const regions = "AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW".split(" ");
+      regions.forEach(code => all.add(String.fromCodePoint(0x1f1e6 + code.charCodeAt(0) - 65, 0x1f1e6 + code.charCodeAt(1) - 65)));
+      return [...all];
+    }
+
+    const emojiCatalog = buildEmojiCatalog();
+    function renderEmojiPicker() {
+      const queryText = document.getElementById("emoji-picker-search").value.trim().toLowerCase();
+      const choices = emojiCatalog.filter(emoji => (activeEmojiCategory === "all" || getEmojiCategory(emoji) === activeEmojiCategory) && (!queryText || emoji.includes(queryText)));
+      document.getElementById("emoji-picker-grid").innerHTML = choices.map(emoji => `<button type="button" data-select-emoji="${emoji}" aria-label="${t("Emoji","Emoji")} ${emoji}">${emoji}</button>`).join("");
+      document.getElementById("emoji-picker-count").textContent = `${choices.length} ${t("emoji","emojis")}`;
+    }
+
+    function renderEmojiCategories() {
+      document.getElementById("emoji-picker-categories").innerHTML = emojiCategories.map(category => `<button type="button" data-emoji-category="${category.id}" class="${category.id === activeEmojiCategory ? "active" : ""}">${t(category.rw, category.en)}</button>`).join("");
+    }
+    renderEmojiCategories();
+    document.getElementById("emoji-picker-popover").setAttribute("aria-label", t("Igitekerezo ukoresheje emoji", "Emoji reactions"));
+    document.getElementById("emoji-picker-close").setAttribute("aria-label", t("Funga urutonde rwa emoji", "Close emoji picker"));
+    document.getElementById("emoji-picker-categories").addEventListener("click", event => {
+      const button = event.target.closest("[data-emoji-category]");
+      if (!button) return;
+      activeEmojiCategory = button.dataset.emojiCategory;
+      document.querySelectorAll("[data-emoji-category]").forEach(item => item.classList.toggle("active", item === button));
+      renderEmojiPicker();
+    });
+    document.getElementById("emoji-picker-search").addEventListener("input", renderEmojiPicker);
+    document.getElementById("emoji-picker-grid").addEventListener("click", event => {
+      const button = event.target.closest("[data-select-emoji]");
+      if (button) saveMessageReaction(activeReactionMessageId, button.dataset.selectEmoji);
+    });
+    document.getElementById("custom-reaction-submit").addEventListener("click", () => {
+      const input = document.getElementById("custom-reaction-input");
+      if (!input.value.trim()) { input.focus(); return; }
+      saveMessageReaction(activeReactionMessageId, input.value.trim());
+    });
+    document.getElementById("custom-reaction-input").addEventListener("keydown", event => {
+      if (event.key === "Enter") { event.preventDefault(); document.getElementById("custom-reaction-submit").click(); }
+    });
+    document.getElementById("emoji-picker-close").addEventListener("click", () => { document.getElementById("emoji-picker-popover").hidden = true; });
+    document.addEventListener("click", event => {
+      if (!event.target.closest("#emoji-picker-popover, [data-open-reactions]")) document.getElementById("emoji-picker-popover").hidden = true;
+    });
+    async function saveMessageReaction(messageId, emoji) {
+      if (!messageId || !emoji || !currentTarget) return;
+      const group = currentTarget.type === "group";
+      const chatId = group ? currentTarget.data.id : [currentUser.uid, currentTarget.data.uid].sort().join("_");
+      try {
+        const response = await fetch('/api/chat/reactions', { method: 'POST', headers: { Authorization: 'Bearer ' + await currentUser.getIdToken(), 'Content-Type': 'application/json' }, body: JSON.stringify({ chatType: group ? 'group' : 'private', chatId, messageId, emoji }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to save reaction.');
+        document.getElementById("emoji-picker-popover").hidden = true;
+      } catch (error) { alert(error.message || 'Unable to save reaction.'); }
+    }
+    document.getElementById("messages").addEventListener("click",async event=>{
+      const b=event.target.closest("button");if(!b||!currentTarget)return;
+      const group=currentTarget.type==="group",chatId=group?currentTarget.data.id:[currentUser.uid,currentTarget.data.uid].sort().join("_");
+      const messageId=b.dataset.reply||b.dataset.report||b.dataset.id||b.dataset.customReaction;
+      const msg=messageCache.find(m=>m.id===messageId);
+      if(b.dataset.report){try{const r=await fetch('/api/chat/reports',{method:'POST',headers:{Authorization:'Bearer '+await currentUser.getIdToken(),'Content-Type':'application/json'},body:JSON.stringify({targetId:msg?.senderId,messageId:b.dataset.report,chatType:group?'group':'private',chatId,reason:'Reported from chat'})});if(!r.ok)throw Error();alert('Message reported to moderators.')}catch{alert('Unable to send report right now.')}b.closest('details')?.removeAttribute('open');}
+      if(b.dataset.reply){replyTo=msg;document.getElementById('message-input').placeholder=`Replying: ${(msg?.text||'').slice(0,60)}`;document.getElementById('message-input').focus();b.closest('details')?.removeAttribute('open')}
+      if(b.dataset.openReactions){
+        activeReactionMessageId=b.dataset.openReactions;
+        activeEmojiCategory="all";
+        document.getElementById("emoji-picker-search").value="";
+        document.getElementById("custom-reaction-input").value="";
+        document.querySelectorAll("[data-emoji-category]").forEach(item=>item.classList.toggle("active",item.dataset.emojiCategory==="all"));
+        renderEmojiPicker();
+        document.getElementById("emoji-picker-popover").hidden=false;
+      }
+      if(b.dataset.react)saveMessageReaction(b.dataset.id,b.dataset.react);
+    });
+
+    async function persistChatMessage(type, chatId, message) {
+      const response=await fetch("/api/chat/messages",{method:"POST",headers:{Authorization:"Bearer "+await currentUser.getIdToken(),"Content-Type":"application/json"},body:JSON.stringify({chatType:type,chatId,...message})});
+      const result=await response.json();if(!response.ok){const error=new Error(result.error||"Message could not be sent.");error.status=response.status;throw error}return result;
+    }
+    async function flushOfflineMessages(){if(!currentUser)return;let queue=[];try{queue=JSON.parse(localStorage.getItem("urungano-message-queue")||"[]")}catch{};for(const item of queue){try{await persistChatMessage(item.type,item.chatId,item.message);queue=queue.filter(q=>q.id!==item.id);localStorage.setItem("urungano-message-queue",JSON.stringify(queue))}catch{return}}}
+    window.addEventListener("online",flushOfflineMessages);
     window.sendMessage = async () => {
       const input = document.getElementById("message-input");
       const text = input.value.trim();
       if (!text || !currentTarget) return;
+      const now=Date.now();if(now-lastSentAt<1200)return;lastSentAt=now;
+      const recent=Number(localStorage.getItem("urungano-chat-rate-window")||0),count=Number(localStorage.getItem("urungano-chat-rate-count")||0);if(now-recent>60000){localStorage.setItem("urungano-chat-rate-window",String(now));localStorage.setItem("urungano-chat-rate-count","0")}else if(count>=12){alert("Please wait a moment before sending more messages.");return}localStorage.setItem("urungano-chat-rate-count",String(count+1));
+      if (currentUserProfile?.mutedUntil > Date.now()) { alert("Your account is temporarily muted by a moderator."); return; }
+      if(currentTarget.type==="private"&&blockedUsers.has(currentTarget.data.uid)){alert("You blocked this person on this device.");return;}
+      if (/\b(kill myself|suicid|self[- ]?harm|end my life|hurt myself|want to die|kwiyahura|kwikomeretsa|ndifuza gupfa|kwiyambura ubuzima)\b/i.test(text)) { alert("You deserve immediate support. Call 114 (mental health), 3550 (support), or 112 (emergency). Choose Talk to a human to speak with a person."); if(confirm("Talk to a human on WhatsApp now?"))window.open('https://wa.me/250786561823','_blank','noopener'); }
 
       const messageData = {
         text,
         senderId: currentUser.uid,
         senderName: currentUserProfile?.username || "User",
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        ...(replyTo ? { replyToId:replyTo.id, replyText:replyTo.text } : {})
       };
 
-      if (currentTarget.type === "group") {
-        await addDoc(collection(db, "groups", currentTarget.data.id, "messages"), messageData);
-      } else if (currentTarget.type === "private") {
-        const chatId = [currentUser.uid, currentTarget.data.uid].sort().join("_");
-        await addDoc(collection(db, "chats", chatId, "messages"), messageData);
-      }
-      input.value = "";
+      const type=currentTarget.type,chatId=type==="group"?currentTarget.data.id:[currentUser.uid,currentTarget.data.uid].sort().join("_");
+      const privateKey=type==="private"?"urungano-disappearing-"+chatId:null;const ttl=privateKey?({"24h":86400000,"7d":604800000}[localStorage.getItem(privateKey)]||0):0;
+      const anonymous=type==="group"&&localStorage.getItem("urungano-anonymous-"+chatId)==="1";
+      const queuedMessage={text,senderId:currentUser.uid,senderName:anonymous?"Anonymous":(currentUserProfile?.username||"User"),...(ttl?{expiresAt:Date.now()+ttl}:{}),...(replyTo?{replyToId:replyTo.id,replyText:replyTo.text}:{})};
+      try { if(!navigator.onLine)throw new Error("offline"); await persistChatMessage(type,chatId,queuedMessage); }
+      catch (error) { if(error.status){alert(error.message);return}const queue=JSON.parse(localStorage.getItem("urungano-message-queue")||"[]");queue.push({id:crypto.randomUUID(),type,chatId,message:queuedMessage});localStorage.setItem("urungano-message-queue",JSON.stringify(queue));document.getElementById("typing-status").textContent="Saved to send when connection returns."; }
+      input.value = ""; replyTo=null; input.placeholder=t("Andika message hano...","Type your message here...");
     };
-
-    window.logout = () => signOut(auth);
 
     window.mobileBackToList = () => {
       currentTarget = null;
@@ -425,22 +560,11 @@ function refreshHeader() {
       document.getElementById("users-title").textContent = t("Abandi bakoresha", "Other Users");
       document.getElementById("send-btn").textContent = t("Ohereza", "Send");
       document.getElementById("message-input").placeholder = t("Andika message hano...", "Type your message here...");
-      // Update segmented language toggle
-      const langEl = document.getElementById("lang-toggle");
-      if (langEl) {
-langEl.innerHTML = isEnglish
-          ? `<span class="lang-option active">English</span><span class="lang-option">Kinyarwanda</span>`
-          : `<span class="lang-option">English</span><span class="lang-option active">Kinyarwanda</span>`;
-      }
-      document.getElementById("logout-btn").textContent = t("Sohoka", "Logout");
       document.querySelectorAll(".back-btn").forEach(el => el.textContent = t("← Ahabanza", "← Back"));
 
       // Translate the chat header (when no chat selected)
       if (!currentTarget) {
-        const header = document.getElementById("chat-header");
-        if (header) {
-          header.textContent = t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo", "Select a chat");
-        }
+        const title=document.getElementById("chat-header-title");if(title)title.textContent=t("Hitamo itsinda cyangwa umuntu ushaka kuganiramo","Select a chat");
       }
 
       // Translate empty chat state
@@ -459,10 +583,19 @@ langEl.innerHTML = isEnglish
       if (currentTarget) refreshHeader();
     }
 
-    window.toggleLanguage = () => {
-      isEnglish = !isEnglish;
+    document.getElementById("people-search")?.addEventListener("input",e=>{const q=e.target.value.toLowerCase();document.querySelectorAll(".sidebar-item").forEach(item=>item.style.display=item.textContent.toLowerCase().includes(q)?"flex":"none");});
+    document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();document.getElementById("people-search").focus();}if((e.ctrlKey||e.metaKey)&&e.key==="Enter")window.sendMessage();if(e.key==="Escape"){document.querySelectorAll(".message-menu[open]").forEach(menu=>menu.open=false);document.getElementById("emoji-picker-popover").hidden=true;}});
+    if(navigator.onLine)flushOfflineMessages();
+    document.getElementById("message-input")?.addEventListener("input",()=>{const el=document.getElementById("typing-status");if(el){el.textContent="Typing…";clearTimeout(typingTimer);typingTimer=setTimeout(()=>el.textContent="",1500);}});
+    window.addEventListener("urungano-language-change", event => {
+      isEnglish = event.detail?.lang === "en";
       refreshLanguage();
-    };
+      renderEmojiCategories();
+      if (!document.getElementById("emoji-picker-popover").hidden) renderEmojiPicker();
+      document.getElementById("emoji-picker-popover").setAttribute("aria-label", t("Igitekerezo ukoresheje emoji", "Emoji reactions"));
+      document.getElementById("emoji-picker-close").setAttribute("aria-label", t("Funga urutonde rwa emoji", "Close emoji picker"));
+      if (messageCache.length) renderMessages({ docs: messageCache.map(message => ({ id: message.id, data: () => message })) });
+    });
 
     // ===================== INIT =====================
     onAuthStateChanged(auth, async (user) => {
@@ -492,26 +625,18 @@ langEl.innerHTML = isEnglish
       font-family: 'Segoe UI', Arial, sans-serif;
       background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
       min-height: 100vh;
-      padding: 10px;
+      padding: 0;
     }
     .container {
       max-width: 1200px;
       margin: auto;
       background: white;
-      border-radius: 20px;
+      border-radius: 0 0 20px 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       overflow: hidden;
-      height: 96vh;
+      height: calc(100vh - 72px);
       display: flex;
       flex-direction: column;
-    }
-    .header-bar { 
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between; 
-      padding: 15px 20px; 
-      background: white; 
-      border-bottom: 1px solid #e2e8f0; 
     }
     .logo { height: 50px; }
 
@@ -532,6 +657,9 @@ langEl.innerHTML = isEnglish
       flex-direction: row;
       overflow: hidden;
     }
+    body:has(#chat-section) > .container { max-width: 1200px; width: 100%; height: calc(100vh - 72px); padding: 0 !important; border-radius: 0 0 20px 20px; }
+    .input-area { position: relative; }
+    #typing-status { position: absolute; right: 24px; top: -18px; color: #64748b; font-size: 11px; }
 
     /* ===== SIDEBAR ===== */
     .sidebar {
@@ -744,46 +872,6 @@ langEl.innerHTML = isEnglish
       font-size: 15px;
     }
 
-    /* ===== LANGUAGE TOGGLE (Segmented Control) ===== */
-    .lang-segmented {
-      display: inline-flex;
-      background: #e2e8f0;
-      border-radius: 50px;
-      padding: 3px;
-      cursor: pointer;
-      user-select: none;
-      border: 1px solid #d1d5db;
-    }
-    .lang-segmented .lang-option {
-      padding: 8px 18px;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 13px;
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-      color: #6b7280;
-    }
-    .lang-segmented .lang-option.active {
-      background: #10b981;
-      color: white;
-      box-shadow: 0 2px 6px rgba(16,185,129,0.25);
-    }
-    .lang-segmented .lang-option:not(.active):hover {
-      color: #374151;
-    }
-
-    /* ===== LOGOUT BUTTON ===== */
-    #logout-btn {
-      margin-top: 30px;
-      width: 100%;
-      background: #ef4444;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 600;
-    }
-    #logout-btn:hover {
-      background: #dc2626;
-    }
-
     /* Secondary text lighter */
     .text-muted {
       color: #9ca3af;
@@ -811,8 +899,11 @@ langEl.innerHTML = isEnglish
         flex-shrink: 0;
       }
     }
+    .message-actions{display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-top:8px}.message-actions button,.message-menu summary,.reaction-picker summary{border:0;border-radius:9px;padding:6px 9px;background:#e7f4f0;color:#174b45;font-size:12px;cursor:pointer;list-style:none}.message-menu summary::-webkit-details-marker,.reaction-picker summary::-webkit-details-marker{display:none}.message-menu-dropdown,.emoji-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px;border:1px solid #d7e7e2;border-radius:12px;background:#fff;box-shadow:0 8px 20px rgba(15,50,45,.12)}.message-menu-dropdown button,.emoji-picker button{background:#f0f8f5}.quick-reactions{display:flex;flex-wrap:wrap;gap:4px}.custom-reaction-row{display:flex;gap:5px;width:100%}.custom-reaction-row input{min-width:0;width:130px;border:1px solid #d5e3df;border-radius:8px;padding:6px}.reaction-counts{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}.reaction-count{border:0;border-radius:999px;padding:3px 8px;background:#e7f4f0;color:#174b45}.reply-quote{display:block;margin-bottom:5px;padding:5px 8px;border-left:3px solid #0f766e;background:#f1f8f6}.header-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.chat-header #block-user-btn{border:1px solid rgba(255,255,255,.65);border-radius:9px;padding:7px 10px;background:rgba(255,255,255,.16);color:#fff;font-size:13px;cursor:pointer}.chat-header #block-user-btn:disabled{opacity:.75;cursor:default}
+    .chat-area{position:relative}.emoji-picker-popover{position:absolute;z-index:900;right:14px;bottom:76px;width:min(390px,calc(100% - 28px));padding:12px;border:1px solid #d7e7e2;border-radius:16px;background:#fff;color:#174b45;box-shadow:0 14px 40px rgba(15,50,45,.2)}.emoji-picker-popover[hidden]{display:none!important}.emoji-picker-top{display:flex;gap:8px;align-items:center}.emoji-picker-top input{min-width:0;flex:1;padding:9px;border:1px solid #d5e3df;border-radius:10px}.emoji-picker-top button,.emoji-picker-custom button{border:0;border-radius:9px;padding:8px 10px;background:#e7f4f0;color:#174b45}.emoji-picker-categories{display:flex;gap:5px;overflow-x:auto;padding:9px 0}.emoji-picker-categories button{flex:0 0 auto;border:0;border-radius:999px;padding:6px 9px;background:#f0f8f5;color:#174b45;font-size:12px}.emoji-picker-categories button.active{background:#087f76;color:#fff}.emoji-picker-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;max-height:230px;overflow:auto;padding:2px}.emoji-picker-grid button{border:0;border-radius:8px;background:transparent;font-size:22px;line-height:1.3;padding:4px}.emoji-picker-grid button:hover{background:#e7f4f0}.emoji-picker-count{margin:4px 2px;color:#647b78;font-size:11px}.emoji-picker-custom{display:flex;gap:6px;border-top:1px solid #e4efec;padding-top:8px}.emoji-picker-custom input{min-width:0;flex:1;border:1px solid #d5e3df;border-radius:9px;padding:8px}
   </style>
-    <link rel="stylesheet" href="urungano-design.css">
+    <link rel="stylesheet" href="urungano-design.css?v=20261118-2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
   <div class="container">
@@ -838,29 +929,16 @@ langEl.innerHTML = isEnglish
     <!-- Chat Section -->
     <div id="chat-section">
       <div class="sidebar">
-        <div class="header-bar">
-          <img src="urungano-logo.jpeg" alt="Logo" class="logo">
-          <button class="back-btn btn-primary-back" onclick="window.location.href='index.html'" style="background:#0f766e;">← Ahabanza</button>
-        </div>
-
-        <div style="margin:15px 0; text-align:right;">
-          <span onclick="toggleLanguage()" id="lang-toggle" class="lang-segmented">
-            <span class="lang-option">English</span>
-            <span class="lang-option active">Kinyarwanda</span>
-          </span>
-        </div>
-
-        <h3 id="groups-title">Amatsinda</h3>
+        <input id="people-search" type="search" placeholder="Search people and groups" aria-label="Search people and groups" style="width:100%;padding:10px;border-radius:10px;margin:10px 0"><h3 id="groups-title">Amatsinda</h3>
         <div id="groups-list"></div>
 
         <h3 id="users-title" style="margin-top:25px;">Abandi bakoresha</h3>
         <div id="users-list"></div>
 
-        <button id="logout-btn" onclick="logout()" style="margin-top:30px; width:100%; background:#ef4444; padding:14px;">Sohoka</button>
       </div>
 
       <div class="chat-area">
-        <div class="chat-header" id="chat-header">Hitamo itsinda cyangwa umuntu ushaka kuganiramo</div>
+        <div class="chat-header" id="chat-header"><div class="header-title-row"><span id="chat-header-title">Hitamo itsinda cyangwa umuntu ushaka kuganiramo</span><button id="block-user-btn" type="button" hidden>Block user</button></div><p id="group-rules" class="hidden" style="font-size:12px;margin-top:4px">Be kind, protect personal information, and avoid harmful content.</p></div>
         <div id="messages">
           <!-- Empty state (visible when no messages) -->
           <div class="empty-chat-state">
@@ -880,15 +958,52 @@ langEl.innerHTML = isEnglish
             <p id="empty-chat-desc">Hitamo itsinda cyangwa umuntu wo here hose ugire ibyo uvuga</p>
           </div>
         </div>
-        
+        <section id="emoji-picker-popover" class="emoji-picker-popover" role="dialog" aria-label="Emoji reactions" hidden>
+          <div class="emoji-picker-top"><input id="emoji-picker-search" type="search" data-placeholder-en="Search emojis" data-placeholder-rw="Shakisha emoji" placeholder="Search emojis" aria-label="Search emojis"><button type="button" id="emoji-picker-close" aria-label="Close emoji picker">×</button></div>
+          <div class="emoji-picker-categories" id="emoji-picker-categories"></div>
+          <div id="emoji-picker-grid" class="emoji-picker-grid"></div>
+          <p id="emoji-picker-count" class="emoji-picker-count" aria-live="polite"></p>
+          <div class="emoji-picker-custom"><input id="custom-reaction-input" type="text" maxlength="32" data-placeholder-en="Or enter any emoji" data-placeholder-rw="Cyangwa andika emoji ushaka" placeholder="Or enter any emoji" aria-label="Enter any emoji"><button type="button" id="custom-reaction-submit" data-en="React" data-rw="Tanga igitekerezo">React</button></div>
+        </section>
         <div class="input-area">
           <input id="message-input" placeholder="Andika message hano..." onkeypress="if(event.key==='Enter') sendMessage()">
           <button onclick="sendMessage()" id="send-btn">Ohereza</button>
+          <span id="typing-status" aria-live="polite"></span>
         </div>
       </div>
     </div>
   </div>
+  <script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/service-worker.js").catch(()=>{});</script>
+  <!-- Shared SRH footer -->
+<footer class="urungano-site-footer bg-slate-900 text-white py-12">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+            <div class="space-y-3 text-sm">
+                <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+                <a href="tel:3029" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3029" data-rw="Isange One Stop Center: 3029">Isange One Stop Center: 3029</span></a>
+                <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+            <div class="flex flex-col space-y-3 text-sm">
+                <a href="/srh#ai-assistant" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                <a href="/srh" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+                <a href="/mental-health" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+                <a href="/about-us" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
+            </div>
+        </div>
+        <div class="text-sm opacity-75">
+            <div class="mt-4 space-y-2">
+                <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+                <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+            </div>
+            <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
+        </div>
+    </div>
+</footer>
+<script src="/site-shell.js?v=20261118-5"></script>
   <script type="module" src="institution-tracker.js"></script>
-  <script src="page-visitor-tracker.js"></script>
-</body>
+  <script src="page-visitor-tracker.js"></script></body>
 </html>

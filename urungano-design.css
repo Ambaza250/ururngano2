@@ -150,7 +150,7 @@ body:has(.container) { background: radial-gradient(ellipse at 10% 5%, #e8f5f0, t
 .impact-stats-intro > p:last-child { margin: 10px auto 0; max-width: 560px; }
 .impact-stats-grid { display: grid; grid-auto-columns: minmax(260px, 1fr); grid-auto-flow: column; grid-template-rows: minmax(190px, auto); gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; padding: 2px 2px 14px; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
 .impact-stats-grid::-webkit-scrollbar { display: none; }
-.impact-stat-card { display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 22px 16px; border: 1px solid #d9e9e5; border-radius: 24px; background: rgba(255,255,255,.88); box-shadow: 0 10px 28px rgba(27,74,70,.07); text-align: center; }
+.impact-stat-card { display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 22px 16px; border: 1px solid #d9e9e5; border-radius: 24px; background: rgba(255,255,255,.88); box-shadow: 0 10px 28px rgba(27,74,70,.07); text-align: center; scroll-snap-align: start; }
 .impact-stat-icon { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: #d9f2ef; color: var(--ur-teal); }
 .impact-stat-icon svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .impact-stat-card strong { color: var(--ur-ink); font-size: clamp(1.75rem, 3vw, 2.35rem); font-weight: 800; line-height: 1.1; }
@@ -419,7 +419,7 @@ body:has(.account-main), body:has(.booking-main), body:has(.card) { background: 
 .urungano-language button.active { background: white; color: #1d4ed8; box-shadow: 0 1px 5px rgba(15,23,42,.15); }
 .urungano-menu-toggle { display: none; border: 0; border-radius: 12px; background: #f1f5f9; padding: .55rem .7rem; color: #334155; font-size: 1.2rem; cursor: pointer; }
 .urungano-mobile-menu { display: none; }
-.urungano-site-footer { margin-top: 3rem; background: #0f172a; color: #e2e8f0; padding: 2.5rem 1rem 1rem; }
+.urungano-site-footer { margin-top: 0; background: #0f172a; color: #e2e8f0; padding: 3rem 0; }
 .urungano-footer-inner { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 2rem; max-width: 1150px; margin: 0 auto; }
 .urungano-footer-inner h2,.urungano-footer-inner h3 { margin: 0 0 .75rem; color: white; font-size: 1.1rem; }
 .urungano-footer-inner p { margin: 0; color: #cbd5e1; }
@@ -443,3 +443,9 @@ body:has(.account-main), body:has(.booking-main), body:has(.card) { background: 
   .service-page .text-3xl { font-size: 1.55rem; }
   .service-page .text-2xl { font-size: 1.3rem; }
 }
+.urungano-site-header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);border-bottom:1px solid var(--ur-line);box-shadow:0 8px 28px rgba(25,65,63,.055);backdrop-filter:blur(16px)}
+.urungano-nav{max-width:1200px;margin:auto;min-height:72px;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.urungano-brand{display:flex;align-items:center;gap:10px;color:var(--ur-ink);text-decoration:none;font-weight:800;font-size:1.2rem}.urungano-brand img{width:46px;height:46px;object-fit:cover;border-radius:14px}
+.urungano-header-controls{display:flex;align-items:center;gap:12px}.urungano-language{display:flex;gap:4px;background:#f0f6f3;border-radius:999px;padding:4px}.urungano-language button{border:0;background:transparent;border-radius:999px;padding:7px 11px;font-weight:700;color:var(--ur-muted)}.urungano-language button.active{background:white;color:var(--ur-teal-dark);box-shadow:0 2px 8px #133f3b20}
+.urungano-profile{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--ur-line);background:#f5f8f7;color:var(--ur-teal-dark)}.urungano-profile svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.urungano-menu-toggle{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--ur-line);border-radius:13px;background:white;color:var(--ur-ink);font-size:1.35rem;cursor:pointer}.urungano-mobile-menu{display:none;position:absolute;top:100%;right:max(16px,calc((100% - 1160px)/2));width:min(300px,calc(100vw - 32px));padding:10px;background:white;border:1px solid var(--ur-line);border-radius:0 0 18px 18px;box-shadow:var(--ur-shadow)}.urungano-mobile-menu.open{display:flex;flex-direction:column}.urungano-mobile-menu a,.urungano-mobile-menu button{padding:11px 12px;border:0;border-radius:10px;text-align:left;color:var(--ur-ink);background:transparent;text-decoration:none;font:inherit}.urungano-mobile-menu a:hover,.urungano-mobile-menu button:hover{background:var(--ur-mint)}.urungano-mobile-menu [hidden]{display:none}

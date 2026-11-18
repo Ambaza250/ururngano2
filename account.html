@@ -4,7 +4,8 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Manage account | Urungano</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="urungano-design.css">
+  <link rel="stylesheet" href="urungano-design.css?v=20261118-2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="bg-slate-50" data-lang="en">
   <nav class="account-nav">
@@ -32,6 +33,8 @@
         <p id="account-status" role="status" class="text-sm min-h-5"></p>
         <button class="w-full rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3" data-en="Save changes" data-rw="Bika impinduka">Save changes</button>
       </form>
+      <div class="mt-6 border-t pt-5"><h2 class="font-semibold">Your data</h2><p class="text-sm text-slate-600 mt-1">Download a copy of your profile, pharmacy orders, and private chats.</p><button id="export-data" type="button" class="mt-3 rounded-xl border px-4 py-2">Export my data</button><button id="delete-account" type="button" class="mt-3 ml-2 rounded-xl bg-red-700 px-4 py-2 text-white">Delete account and data</button></div>
+      <div class="mt-6 border-t pt-5"><button id="account-logout" type="button" class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700" data-en="Log out" data-rw="Sohoka">Log out</button></div>
     </section>
   </main>
   <script>
@@ -45,13 +48,16 @@
   </script>
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js';
-    import { getAuth, onAuthStateChanged, updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
+    import { getAuth, onAuthStateChanged, updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential, signOut } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
     import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
     const config = { apiKey:'AIzaSyDy9ZCOQQIMnq6GOOnSS3Hk3IMSk06jTf4', authDomain:'urungano-chat-50d62.firebaseapp.com', projectId:'urungano-chat-50d62', storageBucket:'urungano-chat-50d62.firebasestorage.app', messagingSenderId:'730372170670', appId:'1:730372170670:web:91300da03f18f488afde3f' };
     const app = getApps()[0] || initializeApp(config), auth = getAuth(app), db = getFirestore(app);
     const form = document.getElementById('account-form'), status = document.getElementById('account-status');
     let user;
     onAuthStateChanged(auth, current => { user = current; if (!current) return location.replace('auth.html'); document.getElementById('username').value = current.displayName || ''; document.getElementById('account-email').textContent = current.email || ''; });
+    document.getElementById('account-logout').addEventListener('click', async () => { await signOut(auth); location.replace('auth.html'); });
+    document.getElementById('export-data').addEventListener('click',async()=>{try{const r=await fetch('/api/account/export',{headers:{Authorization:'Bearer '+await user.getIdToken()}});const data=await r.json();if(!r.ok)throw Error(data.error);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='urungano-my-data.json';a.click();URL.revokeObjectURL(a.href)}catch(e){status.textContent=e.message}});
+    document.getElementById('delete-account').addEventListener('click',async()=>{if(!user||!confirm('Permanently delete your account and stored data? This cannot be undone.'))return;try{const r=await fetch('/api/account',{method:'DELETE',headers:{Authorization:'Bearer '+await user.getIdToken(true)}});const data=await r.json();if(!r.ok)throw Error(data.error);await auth.signOut();location.replace('auth.html')}catch(e){status.textContent=e.message}});
     form.addEventListener('submit', async event => {
       event.preventDefault(); if (!user) return;
       const username = document.getElementById('username').value.trim(), currentPassword = document.getElementById('current-password').value, newPassword = document.getElementById('new-password').value;
@@ -69,5 +75,34 @@
       finally { submit.disabled = false; }
     });
   </script>
-</body>
+<!-- Shared SRH footer -->
+<footer class="urungano-site-footer bg-slate-900 text-white py-12">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+            <div class="space-y-3 text-sm">
+                <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+                <a href="tel:3029" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3029" data-rw="Isange One Stop Center: 3029">Isange One Stop Center: 3029</span></a>
+                <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+            <div class="flex flex-col space-y-3 text-sm">
+                <a href="/srh#ai-assistant" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                <a href="/srh" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+                <a href="/mental-health" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+                <a href="/about-us" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
+            </div>
+        </div>
+        <div class="text-sm opacity-75">
+            <div class="mt-4 space-y-2">
+                <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+                <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+            </div>
+            <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
+        </div>
+    </div>
+</footer>
+<script src="/site-shell.js?v=20261118-5"></script></body>
 </html>

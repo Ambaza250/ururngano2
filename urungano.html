@@ -169,7 +169,8 @@
     </style>
 
     
-    <link rel="stylesheet" href="urungano-design.css">
+    <link rel="stylesheet" href="urungano-design.css?v=20261118-2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 
@@ -183,83 +184,6 @@
         <div class="hero-slideshow" aria-hidden="true"><div class="hero-slide is-active"></div><div class="hero-slide"></div></div>
         <div class="banner-overlay"></div>
         
-        <!-- NAV -->
-        <nav class="relative z-50 px-4 py-4 md:px-8 md:py-6">
-            <div class="flex items-center justify-between gap-2">
-                <!-- Logo -->
-                <img src="urungano-logo.jpeg" alt="Urungano Logo" class="logo-img">
-
-                <!-- Language Switcher (always visible) -->
-                <div class="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-3xl p-1 shadow-md">
-                    <button onclick="switchLanguage('rw')" id="btn-rw" class="lang-btn active px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">RW</button>
-                    <button onclick="switchLanguage('en')" id="btn-en" class="lang-btn px-3 py-2 rounded-3xl text-xs md:px-6 md:py-2.5 md:text-sm">EN</button>
-                </div>
-
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex gap-3">
-                    <a href="srh.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
-                       data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-                    <a href="mental-health.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
-                       data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                    <a href="about-us.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
-                       data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
-                    <a href="chat.html" class="nav-button bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm"
-                       data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
-                    <button id="login-btn" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
-                        <span id="login-btn-text" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
-                    </button>
-                    <button id="logout-btn" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
-                        <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
-                    </button>
-                    <div id="more-actions-menu" style="display:none;">
-                        <button id="more-actions-toggle" onclick="toggleMoreActions()" class="nav-button inline-flex items-center gap-2 bg-white/95 hover:bg-white text-slate-900 font-semibold px-4 py-3 rounded-2xl transition shadow-md text-sm" aria-expanded="false" aria-controls="more-actions-dropdown">
-                            <span data-en="More" data-rw="Ibindi">More</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                        </button>
-                        <div id="more-actions-dropdown">
-                            <a id="manage-account-btn" href="account.html" class="nav-button bg-teal-700 text-white hover:bg-teal-800 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" data-en="Manage account" data-rw="Hindura amakuru ya konti" style="white-space:nowrap; display:none;">Hindura amakuru ya konti</a>
-                            <button id="therapy-cta-btn" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
-                                <span id="therapy-cta-text" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mobile hamburger -->
-                <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden bg-white/90 text-slate-800 rounded-xl p-2.5 shadow-md focus:outline-none" aria-label="Open menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Mobile menu dropdown -->
-            <div id="mobile-menu" class="flex-col gap-2 mt-3 md:hidden">
-                <a href="srh.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
-                   data-en="SRH Services" data-rw="Ubuzima Bw' Imyororokere">Ubuzima Bw' Imyororokere</a>
-                <a href="mental-health.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
-                   data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</a>
-                <a href="about-us.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
-                   data-en="About Us" data-rw="Ibitwerekeye">Ibitwerekeye</a>
-                <a href="chat.html" class="nav-button block bg-white/95 hover:bg-white text-slate-900 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm text-center"
-                   data-en="Chat With Your Peers" data-rw="Ganira N' Urungano">Ganira N' Urungano</a>
-
-<!-- Auth CTA buttons (mobile variants, controlled by same auth logic) -->
-                <button id="login-btn-mobile" onclick="goToAuth()" class="nav-button bg-blue-600 text-white hover:bg-blue-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap;">
-                    <span id="login-btn-text-mobile" data-en="Login" data-rw="Kwinjira">Kwinjira</span>
-                </button>
-                <a id="manage-account-btn-mobile" href="account.html" class="nav-button bg-teal-700 text-white font-semibold px-5 py-3 rounded-2xl text-sm text-center" data-en="Manage account information" data-rw="Hindura amakuru ya konti" style="display:none;">Hindura amakuru ya konti</a>
-
-                <button id="therapy-cta-btn-mobile" onclick="goToTherapyCta()" class="nav-button bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
-                    <span id="therapy-cta-text-mobile" data-en="Book a therapist" data-rw="Tegura umujyanama">Book a therapist</span>
-                </button>
-
-                <button id="logout-btn-mobile" onclick="logout()" class="nav-button bg-red-500 text-white hover:bg-red-600 font-semibold px-5 py-3 rounded-2xl transition shadow-md text-sm" style="white-space:nowrap; display:none;">
-                    <span data-en="Logout" data-rw="Sohoka">Sohoka</span>
-                </button>
-            </div>
-        </nav>
-
         <!-- Welcome Text -->
         <div class="hero-copy absolute bottom-8 left-1/2 -translate-x-1/2 text-center px-4 w-full max-w-5xl md:bottom-16">
             <p class="hero-eyebrow" data-en="A safe space to learn and find support" data-rw="Ahantu hizewe ho kwigira no gushaka ubufasha">Ahantu hizewe ho kwigira no gushaka ubufasha</p>
@@ -289,7 +213,7 @@
 <main class="home-sections" aria-label="Urungano services">
   <section id="srh-overview" class="home-feature home-feature-srh" aria-labelledby="srh-overview-title">
     <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">🌸</span><h2 id="srh-overview-title" data-en="Sexual and Reproductive Health" data-rw="Ubuzima bw’Imyororokere">Ubuzima bw’Imyororokere</h2><p data-en="Explore lessons on periods, the body and HIV, and use the menstrual tracker to follow your cycle." data-rw="Soma amasomo ku mihango, umubiri na virusi itera SIDA, kandi ukoreshe ikurikirana ry’imihango umenye uko ukwezi kwawe kugenda.">Soma amasomo ku mihango, umubiri na virusi itera SIDA, kandi ukoreshe ikurikirana ry’imihango umenye uko ukwezi kwawe kugenda.</p></div>
-    <div class="home-feature-actions"><a class="home-action" href="srh.html#lesson1" data-en="Lessons" data-rw="Amasomo">Amasomo</a><a class="home-action" href="srh.html#calculator" data-en="Menstrual tracker" data-rw="Ikurikirana ry’imihango">Ikurikirana ry’imihango</a><a class="home-action" href="srh.html#ai-assistant" data-en="Urungano AI" data-rw="Urungano AI">Urungano AI</a></div>
+    <div class="home-feature-actions"><a class="home-action" href="srh.html#lesson1" data-en="Menstrual advice" data-rw="Inama ku mihango">Inama ku mihango</a><a class="home-action" href="srh.html#lesson5" data-en="HIV advice" data-rw="Inama kuri VIH">Inama kuri VIH</a><a class="home-action" href="srh.html#calculator" data-en="Menstrual tracker" data-rw="Ikurikirana ry’imihango">Ikurikirana ry’imihango</a><a class="home-action" href="srh.html#ai-assistant" data-en="Urungano AI" data-rw="Urungano AI">Urungano AI</a></div>
   </section>
   <section class="home-feature home-feature-peers" aria-labelledby="peers-title">
     <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">💬</span><h2 id="peers-title" data-en="Chat with peers" data-rw="Ganira n’urungano">Ganira n’urungano</h2><p data-en="Connect with other young people to share experiences, ask questions and encourage one another in a respectful space." data-rw="Ganira n’urundi rubyiruko, musangire ibyo mwanyuzemo, mubaze ibibazo kandi muterane inkunga ahantu hubahana.">Ganira n’urundi rubyiruko, musangire ibyo mwanyuzemo, mubaze ibibazo kandi muterane inkunga ahantu hubahana.</p></div>
@@ -297,7 +221,7 @@
   </section>
   <section class="home-feature home-feature-mental" aria-labelledby="mental-overview-title">
     <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">🧠</span><h2 id="mental-overview-title" data-en="Mental health" data-rw="Ubuzima bwo mu mutwe">Ubuzima bwo mu mutwe</h2><p data-en="Learn about emotions, recognize when you or someone else may need support, and take a private mental health check-in." data-rw="Menya ibyerekeye amarangamutima, umenye igihe wowe cyangwa undi akeneye ubufasha, kandi wisuzume mu ibanga uko wiyumva.">Menya ibyerekeye amarangamutima, umenye igihe wowe cyangwa undi akeneye ubufasha, kandi wisuzume mu ibanga uko wiyumva.</p></div>
-    <div class="home-feature-actions"><a class="home-action" href="mental-health.html#lesson1" data-en="Lessons" data-rw="Amasomo">Amasomo</a><a class="home-action" href="mental-health.html#screening-tool" data-en="Mental health test" data-rw="Isuzuma ry’ubuzima bwo mu mutwe">Isuzuma ry’ubuzima bwo mu mutwe</a><a class="home-action" href="mental-health.html#ai-assistant" data-en="Urungano AI" data-rw="Urungano AI">Urungano AI</a></div>
+    <div class="home-feature-actions"><a class="home-action" href="mental-health.html#lesson1" data-en="Mental health advice" data-rw="Inama ku buzima bwo mu mutwe">Inama ku buzima bwo mu mutwe</a><a class="home-action" href="mental-health.html#screening-tool" data-en="Mental health test" data-rw="Isuzuma ry’ubuzima bwo mu mutwe">Isuzuma ry’ubuzima bwo mu mutwe</a><a class="home-action" href="mental-health.html#ai-assistant" data-en="Urungano AI" data-rw="Urungano AI">Urungano AI</a></div>
   </section>
   <section class="home-feature home-feature-therapy" aria-labelledby="therapy-title">
     <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">🤝</span><h2 id="therapy-title" data-en="Chat with a therapist" data-rw="Ganira n’umujyanama">Ganira n’umujyanama</h2><p data-en="Speak privately with a trained therapist who listens with care and offers support suited to your needs." data-rw="Ganira mu ibanga n’umujyanama w’umwuga ukwitaho kandi akaguha ubufasha bujyanye n’ibyo ukeneye.">Ganira mu ibanga n’umujyanama w’umwuga ukwitaho kandi akaguha ubufasha bujyanye n’ibyo ukeneye.</p></div>
@@ -306,104 +230,16 @@
   <section class="home-feature home-feature-srh" aria-labelledby="pharmacy-title"><div class="home-feature-copy"><span class="home-feature-icon">💊</span><h2 id="pharmacy-title" data-en="Pharmacy" data-rw="Farumasi">Farumasi</h2><p data-en="Browse medicines, submit an order for review, and receive MoMo payment instructions after approval." data-rw="Reba imiti, ohereza ubusabe busuzumwe, kandi uhabwe amabwiriza yo kwishyura kuri MoMo bumaze kwemezwa.">Reba imiti, ohereza ubusabe busuzumwe, kandi uhabwe amabwiriza yo kwishyura kuri MoMo bumaze kwemezwa.</p></div><div class="home-feature-actions"><a class="home-action" href="/pharmacy" data-en="Visit pharmacy" data-rw="Sura farumasi">Sura farumasi</a></div></section>
   <section class="home-feature home-feature-mental" aria-labelledby="doctor-title"><div class="home-feature-copy"><span class="home-feature-icon">🩺</span><h2 id="doctor-title" data-en="Consult a doctor" data-rw="Gisha inama muganga">Gisha inama muganga</h2><p data-en="Book a consultation with a doctor, get health guidance, and chat on WhatsApp after payment approval." data-rw="Tegura gahunda na muganga, uhabwe inama z’ubuzima kandi muganire kuri WhatsApp ubwishyu bumaze kwemezwa.">Tegura gahunda na muganga, uhabwe inama z’ubuzima kandi muganire kuri WhatsApp ubwishyu bumaze kwemezwa.</p></div><div class="home-feature-actions"><a class="home-action" href="/consult-doctor" data-en="Find a doctor" data-rw="Shaka muganga">Shaka muganga</a></div></section>
   <section class="home-feature home-feature-peers" aria-labelledby="lab-title"><div class="home-feature-copy"><span class="home-feature-icon">🧪</span><h2 id="lab-title" data-en="Lab tests" data-rw="Ibipimo bya laboratwari">Ibipimo bya laboratwari</h2><p data-en="Choose a test and hospital, submit your payment for review, and receive an appointment after approval." data-rw="Hitamo igipimo n’ibitaro, ohereza ubwishyu busuzumwe, kandi uhabwe gahunda bumaze kwemezwa.">Hitamo igipimo n’ibitaro, ohereza ubwishyu busuzumwe, kandi uhabwe gahunda bumaze kwemezwa.</p></div><div class="home-feature-actions"><a class="home-action" href="/lab-test" data-en="Explore lab tests" data-rw="Reba ibipimo">Reba ibipimo</a></div></section>
+  <section id="emergency" class="home-feature home-feature-mental" aria-labelledby="emergency-title">
+    <div class="home-feature-copy"><span class="home-feature-icon" aria-hidden="true">🆘</span><h2 id="emergency-title" data-en="Emergency helplines" data-rw="Imirongo y’ubufasha bwihutirwa">Imirongo y’ubufasha bwihutirwa</h2><p data-en="Tap a helpline name to call for urgent support." data-rw="Kanda izina ry’umurongo w’ubufasha uhamagare ukeneye ubufasha bwihutirwa.">Kanda izina ry’umurongo w’ubufasha uhamagare ukeneye ubufasha bwihutirwa.</p></div>
+    <div class="home-feature-actions">
+      <a class="home-action" href="tel:114" data-en="Mental Health Helpline" data-rw="Ubufasha bw’ubuzima bwo mu mutwe">Ubufasha bw’ubuzima bwo mu mutwe</a>
+      <a class="home-action" href="tel:3550" data-en="Rwanda HDI" data-rw="Rwanda HDI">Rwanda HDI</a>
+      <a class="home-action" href="tel:112" data-en="Police / Emergency" data-rw="Polisi / Ibutabazi">Polisi / Ibutabazi</a>
+      <a class="home-action" href="tel:3029" data-en="Isange One Stop Center" data-rw="Isange One Stop Center">Isange One Stop Center</a>
+    </div>
+  </section>
 </main>
-
-<!-- Core Services Section -->
-<section class="quick-links bg-white border-b border-gray-100 py-8">
-    <div class="max-w-6xl mx-auto px-6">
-        <div class="mb-6 text-center">
-            <h3 class="quick-links-title text-2xl font-bold text-slate-900" data-en="Core Services" data-rw="Serivisi z'Ibanze">Serivisi z'Ibanze</h3>
-            <p class="quick-links-subtitle text-slate-500 mt-2" data-en="Explore the most-used services of Urungano." data-rw="Sura serivisi zikunzwe gukoreshwa kuri Urungano.">Sura serivisi zikunzwe gukoreshwa kuri Urungano.</p>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <a href="srh.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-red-50 transition-all duration-300"><div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🌸</div><span class="font-medium text-gray-800 group-hover:text-red-600 transition-colors" data-en="Sexual & Reproductive Health" data-rw="Ubuzima bw'Imyororokere">Ubuzima bw'Imyororokere</span></a>
-            <a href="srh.html#calculator" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-pink-50 transition-all duration-300"><div class="text-4xl mb-3 group-hover:scale-110 transition-transform">📅</div><span class="font-medium text-gray-800 group-hover:text-pink-600 transition-colors" data-en="Period Tracker" data-rw="Kubara Ukwezi k'Umugore">Kubara Ukwezi k'Umugore</span></a>
-            <a href="mental-health.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-blue-50 transition-all duration-300"><div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🧠</div><span class="font-medium text-gray-800 group-hover:text-blue-600 transition-colors" data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
-            <a href="chat.html" class="quick-link group flex flex-col items-center p-4 rounded-2xl hover:bg-purple-50 transition-all duration-300"><div class="text-4xl mb-3 group-hover:scale-110 transition-transform">💬</div><span class="font-medium text-gray-800 group-hover:text-purple-600 transition-colors" data-en="Chat with your peers" data-rw="Ganira n'Urungano">Ganira n'Urungano</span></a>
-        </div>
-    </div>
-</section>
-
-<!-- Emergency Contacts Section -->
-<section id="emergency" class="emergency-section py-12 bg-red-50 border-t-4 border-red-500">
-    <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold text-center mb-8 text-red-700" 
-            data-en="Emergency Contacts" 
-            data-rw="Imirongo itangirwaho ubufasha">
-            Emergency Contacts
-        </h2>
-        
-        <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto" 
-           data-en="If you are in immediate danger or need urgent help, call these numbers right away. Help is available 24/7." 
-           data-rw="Koresha izi nomero mu gihe cy’ibanze cyangwa ubufasha bwihutirwa. Ubufasha burahari amasaha yose 24/7">
-            If you are in immediate danger or need urgent help, call these numbers right away. Help is available 24/7.
-        </p>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-            <!-- Phone 1 -->
-            <div class="bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">🆘</div>
-                    <div>
-                        <h3 class="font-semibold text-base" data-en="Mental Health Helpline" data-rw="Ubufasha bw'Ubuzima bwo mu Mutwe">Mental Health Helpline</h3>
-                        <p class="text-red-600 font-bold text-lg">114</p>
-                    </div>
-                </div>
-                <a href="tel:114" 
-                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-xl transition-all">
-                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
-                </a>
-            </div>
-
-            <!-- Phone 2 -->
-            <div class="bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">🏥</div>
-                    <div>
-                        <h3 class="font-semibold text-base" data-en="Rwanda HDI" data-rw="Rwanda HDI">Rwanda HDI</h3>
-                        <p class="text-red-600 font-bold text-lg">3530</p>
-                    </div>
-                </div>
-                <a href="tel:3550" 
-                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-xl transition-all">
-                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
-                </a>
-            </div>
-
-            <!-- Phone 3 (Add more if you have) -->
-            <div class="bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">🚨</div>
-                    <div>
-                        <h3 class="font-semibold text-base" data-en="Police & General Emergency" data-rw="Polisi n'Ubufasha bw'Ihutirwa">Police & General Emergency</h3>
-                        <p class="text-red-600 font-bold text-lg">112</p>
-                    </div>
-                </div>
-                <a href="tel:112" 
-                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-xl transition-all">
-                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
-                </a>
-            </div>
-            
-            <div class="bg-white rounded-2xl shadow-md p-4 hover:shadow-lg transition-all">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">🚨</div>
-                    <div>
-                        <h3 class="font-semibold text-base" data-en="Isange One Stop Center" data-rw="Isange One Stop Center">Isange One Stop Center</h3>
-                        <p class="text-red-600 font-bold text-lg">3029</p>
-                    </div>
-                </div>
-                <a href="tel:112" 
-                   class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-xl transition-all">
-                    <span data-en="Call Now" data-rw="Hamagara Ubu">Call Now</span>
-                </a>
-            </div>
-
-        </div>
-    </div>
-</section>
 
 
 <!-- Community impact metrics – continuous infinite card carousel -->
@@ -498,7 +334,7 @@
         // tiny delay so the browser applies the jump before we clear the flag
         requestAnimationFrame(() => { isResetting = false; });
       }
-    }, 450); // match typical smooth-scroll duration
+    }, 700); // allow the smooth card transition to finish before the seamless loop reset
   }
 
   function startAutoScroll() {
@@ -553,35 +389,6 @@
   startAutoScroll();
 })();
 </script>
-<!-- Footer -->
-<footer class="bg-slate-900 text-white py-12">
-    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
-        <div>
-            <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
-            <div class="space-y-3 text-sm">
-                <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
-                <a href="tel:3550" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3550" data-rw="Isange One Stop Center: 3550">Isange One Stop Center: 3550</span></a>
-                <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
-            </div>
-        </div>
-        <div>
-            <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
-            <div class="flex flex-col space-y-3 text-sm">
-                <a href="#srh-overview" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Services" data-rw="Ubuzima bw’Imyororokere">Ubuzima bw’Imyororokere</span></a>
-                <a href="srh.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
-                <a href="mental-health.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
-                <a href="about-us.html" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
-            </div>
-        </div>
-        <div class="text-sm opacity-75">
-            <div class="mt-4 space-y-2">
-                <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
-                <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
-            </div>
-            <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
-        </div>
-    </div>
-</footer>
 
 
     
@@ -709,7 +516,7 @@ function setTherapyCtaUI({ show = false, label = 'Book a therapist', dest = 'boo
                 const appMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js');
                 const fsMod = await import('https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js');
 
-                const app = appMod.initializeApp(firebaseConfig);
+                const app = appMod.getApps()[0] || appMod.initializeApp(firebaseConfig);
                 const db = fsMod.getFirestore(app);
 
                 const uid = user?.uid;
@@ -818,7 +625,7 @@ function setAuthUI(loggedIn) {
             try {
                 const appMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js");
                 const authMod = await import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js");
-                const app = appMod.initializeApp(firebaseConfig);
+                const app = appMod.getApps()[0] || appMod.initializeApp(firebaseConfig);
                 _auth = authMod.getAuth(app);
 
                 _unsubscribe = authMod.onAuthStateChanged(_auth, async (user) => {
@@ -1039,6 +846,36 @@ Urungano ni Urubuga rw'ikoranabuhanga rwizewe kandi rudaheza rutanga amakuru n�
       }, 2000);
     })();
   </script>
+  <!-- Shared SRH footer -->
+<footer class="urungano-site-footer bg-slate-900 text-white py-12">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Emergency Help" data-rw="Inkunga y'ibibazo byihutirwa">Inkunga y'ibibazo byihutirwa</h3>
+            <div class="space-y-3 text-sm">
+                <a href="tel:114" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Mental Health: 114" data-rw="Ubuzima bwo mu Mutwe: 114">Ubuzima bwo mu Mutwe: 114</span></a>
+                <a href="tel:3029" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Isange One Stop Center: 3029" data-rw="Isange One Stop Center: 3029">Isange One Stop Center: 3029</span></a>
+                <a href="tel:112" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Police / Emergency: 112" data-rw="Polisi / Ibibazo byihutirwa: 112">Polisi / Ibibazo byihutirwa: 112</span></a>
+            </div>
+        </div>
+        <div>
+            <h3 class="text-xl font-semibold mb-4" data-en="Quick Links" data-rw="Amabwiriza yihuse">Amabwiriza yihuse</h3>
+            <div class="flex flex-col space-y-3 text-sm">
+                <a href="/srh#ai-assistant" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-comment"></i> <span data-en="Talk to Urungano AI" data-rw="Vugana na Urungano AI">Vugana na Urungano AI</span></a>
+                <a href="/srh" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-leaf"></i> <span data-en="SRH Lessons" data-rw="Amasomo y'Imyororokere">Amasomo y'Imyororokere</span></a>
+                <a href="/mental-health" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-brain"></i> <span data-en="Mental Health" data-rw="Ubuzima bwo mu Mutwe">Ubuzima bwo mu Mutwe</span></a>
+                <a href="/about-us" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-info-circle"></i> <span data-en="About Urungano" data-rw="Ibitwerekeye Urungano">Ibitwerekeye Urungano</span></a>
+            </div>
+        </div>
+        <div class="text-sm opacity-75">
+            <div class="mt-4 space-y-2">
+                <a href="tel:+250786561823" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-phone"></i> <span data-en="Phone: +250786561823" data-rw="Telefoni: +250786561823">Telefoni: +250786561823</span></a>
+                <a href="mailto:cyubahirofrederic96@gmail.com" class="flex items-center gap-3 hover:text-pink-400"><i class="fas fa-envelope"></i> <span data-en="Email: cyubahirofrederic96@gmail.com" data-rw="Imeri: cyubahirofrederic96@gmail.com">Imeri: cyubahirofrederic96@gmail.com</span></a>
+            </div>
+            <p class="mt-6 text-xs">© 2026 Urungano Platform • Made with ❤️ for Rwanda</p>
+        </div>
+    </div>
+</footer>
+<script src="site-shell.js?v=20261118-5"></script>
   <script type="module" src="institution-tracker.js"></script>
   <script src="page-visitor-tracker.js"></script>
 </body>

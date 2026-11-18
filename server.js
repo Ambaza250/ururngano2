@@ -15,6 +15,24 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '256kb' }));
+app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
+
+const DEFAULT_MEDICINES = [
+  { name:'Amoxicillin', price:0, requiresPrescription:true }, { name:'ORS', price:0, requiresPrescription:false },
+  { name:'Antimalarial medicine', price:0, requiresPrescription:true }, { name:'Paracetamol', price:0, requiresPrescription:false },
+  { name:'Ibuprofen', price:0, requiresPrescription:false }, { name:'Aspirin', price:0, requiresPrescription:false },
+  { name:'Antacid tablets', price:0, requiresPrescription:false }, { name:'Cetirizine', price:0, requiresPrescription:false },
+  { name:'Cough lozenges', price:0, requiresPrescription:false }, { name:'Condoms', price:0, requiresPrescription:false },
+  { name:'Emergency contraceptive pills', price:0, requiresPrescription:false }, { name:'Daily contraceptive pills', price:0, requiresPrescription:false },
+  { name:'Folic acid', price:0, requiresPrescription:false }, { name:'Metformin', price:0, requiresPrescription:true },
+  { name:'Amlodipine', price:0, requiresPrescription:true }, { name:'Inhaler (salbutamol)', price:0, requiresPrescription:true },
+  { name:'Antibiotic eye drops', price:0, requiresPrescription:true }, { name:'Prescription skin cream', price:0, requiresPrescription:true }
+];
+const chatSendWindows = new Map();
+app.get('/api/pharmacy/medicines', async (_req, res) => {
+  try { await ensureFirebaseAdminInit(); const snap = await firebaseAdmin.firestore().collection('medicines').get(); const saved = snap.docs.map(d => ({ id:d.id, ...d.data() })); const medicines = saved.length ? [...DEFAULT_MEDICINES.map(base=>saved.find(m=>m.name===base.name)||base), ...saved.filter(m=>!DEFAULT_MEDICINES.some(base=>base.name===m.name))].filter(m=>m.active!==false) : DEFAULT_MEDICINES; return res.json({ medicines }); }
+  catch (e) { console.warn('Medicine catalog is using its built-in list:',e.message); return res.json({ medicines:DEFAULT_MEDICINES }); }
+});
 
 // Pharmacy order submission and review. Screenshots are uploaded directly to
 // Cloudinary with a short-lived signature; only the resulting secure URL is
@@ -29,9 +47,10 @@ app.post('/api/pharmacy/upload-signature', async (req, res) => {
     if (!cloudName || !apiKey || !apiSecret) return res.status(503).json({ error: 'Image upload is not configured.' });
     const timestamp = Number(req.body?.timestamp);
     if (!Number.isInteger(timestamp) || Math.abs(Date.now() / 1000 - timestamp) > 300) return res.status(400).json({ error: 'Invalid upload timestamp.' });
-    const params = `folder=urungano/pharmacy-orders&timestamp=${timestamp}`;
+    const folder = req.body?.uploadType === 'payment' ? 'urungano/pharmacy-payments' : 'urungano/pharmacy-orders';
+    const params = `folder=${folder}&timestamp=${timestamp}`;
     const signature = crypto.createHash('sha1').update(params + apiSecret).digest('hex');
-    return res.json({ cloudName, apiKey, timestamp, signature });
+    return res.json({ cloudName, apiKey, timestamp, signature, folder });
   } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to prepare upload.' }); }
 });
 
@@ -39,23 +58,18 @@ app.post('/api/pharmacy/orders', async (req, res) => {
   try {
     await ensureFirebaseAdminInit();
     const user = await verifyFirebaseUser(req);
-    const drug = sanitizeString(req.body?.drug, 120);
-    const quantity = Number(req.body?.quantity);
-    const catalog = {
-      'Amoxicillin': false, 'ORS': false, 'Antimalarial medicine': true,
-      'Paracetamol': false, 'Ibuprofen': false, 'Aspirin': false,
-      'Antacid tablets': false, 'Cetirizine': false, 'Cough lozenges': false,
-      'Condoms': false, 'Emergency contraceptive pills': false,
-      'Daily contraceptive pills': false, 'Folic acid': false,
-      'Metformin': true, 'Amlodipine': true, 'Inhaler (salbutamol)': true,
-      'Antibiotic eye drops': true, 'Prescription skin cream': true
-    };
-    if (!Object.prototype.hasOwnProperty.call(catalog, drug) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) return res.status(400).json({ error: 'Choose a medicine from the catalog and a valid quantity.' });
-    const requiresPrescription = catalog[drug];
+    const lines = Array.isArray(req.body?.items) ? req.body.items : [{ drug:req.body?.drug, quantity:req.body?.quantity }];
+    if (!lines.length || lines.length > 30) return res.status(400).json({ error:'Add between 1 and 30 medicines.' });
+    const db = firebaseAdmin.firestore(); const catalogSnap = await db.collection('medicines').get();
+    const catalog = catalogSnap.empty ? DEFAULT_MEDICINES : [...DEFAULT_MEDICINES.map(base=>catalogSnap.docs.map(d=>({id:d.id,...d.data()})).find(m=>m.name===base.name)||base), ...catalogSnap.docs.map(d=>({id:d.id,...d.data()})).filter(m=>!DEFAULT_MEDICINES.some(base=>base.name===m.name))].filter(m=>m.active!==false);
+    const items = lines.map(line => { const medicine = catalog.find(m => m.name === sanitizeString(line.drug,120)); const quantity = Number(line.quantity); if (!medicine || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) throw Object.assign(new Error('Choose medicines from the catalog and valid quantities.'), { status:400 }); if(!(Number(medicine.price)>0)) throw Object.assign(new Error(`Set a price for ${medicine.name} before ordering.`),{status:400}); return { drug:medicine.name, quantity, unitPrice:Number(medicine.price), requiresPrescription:!!medicine.requiresPrescription }; });
+    const requiresPrescription = items.some(item => item.requiresPrescription);
     const imageUrl = sanitizeString(req.body?.imageUrl, 1000);
     if (requiresPrescription && !/^https:\/\/res\.cloudinary\.com\//.test(imageUrl)) return res.status(400).json({ error: 'Upload a valid prescription image for this medicine.' });
     if (!requiresPrescription && imageUrl && !/^https:\/\/res\.cloudinary\.com\//.test(imageUrl)) return res.status(400).json({ error: 'Invalid uploaded image.' });
-    const ref = await firebaseAdmin.firestore().collection('pharmacyOrders').add({ userId: user.uid, drug, quantity, requiresPrescription, ...(imageUrl ? { imageUrl } : {}), status: requiresPrescription ? 'pending' : 'approved', ...(!requiresPrescription ? { momoCode: '*182*8*1*34345*10000#' } : {}), createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    const total = items.reduce((sum,item) => sum + item.unitPrice * item.quantity, 0);
+    const momoCode = `*182*8*1*34345*${total}#`;
+    const ref = await db.collection('pharmacyOrders').add({ userId:user.uid, items, drug:items.map(i=>i.drug).join(', '), quantity:items.reduce((sum,i)=>sum+i.quantity,0), total, requiresPrescription, ...(imageUrl ? { imageUrl } : {}), status:requiresPrescription?'pending':'approved', ...(!requiresPrescription?{momoCode}:{}), createdAt:firebaseAdmin.firestore.FieldValue.serverTimestamp() });
     return res.json({ ok: true, id: ref.id });
   } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to create order.' }); }
 });
@@ -82,27 +96,137 @@ app.post('/api/pharmacy/orders/:id/paid', async (req, res) => {
     const snap = await ref.get();
     if (!snap.exists || snap.data().userId !== user.uid) return res.status(404).json({ error: 'Order not found.' });
     if (snap.data().status !== 'approved') return res.status(409).json({ error: 'This order is not awaiting payment.' });
-    await ref.update({ status: 'paid', paidAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    const paymentImageUrl = sanitizeString(req.body?.paymentImageUrl, 1000);
+    const paymentPhone = sanitizeString(req.body?.paymentPhone, 30);
+    const phoneDigits = paymentPhone.replace(/\D/g, '');
+    if (!/^[+\d\s().-]+$/.test(paymentPhone) || phoneDigits.length < 9 || phoneDigits.length > 12) return res.status(400).json({ error: 'Enter the phone number you used to make the payment.' });
+    if (!/^https:\/\/res\.cloudinary\.com\//.test(paymentImageUrl)) return res.status(400).json({ error: 'Upload a valid payment screenshot before submitting.' });
+    await ref.update({ status: 'payment_review', paymentImageUrl, paymentPhone, paymentSubmittedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
     return res.json({ ok: true });
   } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to update payment status.' }); }
 });
 
+app.post('/api/pharmacy/orders/:id/payment-phone', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const ref = firebaseAdmin.firestore().collection('pharmacyOrders').doc(sanitizeString(req.params.id, 150));
+    const snap = await ref.get();
+    if (!snap.exists || snap.data().userId !== user.uid) return res.status(404).json({ error: 'Order not found.' });
+    if (snap.data().status !== 'payment_review') return res.status(409).json({ error: 'This order is not awaiting payment verification.' });
+    const paymentPhone = sanitizeString(req.body?.paymentPhone, 30);
+    const phoneDigits = paymentPhone.replace(/\D/g, '');
+    if (!/^[+\d\s().-]+$/.test(paymentPhone) || phoneDigits.length < 9 || phoneDigits.length > 12) return res.status(400).json({ error: 'Enter the phone number you used to make the payment.' });
+    await ref.update({ paymentPhone, paymentPhoneUpdatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() });
+    return res.json({ ok: true });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to save the payer phone number.' }); }
+});
+
+app.get('/api/account/export',async(req,res)=>{try{await ensureFirebaseAdminInit();const user=await verifyFirebaseUser(req),db=firebaseAdmin.firestore();const profile=await db.collection('users').doc(user.uid).get();const orders=await db.collection('pharmacyOrders').where('userId','==',user.uid).get();const chats=await db.collection('chats').get();const conversations=[];for(const c of chats.docs){if(c.id.includes(user.uid)){const msgs=await c.ref.collection('messages').get();conversations.push({type:'private',chatId:c.id,messages:msgs.docs.map(m=>({id:m.id,...m.data()}))})}}const groups=await db.collection('groups').get();for(const g of groups.docs){const msgs=await g.ref.collection('messages').where('senderId','==',user.uid).get();if(!msgs.empty)conversations.push({type:'group-messages-sent',groupId:g.id,messages:msgs.docs.map(m=>({id:m.id,...m.data()}))})}return res.json({exportedAt:new Date().toISOString(),profile:profile.exists?profile.data():null,pharmacyOrders:orders.docs.map(d=>({id:d.id,...d.data()})),conversations});}catch(e){return res.status(e.status||500).json({error:e.message||'Unable to export account data.'});}});
+app.delete('/api/account',async(req,res)=>{try{await ensureFirebaseAdminInit();const user=await verifyFirebaseUser(req),db=firebaseAdmin.firestore();const orderSnap=await db.collection('pharmacyOrders').where('userId','==',user.uid).get();for(const d of orderSnap.docs)await d.ref.delete();const chats=await db.collection('chats').get();for(const c of chats.docs)if(c.id.includes(user.uid))await db.recursiveDelete(c.ref);const groups=await db.collection('groups').get();for(const g of groups.docs){const msgs=await g.ref.collection('messages').where('senderId','==',user.uid).get();for(const m of msgs.docs)await m.ref.delete()}const reports=await db.collection('chatReports').where('reporterId','==',user.uid).get();for(const r of reports.docs)await r.ref.delete();const targetReports=await db.collection('chatReports').where('targetId','==',user.uid).get();for(const r of targetReports.docs)await r.ref.set({targetId:'deleted-user'},{merge:true});await db.recursiveDelete(db.collection('users').doc(user.uid));await firebaseAdmin.auth().deleteUser(user.uid);return res.json({ok:true});}catch(e){return res.status(e.status||500).json({error:e.message||'Unable to delete account data.'});}});
 app.post('/api/admin/pharmacy-orders/:id/status', async (req, res) => {
   try {
     await ensureFirebaseAdminInit();
     await verifyAdmin(req);
-    const allowed = ['approved', 'paid', 'delivered', 'rejected'];
+    const allowed = ['approved', 'paid', 'rejected'];
     const status = sanitizeString(req.body?.status, 20);
     if (!allowed.includes(status)) return res.status(400).json({ error: 'Invalid order status.' });
     const ref = firebaseAdmin.firestore().collection('pharmacyOrders').doc(sanitizeString(req.params.id, 150));
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({ error: 'Order not found.' });
+    if (status === 'paid' && snap.data().status !== 'payment_review') return res.status(409).json({ error: 'This order has no payment screenshot awaiting verification.' });
     const updates = { status, updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp() };
-    if (status === 'approved') updates.momoCode = '*182*8*1*34345*10000#';
+    if (status === 'approved') updates.momoCode = `*182*8*1*34345*${Number(snap.data().total)||0}#`;
     await ref.update(updates);
     return res.json({ ok: true });
   } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to update order.' }); }
 });
+
+app.get('/api/chat/groups', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    await verifyFirebaseUser(req);
+    const snap = await firebaseAdmin.firestore().collection('groups').get();
+    const groups = snap.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    return res.json({ groups });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load chat groups.' }); }
+});
+
+app.get('/api/chat/users', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const snap = await firebaseAdmin.firestore().collection('users').get();
+    const users = snap.docs
+      .filter(doc => doc.id !== user.uid)
+      .map(doc => {
+        const data = doc.data() || {};
+        return { uid: doc.id, username: sanitizeString(data.username || data.displayName || 'User', 80) };
+      });
+    return res.json({ users });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load chat users.' }); }
+});
+
+app.get('/api/chat/messages', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const type = req.query.chatType === 'group' ? 'group' : 'private';
+    const chatId = sanitizeString(req.query.chatId, 160);
+    if (!chatId) return res.status(400).json({ error: 'A conversation is required.' });
+    const db = firebaseAdmin.firestore();
+    let ref;
+    if (type === 'group') {
+      const group = await db.collection('groups').doc(chatId).get();
+      if (!group.exists) return res.status(404).json({ error: 'Group not found.' });
+      ref = group.ref.collection('messages');
+    } else {
+      if (!chatId.split('_').includes(user.uid)) return res.status(403).json({ error: 'You are not a member of this conversation.' });
+      ref = db.collection('chats').doc(chatId).collection('messages');
+    }
+    const snap = await ref.orderBy('createdAt', 'asc').limitToLast(200).get();
+    return res.json({ messages: snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to load messages.' }); }
+});
+
+app.post('/api/chat/reactions', async (req, res) => {
+  try {
+    await ensureFirebaseAdminInit();
+    const user = await verifyFirebaseUser(req);
+    const type = req.body?.chatType === 'group' ? 'group' : 'private';
+    const chatId = sanitizeString(req.body?.chatId, 160);
+    const messageId = sanitizeString(req.body?.messageId, 160);
+    const emoji = typeof req.body?.emoji === 'string' ? req.body.emoji.trim() : '';
+    const emojiSegments = emoji && typeof Intl.Segmenter === 'function' ? [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(emoji)] : [];
+    const keycapEmoji = /^[0-9#*]\uFE0F?\u20E3$/u.test(emoji);
+    const isEmoji = emoji.length <= 32 && emojiSegments.length === 1 && (/[\p{Extended_Pictographic}\p{Regional_Indicator}]/u.test(emoji) || keycapEmoji);
+    if (!chatId || !messageId || !isEmoji) return res.status(400).json({ error: 'A conversation, message, and single emoji reaction are required.' });
+    const db = firebaseAdmin.firestore();
+    let messageRef;
+    if (type === 'group') {
+      const group = await db.collection('groups').doc(chatId).get();
+      if (!group.exists) return res.status(404).json({ error: 'Group not found.' });
+      messageRef = group.ref.collection('messages').doc(messageId);
+    } else {
+      if (!chatId.split('_').includes(user.uid)) return res.status(403).json({ error: 'You are not a member of this conversation.' });
+      messageRef = db.collection('chats').doc(chatId).collection('messages').doc(messageId);
+    }
+    const message = await messageRef.get();
+    if (!message.exists) return res.status(404).json({ error: 'Message not found.' });
+    await messageRef.update({ [`reactions.${emoji}`]: firebaseAdmin.firestore.FieldValue.arrayUnion(user.uid) });
+    return res.json({ ok: true });
+  } catch (e) { return res.status(e.status || 500).json({ error: e.message || 'Unable to save reaction.' }); }
+});
+
+app.post('/api/chat/reports', async (req,res) => {
+  try { await ensureFirebaseAdminInit(); const user=await verifyFirebaseUser(req); const targetId=sanitizeString(req.body?.targetId,160), messageId=sanitizeString(req.body?.messageId,160), chatType=req.body?.chatType==='group'?'group':'private', chatId=sanitizeString(req.body?.chatId,160), reason=sanitizeString(req.body?.reason,300); if(!targetId||!messageId||!chatId) return res.status(400).json({error:'Message details are required.'}); if(chatType==='private'&&!chatId.split('_').includes(user.uid))return res.status(403).json({error:'You are not a member of this conversation.'}); const db=firebaseAdmin.firestore();const messageRef=chatType==='group'?db.collection('groups').doc(chatId).collection('messages').doc(messageId):db.collection('chats').doc(chatId).collection('messages').doc(messageId);const message=await messageRef.get();if(!message.exists)return res.status(404).json({error:'Message not found.'});const messageData=message.data();const ref=await db.collection('chatReports').add({reporterId:user.uid,targetId:messageData.senderId||targetId,messageId,chatType,chatId,messageText:sanitizeString(messageData.text,3000),reason,status:'open',createdAt:firebaseAdmin.firestore.FieldValue.serverTimestamp()}); return res.json({ok:true,id:ref.id}); }
+  catch(e){return res.status(e.status||500).json({error:e.message||'Unable to submit report.'});}
+});
+app.post('/api/chat/messages',async(req,res)=>{try{await ensureFirebaseAdminInit();const user=await verifyFirebaseUser(req),type=req.body?.chatType==='group'?'group':'private',chatId=sanitizeString(req.body?.chatId,160),text=sanitizeString(req.body?.text,3000);if(!chatId||!text)return res.status(400).json({error:'A conversation and message are required.'});if(type==='private'&&!chatId.split('_').includes(user.uid))return res.status(403).json({error:'You are not a member of this conversation.'});const db=firebaseAdmin.firestore(),profile=await db.collection('users').doc(user.uid).get();if(type==='group'){const group=await db.collection('groups').doc(chatId).get();if(!group.exists)return res.status(404).json({error:'Group not found.'});}if(Number(profile.data()?.mutedUntil)>Date.now())return res.status(403).json({error:'Your account is temporarily muted.'});const now=Date.now(),times=(chatSendWindows.get(user.uid)||[]).filter(t=>now-t<60000);if(times.length>=12)return res.status(429).json({error:'Please wait before sending more messages.'});times.push(now);chatSendWindows.set(user.uid,times);const payload={text,senderId:user.uid,senderName:req.body?.senderName==='Anonymous'?'Anonymous':sanitizeString(profile.data()?.username||user.name||'User',80),createdAt:firebaseAdmin.firestore.FieldValue.serverTimestamp(),...(req.body?.replyToId?{replyToId:sanitizeString(req.body.replyToId,160),replyText:sanitizeString(req.body.replyText,3000)}:{}),...(Number.isFinite(Number(req.body?.expiresAt))?{expiresAt:Number(req.body.expiresAt)}:{})};const ref=type==='group'?db.collection('groups').doc(chatId).collection('messages'):db.collection('chats').doc(chatId).collection('messages');const saved=await ref.add(payload);return res.json({ok:true,id:saved.id});}catch(e){return res.status(e.status||500).json({error:e.message||'Unable to send message.'});}});
+app.get('/api/admin/chat-reports', async(req,res)=>{try{await ensureFirebaseAdminInit();await verifyAdmin(req);const snap=await firebaseAdmin.firestore().collection('chatReports').orderBy('createdAt','desc').limit(200).get();const medicines=await firebaseAdmin.firestore().collection('medicines').get();return res.json({reports:snap.docs.map(d=>({id:d.id,...d.data()})),medicines:medicines.empty?DEFAULT_MEDICINES:[...DEFAULT_MEDICINES.map(base=>medicines.docs.map(d=>({id:d.id,...d.data()})).find(m=>m.name===base.name)||base),...medicines.docs.map(d=>({id:d.id,...d.data()})).filter(m=>!DEFAULT_MEDICINES.some(base=>base.name===m.name))].filter(m=>m.active!==false)});}catch(e){return res.status(e.status||500).json({error:e.message||'Unable to load reports.'});}});
+app.post('/api/admin/chat-mute/:uid',async(req,res)=>{try{await ensureFirebaseAdminInit();await verifyAdmin(req);const uid=sanitizeString(req.params.uid,160);await firebaseAdmin.firestore().collection('users').doc(uid).set({mutedUntil:Date.now()+Math.min(168,Math.max(1,Number(req.body?.hours)||24))*3600000},{merge:true});return res.json({ok:true});}catch(e){return res.status(e.status||500).json({error:e.message||'Unable to mute user.'});}});
+app.post('/api/admin/chat-delete-message',async(req,res)=>{try{await ensureFirebaseAdminInit();await verifyAdmin(req);const type=req.body?.chatType==='group'?'group':'private',chatId=sanitizeString(req.body?.chatId,160),messageId=sanitizeString(req.body?.messageId,160);if(!chatId||!messageId)return res.status(400).json({error:'Message details are required.'});const path=type==='group'?`groups/${chatId}/messages/${messageId}`:`chats/${chatId}/messages/${messageId}`;await firebaseAdmin.firestore().doc(path).delete();return res.json({ok:true});}catch(e){return res.status(e.status||500).json({error:e.message||'Unable to delete message.'});}});
+app.post('/api/admin/medicines',async(req,res)=>{try{await ensureFirebaseAdminInit();await verifyAdmin(req);const name=sanitizeString(req.body?.name,120),price=Number(req.body?.price),requiresPrescription=!!req.body?.requiresPrescription;if(!name||!Number.isFinite(price)||price<0||price>10000000)return res.status(400).json({error:'Enter a medicine name and valid price.'});const db=firebaseAdmin.firestore(),ref=db.collection('medicines').doc(name.toLowerCase().replace(/[^a-z0-9]+/g,'-'));await ref.set({name,price,requiresPrescription,active:true,updatedAt:firebaseAdmin.firestore.FieldValue.serverTimestamp()},{merge:true});return res.json({ok:true});}catch(e){return res.status(e.status||500).json({error:e.message||'Unable to save medicine.'});}});
 
 const DATA_DIR = path.join(__dirname, 'data');
 const PERIODS_FILE = path.join(DATA_DIR, 'periods.json');
